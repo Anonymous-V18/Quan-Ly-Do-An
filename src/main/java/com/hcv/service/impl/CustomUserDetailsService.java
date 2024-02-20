@@ -31,7 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         List<GrantedAuthority> authorities = new ArrayList<>();
         for (RoleDTO role : userDTO.getRoles()) {
-            authorities.add(new SimpleGrantedAuthority(STR."ROLE_\{role.getCode()}"));
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getCode()));
         }
 
         return new MyUser(

@@ -14,10 +14,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 public class AuthAPI {
 
@@ -39,12 +38,17 @@ public class AuthAPI {
         return new ResponseEntity<>(" SUCCESSFULLY !", HttpStatus.CREATED);
     }
 
-    @PostMapping("/login")
+    @PostMapping("/log-in")
     public LoginOutput createAuthenticationToken(@RequestBody LogInInput authInput) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authInput.getUsername(), authInput.getPassword()));
         UserDetails userDetails = userDetailsService.loadUserByUsername(authInput.getUsername());
         String token = jwtUtil.generateToken(userDetails.getUsername());
         return new LoginOutput(token);
+    }
+
+    @GetMapping("/access-denied")
+    public String accessDenied() {
+        return "Not permissions";
     }
 
 }
