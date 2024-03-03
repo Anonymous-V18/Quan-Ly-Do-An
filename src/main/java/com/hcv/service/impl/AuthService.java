@@ -1,9 +1,9 @@
 package com.hcv.service.impl;
 
-import com.hcv.api_controller.input.SignInInput;
-import com.hcv.api_controller.input.UpdateUserInput;
-import com.hcv.converter.UserConverter;
+import com.hcv.converter.IUserMapper;
 import com.hcv.dto.UserDTO;
+import com.hcv.dto.input.UpdateUserInput;
+import com.hcv.dto.input.UserRequest;
 import com.hcv.entity.RoleEntity;
 import com.hcv.entity.UserEntity;
 import com.hcv.repository.IRoleRepository;
@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,56 +24,56 @@ public class AuthService implements IAuthService {
     @Autowired
     private IRoleRepository roleRepository;
     @Autowired
-    private UserConverter userConverter;
+    private IUserMapper userMapper;
     @Autowired
     private IUserRepository userRepository;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public UserDTO createUser(SignInInput signinInput) {
+    public UserDTO createUser(UserRequest userRequest) {
 
-        UserDTO checkUserNameExist = userService.findOneByUsername(signinInput.getUsername());
+        UserDTO checkUserNameExist = userService.findOneByUsername(userRequest.getUsername());
         if (checkUserNameExist != null) {
             return null;
         }
 
-        String username = signinInput.getUsername();
-        String password = passwordEncoder.encode(signinInput.getPassword());
-        UserDTO userDTO = new UserDTO();
-        userDTO.setUsername(username);
-        userDTO.setPassword(password);
-        userDTO.setIsGraduate(0);
-        UserEntity userEntity = userConverter.toEntity(userDTO);
+        UserEntity userEntity = userMapper.toEntity(userRequest, passwordEncoder);
 
-        List<RoleEntity> listRolesEntity = new ArrayList<>();
-        int sizeListNameRoles = signinInput.getNameRoles().size();
+        List<RoleEntity> listRolesEntity = userRequest.getNameRoles().stream().map(nameRole -> roleRepository.findOneByName(nameRole)).toList();
 
-        for (int i = 0; i < sizeListNameRoles; i++) {
-            String nameRole = signinInput.getNameRoles().get(i).trim();
-            RoleEntity roleEntity = roleRepository.findOneByName(nameRole);
-            listRolesEntity.add(roleEntity);
-        }
         userEntity.setRoles(listRolesEntity);
 
         userRepository.save(userEntity);
 
-        return userConverter.toDTO(userEntity);
+        return userMapper.toDTO(userEntity);
     }
 
     @Override
     public UserDTO updateUser(UpdateUserInput updateUserInput) {
-        String username = updateUserInput.getUsername();
-        String password = passwordEncoder.encode(updateUserInput.getPassword());
-        Integer isGraduated = updateUserInput.getIsGraduate();
-        UserDTO userDTO = new UserDTO();
-        userDTO.setUsername(username);
-        userDTO.setPassword(password);
-        userDTO.setIsGraduate(isGraduated);
-        UserEntity userEntity = userConverter.toEntity(userDTO);
-        UserEntity userEntityOld = userRepository.findOneByUsername(username);
-        userEntity.setRoles(userEntityOld.getRoles());
+        UserEntity userEntity = userRepository.findOneByUsername(updateUserInput.getUsername());
+        String newPassword = passwordEncoder.encode(updateUserInput.getPassword());
+        userEntity.setPassword(newPassword);
+        userRepository.save(userEntity);
+        return userMapper.toDTO(userEntity);
+    }
+
+    @Override
+    public UserDTO updateUserForAdmin(UserRequest updateUserInput) {
+        UserEntity userEntity = userMapper.toEntity(updateUserInput, passwordEncoder);
+        List<RoleEntity> listRolesEntity = updateUserInput.getNameRoles().stream().map(nameRole -> roleRepository.findOneByName(nameRole)).toList();
+        userEntity.setRoles(listRolesEntity);
+        UserEntity userEntityOld = userRepository.findOneByUsername(updateUserInput.getUsername());
+        userEntityOld = userMapper.toEntity(userEntityOld, userEntity);
         userRepository.save(userEntityOld);
-        return userConverter.toDTO(userEntity);
+        return userMapper.toDTO(userEntity);
+    }
+
+    @Override
+    public void deleteUser(Long[] ids) {
+        for (Long id : ids) {
+            userRepository.deleteById(id);
+        }
     }
 }

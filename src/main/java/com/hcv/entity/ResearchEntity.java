@@ -18,6 +18,8 @@ public class ResearchEntity extends BaseEntity {
     private String maDeTai;
     @Column(name = "detail")
     private String detail;
+    @Column(name = "old_detail")
+    private String old_detail;
     @Column(name = "notes")
     private String notes;
     @Column(name = "max_members")
@@ -32,9 +34,8 @@ public class ResearchEntity extends BaseEntity {
     @ManyToMany(mappedBy = "researches")
     private List<TeacherEntity> teachers = new ArrayList<>();
 
-    @OneToOne
-    @JoinColumn(name = "feedback_id")
-    private FeedbackEntity feedbacks;
+    @OneToMany(mappedBy = "researches")
+    private List<FeedbackEntity> feedbacks;
 
     @ManyToMany
     @JoinTable(name = "research_subject"

@@ -19,6 +19,7 @@ public class FeedbackEntity extends BaseEntity {
     @Column(name = "is_read")
     private String is_Read;
 
+
     @ManyToOne
     @JoinColumn(name = "teacher_id")
     private TeacherEntity teachers;
@@ -27,7 +28,8 @@ public class FeedbackEntity extends BaseEntity {
     @JoinColumn(name = "student_id")
     private StudentEntity students;
 
-    @OneToOne(mappedBy = "feedbacks")
+    @ManyToOne
+    @JoinColumn(name = "research_id")
     private ResearchEntity researches;
 
 }

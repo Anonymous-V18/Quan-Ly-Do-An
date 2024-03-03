@@ -13,9 +13,6 @@ import java.util.List;
 @Table(name = "group")
 public class GroupEntity extends BaseEntity {
 
-    @Column(name = "ma_so_gvhd")
-    private String maSo_GVHD;
-
     @ManyToOne
     @JoinColumn(name = "teacher_id")
     private TeacherEntity teachers;

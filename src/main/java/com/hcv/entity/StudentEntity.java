@@ -3,10 +3,8 @@ package com.hcv.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -18,10 +16,6 @@ public class StudentEntity extends BaseEntity {
     private String maSo;
     @Column(name = "name")
     private String name;
-    @Temporal(TemporalType.DATE)
-    @DateTimeFormat(pattern = "dd/MM/yyyy")
-    @Column(name = "ngay_sinh")
-    private Date DOB;
     @Column(name = "class")
     private String myClass;
     @Column(name = "email")

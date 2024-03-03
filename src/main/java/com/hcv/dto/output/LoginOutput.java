@@ -1,4 +1,4 @@
-package com.hcv.api_controller.output;
+package com.hcv.dto.output;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,5 +8,6 @@ import lombok.Getter;
 public class LoginOutput {
 
     private String accessToken;
+    private String allRole;
 
 }

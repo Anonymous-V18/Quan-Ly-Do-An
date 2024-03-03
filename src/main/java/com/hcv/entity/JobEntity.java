@@ -14,6 +14,7 @@ import java.util.List;
 @Table(name = "job")
 @Data
 public class JobEntity extends BaseEntity {
+
     @Temporal(TemporalType.DATE)
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     @Column(name = "from")
@@ -29,7 +30,10 @@ public class JobEntity extends BaseEntity {
     @Column(name = "is_completed")
     private Integer isCompleted;
 
-    @ManyToMany(mappedBy = "jobs")
+    @ManyToMany
+    @JoinTable(name = "job_teacher"
+            , joinColumns = @JoinColumn(name = "job_id")
+            , inverseJoinColumns = @JoinColumn(name = "teacher_id"))
     private List<TeacherEntity> teachers = new ArrayList<>();
 
     @ManyToMany(mappedBy = "jobs")

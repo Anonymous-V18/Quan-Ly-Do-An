@@ -1,6 +1,6 @@
 package com.hcv.service.impl;
 
-import com.hcv.converter.UserConverter;
+import com.hcv.converter.IUserMapper;
 import com.hcv.dto.UserDTO;
 import com.hcv.entity.UserEntity;
 import com.hcv.repository.IUserRepository;
@@ -14,7 +14,7 @@ import java.util.List;
 public class UserService implements IUserService {
 
     @Autowired
-    private UserConverter userConverter;
+    private IUserMapper userMapper;
     @Autowired
     private IUserRepository userRepository;
 
@@ -25,13 +25,13 @@ public class UserService implements IUserService {
         if (userEntity == null) {
             return null;
         }
-        return userConverter.toDTO(userEntity);
+        return userMapper.toDTO(userEntity);
     }
 
     @Override
     public List<UserDTO> findAll() {
         List<UserEntity> users = userRepository.findAll();
-        return users.stream().map(userEntity -> userConverter.toDTO(userEntity)).toList();
+        return users.stream().map(userEntity -> userMapper.toDTO(userEntity)).toList();
     }
 
 

@@ -1,4 +1,4 @@
-package com.hcv.api_controller.input;
+package com.hcv.dto.input;
 
 import lombok.Getter;
 

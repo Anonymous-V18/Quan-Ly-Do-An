@@ -1,7 +1,7 @@
 package com.hcv.api_controller;
 
-import com.hcv.api_controller.input.SubjectInput;
 import com.hcv.dto.SubjectDTO;
+import com.hcv.dto.input.SubjectInput;
 import com.hcv.service.ISubjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,13 +29,15 @@ public class SubjectAPI {
     }
 
     @PutMapping("/update/{id}")
-    public SubjectDTO update(@PathVariable(name = "id") Long id,
-                             @RequestBody SubjectInput subjectInput) {
+    public ResponseEntity<?> update(@PathVariable(name = "id") Long id,
+                                    @RequestBody SubjectInput subjectInput) {
         SubjectDTO old_subjectDTO = subjectService.findOneById(id);
         if (old_subjectDTO == null) {
-            return subjectService.insert(subjectInput);
+            subjectService.insert(subjectInput);
+            return new ResponseEntity<>("Successfully !", HttpStatus.CREATED);
         }
-        return subjectService.update(old_subjectDTO, subjectInput);
+        subjectService.update(old_subjectDTO, subjectInput);
+        return new ResponseEntity<>("Successfully !", HttpStatus.OK);
     }
 
     @DeleteMapping("/delete")

@@ -3,10 +3,8 @@ package com.hcv.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
@@ -19,10 +17,6 @@ public class TeacherEntity extends BaseEntity {
     private String maSo;
     @Column(name = "name")
     private String name;
-    @Temporal(TemporalType.DATE)
-    @DateTimeFormat(pattern = "dd/MM/yyyy")
-    @Column(name = "ngay_sinh")
-    private Date DOB;
     @Column(name = "hoc_vi")
     private String hocVi;
     @Column(name = "email")
@@ -57,10 +51,7 @@ public class TeacherEntity extends BaseEntity {
     private List<GroupEntity> groups = new ArrayList<>();
 
 
-    @ManyToMany
-    @JoinTable(name = "teacher_job"
-            , joinColumns = @JoinColumn(name = "teacher_id")
-            , inverseJoinColumns = @JoinColumn(name = "job_id"))
+    @ManyToMany(mappedBy = "teachers")
     private List<JobEntity> jobs = new ArrayList<>();
 
 }

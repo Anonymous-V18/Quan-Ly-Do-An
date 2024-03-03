@@ -1,6 +1,6 @@
 package com.hcv.service.impl;
 
-import com.hcv.converter.DepartmentConverter;
+import com.hcv.converter.IDepartmentMapper;
 import com.hcv.dto.DepartmentDTO;
 import com.hcv.entity.DepartmentEntity;
 import com.hcv.repository.IDepartmentRepository;
@@ -20,7 +20,7 @@ public class DepartmentService implements IDepartmentService {
     private IDepartmentRepository departmentRepository;
 
     @Autowired
-    private DepartmentConverter departmentConverter;
+    private IDepartmentMapper departmentMapper;
 
     @Autowired
     private ISubjectRepository subjectRepository;
@@ -29,18 +29,16 @@ public class DepartmentService implements IDepartmentService {
     private ISubjectService subjectService;
 
     @Override
-    public DepartmentDTO insert(DepartmentDTO departmentDTO) {
-        DepartmentEntity departmentEntity = departmentConverter.toEntity(departmentDTO);
+    public void insert(DepartmentDTO departmentDTO) {
+        DepartmentEntity departmentEntity = departmentMapper.toEntity(departmentDTO);
         departmentRepository.save(departmentEntity);
-        return departmentDTO;
     }
 
     @Override
-    public DepartmentDTO update(DepartmentDTO new_departmentDTO, DepartmentDTO old_departmentDTO) {
+    public void update(DepartmentDTO new_departmentDTO, DepartmentDTO old_departmentDTO) {
         old_departmentDTO.setName(new_departmentDTO.getName());
-        DepartmentEntity departmentEntityUpdate = departmentConverter.toEntity(old_departmentDTO);
+        DepartmentEntity departmentEntityUpdate = departmentMapper.toEntity(old_departmentDTO);
         departmentRepository.save(departmentEntityUpdate);
-        return departmentConverter.toDTO(departmentEntityUpdate);
     }
 
     @Override
@@ -53,13 +51,13 @@ public class DepartmentService implements IDepartmentService {
     @Override
     public DepartmentDTO findOneById(Long id) {
         DepartmentEntity departmentEntity = departmentRepository.findOneById(id);
-        return departmentConverter.toDTO(departmentEntity);
+        return departmentMapper.toDTO(departmentEntity);
     }
 
     @Override
     public DepartmentDTO findOneByName(String name) {
         DepartmentEntity departmentEntity = departmentRepository.findOneByName(name);
-        return departmentEntity == null ? null : departmentConverter.toDTO(departmentEntity);
+        return departmentEntity == null ? null : departmentMapper.toDTO(departmentEntity);
     }
 
     @Override
@@ -67,7 +65,7 @@ public class DepartmentService implements IDepartmentService {
         List<DepartmentEntity> resultEntity = departmentRepository.findAll();
         List<DepartmentDTO> resultDTO = new ArrayList<>();
         for (DepartmentEntity departmentEntity : resultEntity) {
-            DepartmentDTO departmentDTO = departmentConverter.toDTO(departmentEntity);
+            DepartmentDTO departmentDTO = departmentMapper.toDTO(departmentEntity);
             resultDTO.add(departmentDTO);
         }
         return resultDTO;
