@@ -20,7 +20,7 @@ public class UserAPI {
     private IUserService userService;
 
     @GetMapping("/showAllUsers")
-    @PreAuthorize("hasRole('ROLE_TEACHER')")
+    @PreAuthorize("hasRole('ROLE_DEAN')")
     public ResponseEntity<?> showListUsers() {
         List<UserDTO> users = userService.findAll();
         return new ResponseEntity<>(users, HttpStatus.OK);

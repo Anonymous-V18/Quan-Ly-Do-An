@@ -2,6 +2,7 @@ package com.hcv.api_controller;
 
 import com.hcv.api_controller.input.LogInInput;
 import com.hcv.api_controller.input.SignInInput;
+import com.hcv.api_controller.input.UpdateUserInput;
 import com.hcv.api_controller.output.LoginOutput;
 import com.hcv.dto.UserDTO;
 import com.hcv.service.IAuthService;
@@ -44,6 +45,12 @@ public class AuthAPI {
         UserDetails userDetails = userDetailsService.loadUserByUsername(authInput.getUsername());
         String token = jwtUtil.generateToken(userDetails.getUsername());
         return new LoginOutput(token);
+    }
+
+    @PutMapping("/update-user")
+    public ResponseEntity<?> updateUser(@RequestBody UpdateUserInput updateUserInput) {
+        UserDTO userDTO = authService.updateUser(updateUserInput);
+        return new ResponseEntity<>("Update user successful", HttpStatus.OK);
     }
 
     @GetMapping("/access-denied")

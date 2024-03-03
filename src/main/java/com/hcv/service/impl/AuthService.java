@@ -1,6 +1,7 @@
 package com.hcv.service.impl;
 
 import com.hcv.api_controller.input.SignInInput;
+import com.hcv.api_controller.input.UpdateUserInput;
 import com.hcv.converter.UserConverter;
 import com.hcv.dto.UserDTO;
 import com.hcv.entity.RoleEntity;
@@ -43,15 +44,15 @@ public class AuthService implements IAuthService {
         UserDTO userDTO = new UserDTO();
         userDTO.setUsername(username);
         userDTO.setPassword(password);
-        userDTO.setIsGraduate(1);
+        userDTO.setIsGraduate(0);
         UserEntity userEntity = userConverter.toEntity(userDTO);
 
         List<RoleEntity> listRolesEntity = new ArrayList<>();
         int sizeListNameRoles = signinInput.getNameRoles().size();
-        RoleEntity roleEntity = new RoleEntity();
+
         for (int i = 0; i < sizeListNameRoles; i++) {
             String nameRole = signinInput.getNameRoles().get(i).trim();
-            roleEntity = roleRepository.findOneByName(nameRole);
+            RoleEntity roleEntity = roleRepository.findOneByName(nameRole);
             listRolesEntity.add(roleEntity);
         }
         userEntity.setRoles(listRolesEntity);
@@ -61,4 +62,19 @@ public class AuthService implements IAuthService {
         return userConverter.toDTO(userEntity);
     }
 
+    @Override
+    public UserDTO updateUser(UpdateUserInput updateUserInput) {
+        String username = updateUserInput.getUsername();
+        String password = passwordEncoder.encode(updateUserInput.getPassword());
+        Integer isGraduated = updateUserInput.getIsGraduate();
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsername(username);
+        userDTO.setPassword(password);
+        userDTO.setIsGraduate(isGraduated);
+        UserEntity userEntity = userConverter.toEntity(userDTO);
+        UserEntity userEntityOld = userRepository.findOneByUsername(username);
+        userEntity.setRoles(userEntityOld.getRoles());
+        userRepository.save(userEntityOld);
+        return userConverter.toDTO(userEntity);
+    }
 }

@@ -22,7 +22,7 @@ public class RoleEntity extends BaseEntity {
     private CodeRole code;
 
     @ManyToMany(mappedBy = "roles")
-    List<UserEntity> users = new ArrayList<>();
+    private List<UserEntity> users = new ArrayList<>();
 
 }
 

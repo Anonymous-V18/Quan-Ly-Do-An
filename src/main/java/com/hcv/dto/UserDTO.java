@@ -16,6 +16,6 @@ public class UserDTO extends BaseDTO<UserDTO> {
 
     private Integer isGraduate;
 
-    List<RoleDTO> roles = new ArrayList<>();
+    private List<RoleDTO> roles = new ArrayList<>();
 
 }
