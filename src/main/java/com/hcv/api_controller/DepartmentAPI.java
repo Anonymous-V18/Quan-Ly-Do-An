@@ -21,19 +21,22 @@ public class DepartmentAPI {
     public ResponseEntity<?> insert(@RequestBody DepartmentDTO departmentDTO) {
         DepartmentDTO old_departmentDTO = departmentService.findOneByName(departmentDTO.getName());
         if (old_departmentDTO == null) {
-            return new ResponseEntity<>(departmentService.insert(departmentDTO), HttpStatus.CREATED);
+            departmentService.insert(departmentDTO);
+            return new ResponseEntity<>("Successfully !", HttpStatus.CREATED);
         }
         return new ResponseEntity<>("Department already exist !", HttpStatus.CONFLICT);
     }
 
     @PutMapping("/update/{id}")
-    public DepartmentDTO update(@PathVariable(value = "id") Long id,
-                                @RequestBody DepartmentDTO new_departmentDTO) {
+    public ResponseEntity<?> update(@PathVariable(value = "id") Long id,
+                                    @RequestBody DepartmentDTO new_departmentDTO) {
         DepartmentDTO old_departmentDTO = departmentService.findOneById(id);
         if (old_departmentDTO == null) {
-            return departmentService.insert(new_departmentDTO);
+            departmentService.insert(new_departmentDTO);
+            return new ResponseEntity<>("Successfully !", HttpStatus.CREATED);
         }
-        return departmentService.update(new_departmentDTO, old_departmentDTO);
+        departmentService.update(new_departmentDTO, old_departmentDTO);
+        return new ResponseEntity<>("Successfully !", HttpStatus.OK);
     }
 
     @DeleteMapping("/delete")

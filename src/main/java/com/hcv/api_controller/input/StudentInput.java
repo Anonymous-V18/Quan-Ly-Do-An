@@ -1,4 +1,4 @@
-package com.hcv.dto;
+package com.hcv.api_controller.input;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
@@ -7,8 +7,7 @@ import lombok.Setter;
 import java.util.Date;
 
 @Getter
-@Setter
-public class StudentDTO extends BaseDTO<StudentDTO> {
+public class StudentInput {
 
     private String maSo;
     private String name;
@@ -17,6 +16,10 @@ public class StudentDTO extends BaseDTO<StudentDTO> {
     private String myClass;
     private String email;
     private String phoneNumber;
-    private SubjectDTO subjects;
+    private String chucVu;
+    @Setter
+    private Long user_id;
+    private String departmentName;
+    private String subjectName;
 
 }

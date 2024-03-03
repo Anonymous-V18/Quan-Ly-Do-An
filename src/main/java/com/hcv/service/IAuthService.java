@@ -9,4 +9,6 @@ public interface IAuthService {
 
     UserDTO updateUser(UpdateUserInput updateUserInput);
 
+    void deleteUser(Long[] ids);
+
 }

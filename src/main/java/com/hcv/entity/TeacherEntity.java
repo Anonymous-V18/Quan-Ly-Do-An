@@ -57,10 +57,7 @@ public class TeacherEntity extends BaseEntity {
     private List<GroupEntity> groups = new ArrayList<>();
 
 
-    @ManyToMany
-    @JoinTable(name = "teacher_job"
-            , joinColumns = @JoinColumn(name = "teacher_id")
-            , inverseJoinColumns = @JoinColumn(name = "job_id"))
+    @ManyToMany(mappedBy = "teachers")
     private List<JobEntity> jobs = new ArrayList<>();
 
 }

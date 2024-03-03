@@ -29,13 +29,15 @@ public class SubjectAPI {
     }
 
     @PutMapping("/update/{id}")
-    public SubjectDTO update(@PathVariable(name = "id") Long id,
-                             @RequestBody SubjectInput subjectInput) {
+    public ResponseEntity<?> update(@PathVariable(name = "id") Long id,
+                                    @RequestBody SubjectInput subjectInput) {
         SubjectDTO old_subjectDTO = subjectService.findOneById(id);
         if (old_subjectDTO == null) {
-            return subjectService.insert(subjectInput);
+            subjectService.insert(subjectInput);
+            return new ResponseEntity<>("Successfully !", HttpStatus.CREATED);
         }
-        return subjectService.update(old_subjectDTO, subjectInput);
+        subjectService.update(old_subjectDTO, subjectInput);
+        return new ResponseEntity<>("Successfully !", HttpStatus.OK);
     }
 
     @DeleteMapping("/delete")

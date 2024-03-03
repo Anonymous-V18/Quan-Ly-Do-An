@@ -8,5 +8,6 @@ import lombok.Getter;
 public class LoginOutput {
 
     private String accessToken;
+    private String allRole;
 
 }

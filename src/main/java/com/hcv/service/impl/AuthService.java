@@ -77,4 +77,11 @@ public class AuthService implements IAuthService {
         userRepository.save(userEntityOld);
         return userConverter.toDTO(userEntity);
     }
+
+    @Override
+    public void deleteUser(Long[] ids) {
+        for (Long id : ids) {
+            userRepository.deleteById(id);
+        }
+    }
 }

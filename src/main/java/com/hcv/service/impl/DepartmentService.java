@@ -29,18 +29,16 @@ public class DepartmentService implements IDepartmentService {
     private ISubjectService subjectService;
 
     @Override
-    public DepartmentDTO insert(DepartmentDTO departmentDTO) {
+    public void insert(DepartmentDTO departmentDTO) {
         DepartmentEntity departmentEntity = departmentConverter.toEntity(departmentDTO);
         departmentRepository.save(departmentEntity);
-        return departmentDTO;
     }
 
     @Override
-    public DepartmentDTO update(DepartmentDTO new_departmentDTO, DepartmentDTO old_departmentDTO) {
+    public void update(DepartmentDTO new_departmentDTO, DepartmentDTO old_departmentDTO) {
         old_departmentDTO.setName(new_departmentDTO.getName());
         DepartmentEntity departmentEntityUpdate = departmentConverter.toEntity(old_departmentDTO);
         departmentRepository.save(departmentEntityUpdate);
-        return departmentConverter.toDTO(departmentEntityUpdate);
     }
 
     @Override

@@ -40,17 +40,24 @@ public class AuthAPI {
     }
 
     @PostMapping("/log-in")
-    public LoginOutput createAuthenticationToken(@RequestBody LogInInput authInput) {
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody LogInInput authInput) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authInput.getUsername(), authInput.getPassword()));
         UserDetails userDetails = userDetailsService.loadUserByUsername(authInput.getUsername());
         String token = jwtUtil.generateToken(userDetails.getUsername());
-        return new LoginOutput(token);
+        String allRole = userDetails.getAuthorities().toString();
+        return new ResponseEntity<>(new LoginOutput(token, allRole), HttpStatus.OK);
     }
 
     @PutMapping("/update-user")
     public ResponseEntity<?> updateUser(@RequestBody UpdateUserInput updateUserInput) {
         UserDTO userDTO = authService.updateUser(updateUserInput);
         return new ResponseEntity<>("Update user successful", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete-user")
+    public ResponseEntity<?> deleteUser(@RequestBody Long[] ids) {
+        authService.deleteUser(ids);
+        return new ResponseEntity<>("Successfully !", HttpStatus.OK);
     }
 
     @GetMapping("/access-denied")
