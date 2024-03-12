@@ -2,7 +2,7 @@ package com.hcv.service.impl;
 
 import com.hcv.converter.ISubjectMapper;
 import com.hcv.dto.SubjectDTO;
-import com.hcv.dto.input.SubjectInput;
+import com.hcv.dto.request.SubjectInput;
 import com.hcv.entity.DepartmentEntity;
 import com.hcv.entity.SubjectEntity;
 import com.hcv.repository.IDepartmentRepository;

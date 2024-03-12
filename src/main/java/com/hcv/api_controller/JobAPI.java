@@ -1,7 +1,7 @@
 package com.hcv.api_controller;
 
 import com.hcv.dto.JobDTO;
-import com.hcv.dto.input.JobForTeacherInput;
+import com.hcv.dto.request.JobForTeacherInput;
 import com.hcv.service.IJobService;
 import com.hcv.service.ITeacherService;
 import org.springframework.beans.factory.annotation.Autowired;

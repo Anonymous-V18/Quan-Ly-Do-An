@@ -2,9 +2,9 @@ package com.hcv.api_controller;
 
 import com.hcv.dto.StudentDTO;
 import com.hcv.dto.UserDTO;
-import com.hcv.dto.input.StudentFromExcelInput;
-import com.hcv.dto.input.StudentInput;
-import com.hcv.dto.input.UserRequest;
+import com.hcv.dto.request.StudentFromExcelInput;
+import com.hcv.dto.request.StudentInput;
+import com.hcv.dto.request.UserRequest;
 import com.hcv.service.IAuthService;
 import com.hcv.service.IStudentService;
 import org.springframework.beans.factory.annotation.Autowired;

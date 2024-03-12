@@ -1,10 +1,10 @@
 package com.hcv.api_controller;
 
 import com.hcv.dto.UserDTO;
-import com.hcv.dto.input.LogInInput;
-import com.hcv.dto.input.UpdateUserInput;
-import com.hcv.dto.input.UserRequest;
-import com.hcv.dto.output.LoginOutput;
+import com.hcv.dto.request.LogInInput;
+import com.hcv.dto.request.UpdateUserInput;
+import com.hcv.dto.request.UserRequest;
+import com.hcv.dto.response.LoginOutput;
 import com.hcv.service.IAuthService;
 import com.hcv.service.impl.CustomUserDetailsService;
 import com.hcv.util.JwtUtil;

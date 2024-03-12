@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface IDepartmentService {
 
-    void insert(DepartmentDTO departmentDTO);
+    DepartmentDTO insert(DepartmentDTO departmentDTO);
 
-    void update(DepartmentDTO new_departmentDTO, DepartmentDTO old_departmentDTO);
+    DepartmentDTO update(DepartmentDTO new_departmentDTO, DepartmentDTO old_departmentDTO);
 
     void delete(Long[] ids);
 

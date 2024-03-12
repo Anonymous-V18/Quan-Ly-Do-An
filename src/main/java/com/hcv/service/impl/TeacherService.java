@@ -2,7 +2,7 @@ package com.hcv.service.impl;
 
 import com.hcv.converter.ITeacherMapper;
 import com.hcv.dto.TeacherDTO;
-import com.hcv.dto.input.TeacherInput;
+import com.hcv.dto.request.TeacherInput;
 import com.hcv.entity.DepartmentEntity;
 import com.hcv.entity.SubjectEntity;
 import com.hcv.entity.TeacherEntity;

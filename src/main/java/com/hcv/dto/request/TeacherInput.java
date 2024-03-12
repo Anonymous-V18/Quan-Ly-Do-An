@@ -1,11 +1,9 @@
-package com.hcv.dto;
+package com.hcv.dto.request;
 
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
-public class TeacherDTO extends BaseDTO<TeacherDTO> {
+public class TeacherInput {
 
     private String maSo;
     private String name;
@@ -13,6 +11,8 @@ public class TeacherDTO extends BaseDTO<TeacherDTO> {
     private String email;
     private String phoneNumber;
     private String chucVu;
-    private SubjectDTO subjects;
+    private Long user_id;
+    private String departmentName;
+    private String subjectName;
 
 }

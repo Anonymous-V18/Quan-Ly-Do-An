@@ -1,21 +1,18 @@
-package com.hcv.dto.input;
+package com.hcv.dto.request;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
-
-import java.util.Date;
+import lombok.Setter;
 
 @Getter
-public class TeacherInput {
+public class StudentInput {
 
     private String maSo;
     private String name;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    private Date DOB;
-    private String hocVi;
+    private String myClass;
     private String email;
     private String phoneNumber;
     private String chucVu;
+    @Setter
     private Long user_id;
     private String departmentName;
     private String subjectName;

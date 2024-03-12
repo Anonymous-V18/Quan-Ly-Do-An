@@ -2,8 +2,8 @@ package com.hcv.service.impl;
 
 import com.hcv.converter.IUserMapper;
 import com.hcv.dto.UserDTO;
-import com.hcv.dto.input.UpdateUserInput;
-import com.hcv.dto.input.UserRequest;
+import com.hcv.dto.request.UpdateUserInput;
+import com.hcv.dto.request.UserRequest;
 import com.hcv.entity.RoleEntity;
 import com.hcv.entity.UserEntity;
 import com.hcv.repository.IRoleRepository;
@@ -77,10 +77,4 @@ public class AuthService implements IAuthService {
         }
     }
 
-    @Override
-    public void deleteUser(Long[] ids) {
-        for (Long id : ids) {
-            userRepository.deleteById(id);
-        }
-    }
 }

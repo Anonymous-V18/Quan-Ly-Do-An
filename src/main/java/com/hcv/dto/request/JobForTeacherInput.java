@@ -1,4 +1,4 @@
-package com.hcv.dto.input;
+package com.hcv.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;

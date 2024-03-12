@@ -1,7 +1,7 @@
 package com.hcv.converter;
 
 import com.hcv.dto.UserDTO;
-import com.hcv.dto.input.UserRequest;
+import com.hcv.dto.request.UserRequest;
 import com.hcv.entity.UserEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

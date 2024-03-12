@@ -1,7 +1,7 @@
 package com.hcv.api_controller;
 
 import com.hcv.dto.TeacherDTO;
-import com.hcv.dto.input.TeacherInput;
+import com.hcv.dto.request.TeacherInput;
 import com.hcv.service.ITeacherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

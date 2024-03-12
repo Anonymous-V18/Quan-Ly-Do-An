@@ -1,7 +1,7 @@
 package com.hcv.service;
 
 import com.hcv.dto.TeacherDTO;
-import com.hcv.dto.input.TeacherInput;
+import com.hcv.dto.request.TeacherInput;
 
 import java.util.List;
 
