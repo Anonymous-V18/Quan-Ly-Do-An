@@ -2,48 +2,46 @@ package com.hcv.service.impl;
 
 import com.hcv.converter.IJobMapper;
 import com.hcv.dto.JobDTO;
-import com.hcv.dto.input.JobForTeacherInput;
+import com.hcv.dto.request.JobForTeacherInput;
 import com.hcv.entity.JobEntity;
-import com.hcv.entity.SubjectEntity;
 import com.hcv.entity.TeacherEntity;
-import com.hcv.repository.IJobRepository;
-import com.hcv.repository.ISubjectRepository;
-import com.hcv.repository.ITeacherRepository;
+import com.hcv.entity.UserEntity;
+import com.hcv.repository.*;
 import com.hcv.service.IJobService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JobService implements IJobService {
 
-    @Autowired
-    private IJobRepository jobRepository;
-    @Autowired
-    private IJobMapper jobMapper;
-    @Autowired
-    private ITeacherRepository teacherRepository;
-    @Autowired
-    private ISubjectRepository subjectRepository;
+    IJobRepository jobRepository;
+    IJobMapper jobMapper;
+    ITeacherRepository teacherRepository;
+    ISubjectRepository subjectRepository;
+    IUserRepository userRepository;
+    IDepartmentRepository departmentRepository;
 
     @Override
     public JobDTO insert(JobForTeacherInput jobForTeacherInput) {
         JobEntity jobEntity = jobMapper.toEntity(jobForTeacherInput);
-        if (jobForTeacherInput.getListMaSoGV().isEmpty()) {
-            String subjectName = jobForTeacherInput.getSendTo();
-            SubjectEntity subjectEntity = subjectRepository.findOneByName(subjectName);
-            TeacherEntity teacherEntity = teacherRepository.findOneByChucVuAndSubjects("TRƯỞNG BỘ MÔN", subjectEntity);
-            jobEntity.setTeachers(List.of(teacherEntity));
-        } else {
-            List<TeacherEntity> teachers = new ArrayList<>();
-            for (String maSoGV : jobForTeacherInput.getListMaSoGV()) {
-                TeacherEntity teacherEntity = teacherRepository.findOneByMaSo(maSoGV);
-                teachers.add(teacherEntity);
-            }
-            jobEntity.setTeachers(teachers);
+        String sendTo = jobForTeacherInput.getSendTo();
+        if (sendTo.length() < 8) {
+            String sendFrom = jobForTeacherInput.getSendFrom();
+            UserEntity user = userRepository.findOneByUsername(sendFrom);
+            List<TeacherEntity> teacherEntityList = teacherRepository.findAllByChucVuAndDepartments("TRƯỞNG BỘ MÔN", user.getTeachers().getDepartments());
+            jobEntity.setTeachers(teacherEntityList);
+            jobRepository.save(jobEntity);
+            return jobMapper.toDTO(jobEntity);
         }
+        TeacherEntity teacherEntity = teacherRepository.findOneByMaSo(sendTo);
+        jobEntity.setTeachers(List.of(teacherEntity));
         jobRepository.save(jobEntity);
         return jobMapper.toDTO(jobEntity);
     }

@@ -1,9 +1,9 @@
 package com.hcv.service;
 
 import com.hcv.dto.TeacherDTO;
-import com.hcv.dto.input.TeacherInput;
-
-import java.util.List;
+import com.hcv.dto.request.ShowAllRequest;
+import com.hcv.dto.request.TeacherInput;
+import com.hcv.dto.response.ShowAllResponse;
 
 public interface ITeacherService {
 
@@ -13,7 +13,9 @@ public interface ITeacherService {
 
     void delete(Long[] ids);
 
-    List<TeacherDTO> showAll();
+    int countAll();
+
+    ShowAllResponse<TeacherDTO> showAll(ShowAllRequest showAllRequest);
 
     TeacherDTO findOneByMaSo(String maSo);
 

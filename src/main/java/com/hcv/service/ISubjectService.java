@@ -1,9 +1,9 @@
 package com.hcv.service;
 
 import com.hcv.dto.SubjectDTO;
-import com.hcv.dto.input.SubjectInput;
-
-import java.util.List;
+import com.hcv.dto.request.ShowAllRequest;
+import com.hcv.dto.request.SubjectInput;
+import com.hcv.dto.response.ShowAllResponse;
 
 public interface ISubjectService {
 
@@ -17,5 +17,7 @@ public interface ISubjectService {
 
     SubjectDTO findOneByName(String name);
 
-    List<SubjectDTO> showAll();
+    int countAll();
+
+    ShowAllResponse<SubjectDTO> showAll(ShowAllRequest showAllRequest);
 }

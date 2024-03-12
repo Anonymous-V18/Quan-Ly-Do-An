@@ -1,4 +1,4 @@
-package com.hcv.dto.output;
+package com.hcv.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

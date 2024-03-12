@@ -1,7 +1,7 @@
 package com.hcv.converter;
 
 import com.hcv.dto.UserDTO;
-import com.hcv.dto.input.UserRequest;
+import com.hcv.dto.request.UserRequest;
 import com.hcv.entity.UserEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,6 +12,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public interface IUserMapper {
 
     UserDTO toDTO(UserEntity userEntity);
+
+    @Mapping(target = "password", ignore = true)
+    UserDTO toShowDTO(UserEntity userEntity);
 
     UserEntity toEntity(UserDTO userDTO);
 

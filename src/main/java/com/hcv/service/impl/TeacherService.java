@@ -2,7 +2,9 @@ package com.hcv.service.impl;
 
 import com.hcv.converter.ITeacherMapper;
 import com.hcv.dto.TeacherDTO;
-import com.hcv.dto.input.TeacherInput;
+import com.hcv.dto.request.ShowAllRequest;
+import com.hcv.dto.request.TeacherInput;
+import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.entity.DepartmentEntity;
 import com.hcv.entity.SubjectEntity;
 import com.hcv.entity.TeacherEntity;
@@ -11,32 +13,29 @@ import com.hcv.repository.IDepartmentRepository;
 import com.hcv.repository.ISubjectRepository;
 import com.hcv.repository.ITeacherRepository;
 import com.hcv.repository.IUserRepository;
-import com.hcv.service.IDepartmentService;
-import com.hcv.service.ISubjectService;
 import com.hcv.service.ITeacherService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class TeacherService implements ITeacherService {
 
-    @Autowired
-    private ITeacherRepository teacherRepository;
-    @Autowired
-    private ITeacherMapper teacherMapper;
-    @Autowired
-    private IUserRepository userRepository;
-    @Autowired
-    private IDepartmentRepository departmentRepository;
-    @Autowired
-    private ISubjectRepository subjectRepository;
-    @Autowired
-    private ISubjectService subjectService;
-    @Autowired
-    private IDepartmentService departmentService;
+    ITeacherRepository teacherRepository;
+    ITeacherMapper teacherMapper;
+    IUserRepository userRepository;
+    IDepartmentRepository departmentRepository;
+    ISubjectRepository subjectRepository;
+
 
     @Override
     public TeacherDTO insert(TeacherInput teacherInput) {
@@ -46,12 +45,12 @@ public class TeacherService implements ITeacherService {
         UserEntity userEntity = userRepository.findOneById(teacherInput.getUser_id());
         teacherEntity.setUsers(userEntity);
 
-        DepartmentEntity departmentEntity = departmentRepository.findOneByName(teacherInput.getDepartmentName());
-        teacherEntity.setDepartments(departmentEntity);
-
         SubjectEntity subjectEntity = subjectRepository.findOneByName(teacherInput.getSubjectName());
         teacherEntity.setSubjects(subjectEntity);
 
+        DepartmentEntity departmentEntity = subjectEntity.getDepartments();
+        teacherEntity.setDepartments(departmentEntity);
+        
         teacherRepository.save(teacherEntity);
 
         return teacherMapper.toDTO(teacherEntity);
@@ -65,14 +64,32 @@ public class TeacherService implements ITeacherService {
     }
 
     @Override
-    public List<TeacherDTO> showAll() {
-        List<TeacherEntity> resultEntity = teacherRepository.findAll();
-        List<TeacherDTO> resultDTO = new ArrayList<>();
-        for (TeacherEntity entity : resultEntity) {
-            TeacherDTO dto = teacherMapper.toDTO(entity);
-            resultDTO.add(dto);
-        }
-        return resultDTO;
+    public int countAll() {
+        return (int) teacherRepository.count();
+    }
+
+    @Override
+    public ShowAllResponse<TeacherDTO> showAll(ShowAllRequest showAllRequest) {
+        int page = showAllRequest.getPage();
+        int limit = showAllRequest.getLimit();
+        int totalPages = (int) Math.ceil((1.0 * countAll()) / limit);
+
+        Pageable paging = PageRequest.of(
+                page - 1,
+                limit,
+                Sort.by(Sort.Direction.fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
+        );
+        Page<TeacherEntity> teacherEntityList = teacherRepository.findAll(paging);
+
+        List<TeacherEntity> resultEntity = teacherEntityList.getContent();
+
+        List<TeacherDTO> resultDTO = resultEntity.stream().map(teacherMapper::toDTO).toList();
+
+        return ShowAllResponse.<TeacherDTO>builder()
+                .page(page)
+                .totalPages(totalPages)
+                .responses(resultDTO)
+                .build();
     }
 
     @Override

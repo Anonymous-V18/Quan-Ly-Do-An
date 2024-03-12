@@ -2,38 +2,40 @@ package com.hcv.service.impl;
 
 import com.hcv.converter.IStudentMapper;
 import com.hcv.dto.StudentDTO;
-import com.hcv.dto.input.StudentInput;
+import com.hcv.dto.request.ShowAllRequest;
+import com.hcv.dto.request.StudentInput;
+import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.entity.DepartmentEntity;
 import com.hcv.entity.StudentEntity;
 import com.hcv.entity.SubjectEntity;
 import com.hcv.entity.UserEntity;
-import com.hcv.repository.IDepartmentRepository;
 import com.hcv.repository.IStudentRepository;
 import com.hcv.repository.ISubjectRepository;
 import com.hcv.repository.IUserRepository;
 import com.hcv.service.IStudentService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class StudentService implements IStudentService {
 
-    @Autowired
-    private IStudentRepository studentRepository;
-    @Autowired
-    private IStudentMapper studentMapper;
-    @Autowired
-    private ISubjectRepository subjectRepository;
-    @Autowired
-    private IDepartmentRepository departmentRepository;
-    @Autowired
-    private IUserRepository userRepository;
+    IStudentRepository studentRepository;
+    IStudentMapper studentMapper;
+    ISubjectRepository subjectRepository;
+    IUserRepository userRepository;
 
     @Override
-    public void insert(StudentInput studentInput) {
+    public StudentDTO insert(StudentInput studentInput) {
 
         StudentEntity studentEntity = studentMapper.toEntity(studentInput);
 
@@ -43,10 +45,12 @@ public class StudentService implements IStudentService {
         SubjectEntity subjectEntity = subjectRepository.findOneByName(studentInput.getSubjectName());
         studentEntity.setSubjects(subjectEntity);
 
-        DepartmentEntity departmentEntity = departmentRepository.findOneByName(studentInput.getDepartmentName());
+        DepartmentEntity departmentEntity = subjectEntity.getDepartments();
         studentEntity.setDepartments(departmentEntity);
 
         studentRepository.save(studentEntity);
+
+        return studentMapper.toDTO(studentEntity);
     }
 
     @Override
@@ -63,13 +67,34 @@ public class StudentService implements IStudentService {
     }
 
     @Override
-    public List<StudentDTO> showAll() {
-        List<StudentEntity> resultEntity = studentRepository.findAll();
-        List<StudentDTO> resultDTO = new ArrayList<>();
-        for (StudentEntity studentEntity : resultEntity) {
-            StudentDTO studentDTO = studentMapper.toDTO(studentEntity);
-            resultDTO.add(studentDTO);
-        }
-        return resultDTO;
+    public int countAll() {
+        return (int) studentRepository.count();
     }
+
+    @Override
+    public ShowAllResponse<StudentDTO> showAll(ShowAllRequest showAllRequest) {
+        int page = showAllRequest.getPage();
+        int limit = showAllRequest.getLimit();
+        int totalPages = (int) Math.ceil((1.0 * countAll()) / limit);
+
+        Pageable paging = PageRequest.of(
+                page - 1,
+                limit,
+                Sort.by(Sort.Direction.fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
+        );
+        Page<StudentEntity> studentEntityList = studentRepository.findAll(paging);
+
+        List<StudentEntity> resultEntity = studentEntityList.getContent();
+
+        List<StudentDTO> resultDTO = resultEntity.stream().map(studentMapper::toDTO).toList();
+
+        return ShowAllResponse.<StudentDTO>builder()
+                .page(page)
+                .totalPages(totalPages)
+                .responses(resultDTO)
+                .build();
+
+    }
+
+
 }

@@ -2,7 +2,7 @@ package com.hcv.config;
 
 import com.hcv.filter.JwtRequestFilter;
 import com.hcv.service.impl.CustomUserDetailsService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,10 +26,15 @@ import static org.springframework.security.web.header.writers.ClearSiteDataHeade
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class WebSecurityConfig {
 
-    @Autowired
-    private JwtRequestFilter jwtRequestFilter;
+    private final JwtRequestFilter jwtRequestFilter;
+
+    private final String[] PUBLIC_ENDPOINTS = {
+            "/log-in", "/register", "/log-out", "/update-user",
+            "/subjects/**", "/departments/**", "/teachers/**", "/students/**", "/jobs/**", "/users/**"
+    };
 
 
     @Bean
@@ -62,8 +67,7 @@ public class WebSecurityConfig {
 
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/log-in", "/register", "/log-out", "/update-user").permitAll()
-                        .requestMatchers("/subjects/**", "/departments/**", "/teachers/**", "/students/**", "/jobs/**").permitAll()
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated()
                 );
         http.sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -75,8 +79,6 @@ public class WebSecurityConfig {
                         new ClearSiteDataHeaderWriter(COOKIES, CACHE, STORAGE)))
                 .logoutSuccessUrl("/log-in?log-out").permitAll()
         );
-
-        http.exceptionHandling(e -> e.accessDeniedPage("/access-denied"));
 
         return http.build();
     }

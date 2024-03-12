@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.3</version>
+		<version>3.2.4</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
@@ -19,7 +19,7 @@
 		<lombok.version>1.18.30</lombok.version>
 		<mapstruct_lombok_binding.version>0.2.0</mapstruct_lombok_binding.version>
 		<mysql.version>8.3.0</mysql.version>
-		<jwt-io.version>0.11.5</jwt-io.version>
+		<jwt-io.version>0.12.5</jwt-io.version>
 		<java.version>21</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
@@ -40,6 +40,11 @@
 			<groupId>com.mysql</groupId>
 			<artifactId>mysql-connector-j</artifactId>
 			<version>${mysql.version}</version>
+		</dependency>
+		<!--Validation-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 		<!--Spring data JPA-->
 		<dependency>

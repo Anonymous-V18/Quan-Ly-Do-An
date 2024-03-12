@@ -1,36 +1,34 @@
 package com.hcv.service.impl;
 
-import com.hcv.converter.DepartmentConverter;
+import com.hcv.converter.IDepartmentMapper;
 import com.hcv.dto.DepartmentDTO;
+import com.hcv.dto.request.ShowAllRequest;
+import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.entity.DepartmentEntity;
 import com.hcv.repository.IDepartmentRepository;
-import com.hcv.repository.ISubjectRepository;
 import com.hcv.service.IDepartmentService;
-import com.hcv.service.ISubjectService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DepartmentService implements IDepartmentService {
 
-    @Autowired
-    private IDepartmentRepository departmentRepository;
-
-    @Autowired
-    private DepartmentConverter departmentConverter;
-
-    @Autowired
-    private ISubjectRepository subjectRepository;
-
-    @Autowired
-    private ISubjectService subjectService;
+    IDepartmentRepository departmentRepository;
+    IDepartmentMapper departmentMapper;
 
     @Override
     public DepartmentDTO insert(DepartmentDTO departmentDTO) {
-        DepartmentEntity departmentEntity = departmentConverter.toEntity(departmentDTO);
+        DepartmentEntity departmentEntity = departmentMapper.toEntity(departmentDTO);
         departmentRepository.save(departmentEntity);
         return departmentDTO;
     }
@@ -38,9 +36,9 @@ public class DepartmentService implements IDepartmentService {
     @Override
     public DepartmentDTO update(DepartmentDTO new_departmentDTO, DepartmentDTO old_departmentDTO) {
         old_departmentDTO.setName(new_departmentDTO.getName());
-        DepartmentEntity departmentEntityUpdate = departmentConverter.toEntity(old_departmentDTO);
+        DepartmentEntity departmentEntityUpdate = departmentMapper.toEntity(old_departmentDTO);
         departmentRepository.save(departmentEntityUpdate);
-        return departmentConverter.toDTO(departmentEntityUpdate);
+        return departmentMapper.toDTO(departmentEntityUpdate);
     }
 
     @Override
@@ -53,24 +51,42 @@ public class DepartmentService implements IDepartmentService {
     @Override
     public DepartmentDTO findOneById(Long id) {
         DepartmentEntity departmentEntity = departmentRepository.findOneById(id);
-        return departmentConverter.toDTO(departmentEntity);
+        return departmentMapper.toDTO(departmentEntity);
     }
 
     @Override
     public DepartmentDTO findOneByName(String name) {
         DepartmentEntity departmentEntity = departmentRepository.findOneByName(name);
-        return departmentEntity == null ? null : departmentConverter.toDTO(departmentEntity);
+        return departmentEntity == null ? null : departmentMapper.toDTO(departmentEntity);
     }
 
     @Override
-    public List<DepartmentDTO> showAll() {
-        List<DepartmentEntity> resultEntity = departmentRepository.findAll();
-        List<DepartmentDTO> resultDTO = new ArrayList<>();
-        for (DepartmentEntity departmentEntity : resultEntity) {
-            DepartmentDTO departmentDTO = departmentConverter.toDTO(departmentEntity);
-            resultDTO.add(departmentDTO);
-        }
-        return resultDTO;
+    public int countAll() {
+        return (int) departmentRepository.count();
+    }
+
+    @Override
+    public ShowAllResponse<DepartmentDTO> showAll(ShowAllRequest showAllRequest) {
+        int page = showAllRequest.getPage();
+        int limit = showAllRequest.getLimit();
+        int totalPages = (int) Math.ceil((1.0 * countAll()) / limit);
+
+        Pageable paging = PageRequest.of(
+                page - 1,
+                limit,
+                Sort.by(Sort.Direction.fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
+        );
+        Page<DepartmentEntity> departmentEntityList = departmentRepository.findAll(paging);
+
+        List<DepartmentEntity> resultEntity = departmentEntityList.getContent();
+
+        List<DepartmentDTO> resultDTO = resultEntity.stream().map(departmentMapper::toDTO).toList();
+
+        return ShowAllResponse.<DepartmentDTO>builder()
+                .page(page)
+                .totalPages(totalPages)
+                .responses(resultDTO)
+                .build();
     }
 
 }

@@ -2,27 +2,33 @@ package com.hcv.service.impl;
 
 import com.hcv.converter.ISubjectMapper;
 import com.hcv.dto.SubjectDTO;
-import com.hcv.dto.input.SubjectInput;
+import com.hcv.dto.request.ShowAllRequest;
+import com.hcv.dto.request.SubjectInput;
+import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.entity.DepartmentEntity;
 import com.hcv.entity.SubjectEntity;
 import com.hcv.repository.IDepartmentRepository;
 import com.hcv.repository.ISubjectRepository;
 import com.hcv.service.ISubjectService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SubjectService implements ISubjectService {
 
-    @Autowired
-    private ISubjectRepository subjectRepository;
-    @Autowired
-    private ISubjectMapper subjectMapper;
-    @Autowired
-    private IDepartmentRepository departmentRepository;
+    ISubjectRepository subjectRepository;
+    ISubjectMapper subjectMapper;
+    IDepartmentRepository departmentRepository;
 
     @Override
     public SubjectDTO insert(SubjectInput subjectInput) {
@@ -65,13 +71,31 @@ public class SubjectService implements ISubjectService {
     }
 
     @Override
-    public List<SubjectDTO> showAll() {
-        List<SubjectEntity> resultEntity = subjectRepository.findAll();
-        List<SubjectDTO> resultDTO = new ArrayList<>();
-        for (SubjectEntity subjectEntity : resultEntity) {
-            SubjectDTO subjectDTO = subjectMapper.toDTO(subjectEntity);
-            resultDTO.add(subjectDTO);
-        }
-        return resultDTO;
+    public int countAll() {
+        return (int) subjectRepository.count();
+    }
+    
+    @Override
+    public ShowAllResponse<SubjectDTO> showAll(ShowAllRequest showAllRequest) {
+        int page = showAllRequest.getPage();
+        int limit = showAllRequest.getLimit();
+        int totalPages = (int) Math.ceil((1.0 * countAll()) / limit);
+
+        Pageable paging = PageRequest.of(
+                page - 1,
+                limit,
+                Sort.by(Sort.Direction.fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
+        );
+        Page<SubjectEntity> subjectEntityList = subjectRepository.findAll(paging);
+
+        List<SubjectEntity> resultEntity = subjectEntityList.getContent();
+
+        List<SubjectDTO> resultDTO = resultEntity.stream().map(subjectMapper::toDTO).toList();
+
+        return ShowAllResponse.<SubjectDTO>builder()
+                .page(page)
+                .totalPages(totalPages)
+                .responses(resultDTO)
+                .build();
     }
 }

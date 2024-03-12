@@ -1,55 +1,68 @@
 package com.hcv.api_controller;
 
 import com.hcv.dto.SubjectDTO;
-import com.hcv.dto.input.SubjectInput;
+import com.hcv.dto.request.ShowAllRequest;
+import com.hcv.dto.request.SubjectInput;
+import com.hcv.dto.response.ApiResponse;
+import com.hcv.dto.response.ShowAllResponse;
+import com.hcv.exception.AppException;
+import com.hcv.exception.ErrorCode;
 import com.hcv.service.ISubjectService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/subjects")
 public class SubjectAPI {
 
-    @Autowired
-    private ISubjectService subjectService;
+    private final ISubjectService subjectService;
 
     @PostMapping("/insert")
-    public ResponseEntity<?> insert(@RequestBody SubjectInput subjectInput) {
+    public ResponseEntity<?> insert(@RequestBody @Valid SubjectInput subjectInput) {
         SubjectDTO subjectDTO = subjectService.findOneByName(subjectInput.getName());
-        if (subjectDTO == null) {
-            subjectService.insert(subjectInput);
-            return new ResponseEntity<>("Successfully !", HttpStatus.CREATED);
+        if (subjectDTO != null) {
+            throw new AppException(ErrorCode.SUBJECT_EXISTED);
         }
-        return new ResponseEntity<>("Subject already exist !", HttpStatus.CONFLICT);
+        SubjectDTO new_subjectDTO = subjectService.insert(subjectInput);
+        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(new_subjectDTO).build(), HttpStatus.OK);
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<?> update(@PathVariable(name = "id") Long id,
-                                    @RequestBody SubjectInput subjectInput) {
+                                    @RequestBody @Valid SubjectInput subjectInput) {
         SubjectDTO old_subjectDTO = subjectService.findOneById(id);
         if (old_subjectDTO == null) {
-            subjectService.insert(subjectInput);
-            return new ResponseEntity<>("Successfully !", HttpStatus.CREATED);
+            SubjectDTO new_subjectDTO = subjectService.insert(subjectInput);
+            return new ResponseEntity<>(ApiResponse.builder().code(10000).result(new_subjectDTO).build(), HttpStatus.CREATED);
         }
-        subjectService.update(old_subjectDTO, subjectInput);
-        return new ResponseEntity<>("Successfully !", HttpStatus.OK);
+        SubjectDTO updatedDTO = subjectService.update(old_subjectDTO, subjectInput);
+        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(updatedDTO).build(), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<?> delete(@RequestBody Long[] ids) {
         subjectService.delete(ids);
-        return new ResponseEntity<>("Successfully !", HttpStatus.OK);
+        return new ResponseEntity<>(ApiResponse.builder().code(10000).message("Deleted Successfully !").build(), HttpStatus.OK);
     }
 
     @GetMapping("/showAll")
-    public ResponseEntity<?> showAll() {
-        List<SubjectDTO> subjectDTOs = subjectService.showAll();
-        return new ResponseEntity<>(subjectDTOs, HttpStatus.OK);
+    public ResponseEntity<?> showAll(@RequestBody @Valid ShowAllRequest showAllRequest) {
+        ShowAllResponse<?> response = subjectService.showAll(showAllRequest);
+        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(response).build(), HttpStatus.OK);
+    }
+
+    @GetMapping("/showOne")
+    public ResponseEntity<?> showOne(@RequestParam(name = "name") String name) {
+        SubjectDTO subjectDTO = subjectService.findOneByName(name);
+        if (subjectDTO == null) {
+            return new ResponseEntity<>(ApiResponse.builder().code(10000).message("No search item !").build(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(subjectDTO).build(), HttpStatus.OK);
     }
 
 }

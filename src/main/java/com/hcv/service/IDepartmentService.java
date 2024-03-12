@@ -1,14 +1,14 @@
 package com.hcv.service;
 
 import com.hcv.dto.DepartmentDTO;
-
-import java.util.List;
+import com.hcv.dto.request.ShowAllRequest;
+import com.hcv.dto.response.ShowAllResponse;
 
 public interface IDepartmentService {
 
-    void insert(DepartmentDTO departmentDTO);
+    DepartmentDTO insert(DepartmentDTO departmentDTO);
 
-    void update(DepartmentDTO new_departmentDTO, DepartmentDTO old_departmentDTO);
+    DepartmentDTO update(DepartmentDTO new_departmentDTO, DepartmentDTO old_departmentDTO);
 
     void delete(Long[] ids);
 
@@ -16,5 +16,7 @@ public interface IDepartmentService {
 
     DepartmentDTO findOneByName(String name);
 
-    List<DepartmentDTO> showAll();
+    int countAll();
+
+    ShowAllResponse<DepartmentDTO> showAll(ShowAllRequest showAllRequest);
 }
