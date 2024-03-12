@@ -76,4 +76,11 @@ public class AuthService implements IAuthService {
             userRepository.deleteById(id);
         }
     }
+
+    @Override
+    public void deleteUser(Long[] ids) {
+        for (Long id : ids) {
+            userRepository.deleteById(id);
+        }
+    }
 }
