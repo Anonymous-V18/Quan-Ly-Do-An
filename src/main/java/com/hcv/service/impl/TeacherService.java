@@ -43,7 +43,12 @@ public class TeacherService implements ITeacherService {
     @Override
     public TeacherDTO insert(TeacherInput teacherInput) {
 
-        TeacherEntity teacherEntity = teacherMapper.toEntity(teacherInput);
+        TeacherEntity teacherEntity = teacherRepository.findOneByMaSo(teacherInput.getMaSo());
+        if (teacherEntity != null) {
+            throw new AppException(ErrorCode.TEACHER_EXISTED);
+        }
+
+        teacherEntity = teacherMapper.toEntity(teacherInput);
 
         UserEntity userEntity = userRepository.findOneById(teacherInput.getUser_id());
         if (userEntity == null) {
@@ -122,6 +127,12 @@ public class TeacherService implements ITeacherService {
     @Override
     public TeacherDTO findOneByMaSo(String maSo) {
         TeacherEntity teacher = teacherRepository.findOneByMaSo(maSo);
+        return teacher == null ? null : teacherMapper.toDTO(teacher);
+    }
+
+    @Override
+    public TeacherDTO findOneById(Long id) {
+        TeacherEntity teacher = teacherRepository.findOneById(id);
         return teacher == null ? null : teacherMapper.toDTO(teacher);
     }
 

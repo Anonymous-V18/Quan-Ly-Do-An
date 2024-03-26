@@ -5,8 +5,6 @@ import com.hcv.dto.request.ShowAllRequest;
 import com.hcv.dto.request.SubjectInput;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.ShowAllResponse;
-import com.hcv.exception.AppException;
-import com.hcv.exception.ErrorCode;
 import com.hcv.service.ISubjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +26,6 @@ public class SubjectAPI {
     @PostMapping("/insert")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
     public ResponseEntity<?> insert(@RequestBody @Valid SubjectInput subjectInput) {
-        SubjectDTO subjectDTO = subjectService.findOneByName(subjectInput.getName());
-        if (subjectDTO != null) {
-            throw new AppException(ErrorCode.SUBJECT_EXISTED);
-        }
         SubjectDTO new_subjectDTO = subjectService.insert(subjectInput);
         return new ResponseEntity<>(ApiResponse.builder().code(10000).result(new_subjectDTO).build(), HttpStatus.OK);
     }

@@ -1,5 +1,6 @@
 package com.hcv.api_controller;
 
+import com.hcv.dto.RoleDTO;
 import com.hcv.dto.UserDTO;
 import com.hcv.dto.request.LogInInput;
 import com.hcv.dto.request.UpdateUserInput;
@@ -24,6 +25,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -54,10 +57,11 @@ public class AuthAPI {
         String token = jwtUtil.generateToken(userDetails.getUsername());
         UserDTO userDTO = userService.findOneByUsername(userDetails.getUsername());
         if (userDetails.getAuthorities().toString().contains("ROLE_STUDENT")) {
-            LoginOutput loginOutput = new LoginOutput(token, userDTO.getId(), userDTO.getStudents());
+            LoginOutput loginOutput = new LoginOutput(token, userDTO.getId(), List.of("ROLE_STUDENT"), userDTO.getStudents());
             return new ResponseEntity<>(ApiResponse.builder().code(10000).result(loginOutput).build(), HttpStatus.OK);
         }
-        LoginOutput loginOutput = new LoginOutput(token, userDTO.getId(), userDTO.getTeachers());
+        List<String> authorities = userDTO.getRoles().stream().map(RoleDTO::getName).toList();
+        LoginOutput loginOutput = new LoginOutput(token, userDTO.getId(), authorities, userDTO.getTeachers());
         return new ResponseEntity<>(ApiResponse.builder().code(10000).result(loginOutput).build(), HttpStatus.OK);
     }
 

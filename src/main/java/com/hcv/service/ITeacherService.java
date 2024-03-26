@@ -21,6 +21,8 @@ public interface ITeacherService {
 
     TeacherDTO findOneByMaSo(String maSo);
 
+    TeacherDTO findOneById(Long id);
+
     List<TeacherDTO> findAll();
 
 

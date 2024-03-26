@@ -10,7 +10,6 @@ import lombok.Setter;
 public class StudentInput {
 
     @Setter
-    @NotNull(message = "INVALID_STUDENT_INPUT_PARAM")
     private Long user_id;
 
     @NotNull(message = "INVALID_STUDENT_INPUT_PARAM")

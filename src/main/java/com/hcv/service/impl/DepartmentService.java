@@ -5,6 +5,8 @@ import com.hcv.dto.DepartmentDTO;
 import com.hcv.dto.request.ShowAllRequest;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.entity.DepartmentEntity;
+import com.hcv.exception.AppException;
+import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IDepartmentRepository;
 import com.hcv.service.IDepartmentService;
 import lombok.AccessLevel;
@@ -28,7 +30,11 @@ public class DepartmentService implements IDepartmentService {
 
     @Override
     public DepartmentDTO insert(DepartmentDTO departmentDTO) {
-        DepartmentEntity departmentEntity = departmentMapper.toEntity(departmentDTO);
+        DepartmentEntity departmentEntity = departmentRepository.findOneByName(departmentDTO.getName());
+        if (departmentEntity != null) {
+            throw new AppException(ErrorCode.DEPARTMENT_EXISTED);
+        }
+        departmentEntity = departmentMapper.toEntity(departmentDTO);
         departmentRepository.save(departmentEntity);
         return departmentDTO;
     }

@@ -8,8 +8,6 @@ import com.hcv.dto.request.TeacherInput;
 import com.hcv.dto.request.UserRequest;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.ShowAllResponse;
-import com.hcv.exception.AppException;
-import com.hcv.exception.ErrorCode;
 import com.hcv.service.IAuthService;
 import com.hcv.service.ITeacherService;
 import jakarta.validation.Valid;
@@ -55,18 +53,15 @@ public class TeacherAPI {
     @PostMapping("/insert")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
     public ResponseEntity<?> insert(@RequestBody @Valid TeacherInput teacherInput) {
-        TeacherDTO teacherDTO = teacherService.findOneByMaSo(teacherInput.getMaSo());
-        if (teacherDTO != null) {
-            throw new AppException(ErrorCode.TEACHER_EXISTED);
-        }
         TeacherDTO new_TeacherDTO = teacherService.insert(teacherInput);
         return new ResponseEntity<>(ApiResponse.builder().code(10000).result(new_TeacherDTO).build(), HttpStatus.OK);
     }
 
-    @PutMapping("/update")
+    @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM') or hasRole('TEACHER') or hasRole('HEAD_OF_DEPARTMENT')")
-    public ResponseEntity<?> update(@RequestBody @Valid TeacherInput teacherInput) {
-        TeacherDTO old_teacherDTO = teacherService.findOneByMaSo(teacherInput.getMaSo());
+    public ResponseEntity<?> update(@PathVariable(value = "id") Long id,
+                                    @RequestBody @Valid TeacherInput teacherInput) {
+        TeacherDTO old_teacherDTO = teacherService.findOneById(id);
         if (old_teacherDTO == null) {
             TeacherDTO new_teacherDTO = teacherService.insert(teacherInput);
             return new ResponseEntity<>(ApiResponse.builder().code(10000).result(new_teacherDTO).build(), HttpStatus.CREATED);

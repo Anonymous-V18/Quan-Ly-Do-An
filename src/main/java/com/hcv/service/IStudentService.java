@@ -17,6 +17,8 @@ public interface IStudentService {
 
     StudentDTO findOneByMaSo(String maSo);
 
+    StudentDTO findOneById(Long id);
+
     int countAll();
 
     ShowAllResponse<StudentDTO> showAll(ShowAllRequest showAllRequest);

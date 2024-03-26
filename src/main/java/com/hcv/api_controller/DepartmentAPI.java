@@ -4,8 +4,6 @@ import com.hcv.dto.DepartmentDTO;
 import com.hcv.dto.request.ShowAllRequest;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.ShowAllResponse;
-import com.hcv.exception.AppException;
-import com.hcv.exception.ErrorCode;
 import com.hcv.service.IDepartmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,10 +25,6 @@ public class DepartmentAPI {
     @PostMapping("/insert")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
     public ResponseEntity<?> insert(@RequestBody @Valid DepartmentDTO departmentDTO) {
-        DepartmentDTO old_departmentDTO = departmentService.findOneByName(departmentDTO.getName());
-        if (old_departmentDTO != null) {
-            throw new AppException(ErrorCode.DEPARTMENT_EXISTED);
-        }
         DepartmentDTO new_DepartmentDTO = departmentService.insert(departmentDTO);
         return new ResponseEntity<>(ApiResponse.builder().code(10000).result(new_DepartmentDTO).build(), HttpStatus.CREATED);
     }

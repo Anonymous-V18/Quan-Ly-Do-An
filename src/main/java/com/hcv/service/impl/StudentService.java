@@ -42,7 +42,12 @@ public class StudentService implements IStudentService {
     @Override
     public StudentDTO insert(StudentInput studentInput) {
 
-        StudentEntity studentEntity = studentMapper.toEntity(studentInput);
+        StudentEntity studentEntity = studentRepository.findOneByMaSo(studentInput.getMaSo());
+        if (studentEntity != null) {
+            throw new AppException(ErrorCode.STUDENT_EXISTED);
+        }
+
+        studentEntity = studentMapper.toEntity(studentInput);
 
         UserEntity userEntity = userRepository.findOneById(studentInput.getUser_id());
         if (userEntity == null) {
@@ -88,6 +93,13 @@ public class StudentService implements IStudentService {
             studentRepository.deleteById(id);
         }
     }
+
+    @Override
+    public StudentDTO findOneById(Long id) {
+        StudentEntity student = studentRepository.findOneById(id);
+        return student == null ? null : studentMapper.toDTO(student);
+    }
+
 
     @Override
     public StudentDTO findOneByMaSo(String maSo) {

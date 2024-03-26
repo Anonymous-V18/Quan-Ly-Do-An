@@ -34,9 +34,11 @@ public class SubjectService implements ISubjectService {
 
     @Override
     public SubjectDTO insert(SubjectInput subjectInput) {
-        SubjectDTO subjectDTO = new SubjectDTO();
-        subjectDTO.setName(subjectInput.getName());
-        SubjectEntity subjectEntity = subjectMapper.toEntity(subjectDTO);
+        SubjectEntity subjectEntity = subjectRepository.findOneByName(subjectInput.getName());
+        if (subjectEntity != null) {
+            throw new AppException(ErrorCode.SUBJECT_EXISTED);
+        }
+        subjectEntity = subjectMapper.toEntity(subjectInput);
         DepartmentEntity departmentEntity = departmentRepository.findOneByName(subjectInput.getNameDepartment());
         if (departmentEntity == null) {
             throw new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED);
