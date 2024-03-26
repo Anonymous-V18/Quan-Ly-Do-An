@@ -2,6 +2,7 @@ package com.hcv.service.impl;
 
 import com.hcv.converter.IStudentMapper;
 import com.hcv.dto.StudentDTO;
+import com.hcv.dto.SubjectDTO;
 import com.hcv.dto.request.ShowAllRequest;
 import com.hcv.dto.request.StudentInput;
 import com.hcv.dto.response.ShowAllResponse;
@@ -9,10 +10,13 @@ import com.hcv.entity.DepartmentEntity;
 import com.hcv.entity.StudentEntity;
 import com.hcv.entity.SubjectEntity;
 import com.hcv.entity.UserEntity;
+import com.hcv.exception.AppException;
+import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IStudentRepository;
 import com.hcv.repository.ISubjectRepository;
 import com.hcv.repository.IUserRepository;
 import com.hcv.service.IStudentService;
+import com.hcv.service.ISubjectService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -33,6 +37,7 @@ public class StudentService implements IStudentService {
     IStudentMapper studentMapper;
     ISubjectRepository subjectRepository;
     IUserRepository userRepository;
+    ISubjectService subjectService;
 
     @Override
     public StudentDTO insert(StudentInput studentInput) {
@@ -40,13 +45,37 @@ public class StudentService implements IStudentService {
         StudentEntity studentEntity = studentMapper.toEntity(studentInput);
 
         UserEntity userEntity = userRepository.findOneById(studentInput.getUser_id());
+        if (userEntity == null) {
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
         studentEntity.setUsers(userEntity);
 
         SubjectEntity subjectEntity = subjectRepository.findOneByName(studentInput.getSubjectName());
+        if (subjectEntity == null) {
+            throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
+        }
         studentEntity.setSubjects(subjectEntity);
 
         DepartmentEntity departmentEntity = subjectEntity.getDepartments();
         studentEntity.setDepartments(departmentEntity);
+
+        studentRepository.save(studentEntity);
+
+        return studentMapper.toDTO(studentEntity);
+    }
+
+    @Override
+    public StudentDTO update(StudentDTO old_studentDTO, StudentInput studentInput) {
+        old_studentDTO = studentMapper.toDTO(old_studentDTO, studentInput);
+
+        SubjectDTO subjectDTO = subjectService.findOneByName(studentInput.getSubjectName());
+        if (subjectDTO == null) {
+            throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
+        }
+        old_studentDTO.setSubjects(subjectDTO);
+
+        StudentEntity studentEntity = studentMapper.toEntity(old_studentDTO);
+        studentEntity.setDepartments(studentEntity.getSubjects().getDepartments());
 
         studentRepository.save(studentEntity);
 
@@ -96,5 +125,9 @@ public class StudentService implements IStudentService {
 
     }
 
-
+    @Override
+    public List<StudentDTO> findAll() {
+        List<StudentEntity> resultEntity = studentRepository.findAll();
+        return resultEntity.stream().map(studentMapper::toDTO).toList();
+    }
 }

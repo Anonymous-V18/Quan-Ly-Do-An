@@ -39,7 +39,7 @@ public class UserService implements IUserService {
     @Override
     public List<UserDTO> findAll() {
         List<UserEntity> users = userRepository.findAll();
-        return users.stream().map(userMapper::toDTO).toList();
+        return users.stream().map(userMapper::toShowDTO).toList();
     }
 
     @Override

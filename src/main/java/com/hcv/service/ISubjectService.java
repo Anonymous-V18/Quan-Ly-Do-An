@@ -5,6 +5,8 @@ import com.hcv.dto.request.ShowAllRequest;
 import com.hcv.dto.request.SubjectInput;
 import com.hcv.dto.response.ShowAllResponse;
 
+import java.util.List;
+
 public interface ISubjectService {
 
     SubjectDTO insert(SubjectInput subjectInput);
@@ -20,4 +22,6 @@ public interface ISubjectService {
     int countAll();
 
     ShowAllResponse<SubjectDTO> showAll(ShowAllRequest showAllRequest);
+
+    List<SubjectDTO> findAll();
 }

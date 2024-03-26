@@ -33,7 +33,8 @@ public class WebSecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
             "/log-in", "/register", "/log-out", "/update-user",
-            "/subjects/**", "/departments/**", "/teachers/**", "/students/**", "/jobs/**", "/users/**"
+            "/subjects/**", "/departments/**", "/teachers/**", "/students/**", "/jobs/**", "/users/**",
+            "/showAll", "/showOne"
     };
 
 

@@ -4,6 +4,8 @@ import com.hcv.dto.DepartmentDTO;
 import com.hcv.dto.request.ShowAllRequest;
 import com.hcv.dto.response.ShowAllResponse;
 
+import java.util.List;
+
 public interface IDepartmentService {
 
     DepartmentDTO insert(DepartmentDTO departmentDTO);
@@ -19,4 +21,6 @@ public interface IDepartmentService {
     int countAll();
 
     ShowAllResponse<DepartmentDTO> showAll(ShowAllRequest showAllRequest);
+
+    List<DepartmentDTO> findAll();
 }

@@ -7,6 +7,8 @@ import com.hcv.dto.request.SubjectInput;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.entity.DepartmentEntity;
 import com.hcv.entity.SubjectEntity;
+import com.hcv.exception.AppException;
+import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IDepartmentRepository;
 import com.hcv.repository.ISubjectRepository;
 import com.hcv.service.ISubjectService;
@@ -36,6 +38,9 @@ public class SubjectService implements ISubjectService {
         subjectDTO.setName(subjectInput.getName());
         SubjectEntity subjectEntity = subjectMapper.toEntity(subjectDTO);
         DepartmentEntity departmentEntity = departmentRepository.findOneByName(subjectInput.getNameDepartment());
+        if (departmentEntity == null) {
+            throw new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED);
+        }
         subjectEntity.setDepartments(departmentEntity);
         subjectRepository.save(subjectEntity);
         return subjectMapper.toDTO(subjectEntity);
@@ -46,6 +51,9 @@ public class SubjectService implements ISubjectService {
         old_subjectDTO.setName(subjectInput.getName());
         SubjectEntity subjectEntityUpdate = subjectMapper.toEntity(old_subjectDTO);
         DepartmentEntity departmentEntity = departmentRepository.findOneByName(subjectInput.getNameDepartment());
+        if (departmentEntity == null) {
+            throw new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED);
+        }
         subjectEntityUpdate.setDepartments(departmentEntity);
         subjectRepository.save(subjectEntityUpdate);
         return subjectMapper.toDTO(subjectEntityUpdate);
@@ -74,7 +82,7 @@ public class SubjectService implements ISubjectService {
     public int countAll() {
         return (int) subjectRepository.count();
     }
-    
+
     @Override
     public ShowAllResponse<SubjectDTO> showAll(ShowAllRequest showAllRequest) {
         int page = showAllRequest.getPage();
@@ -97,5 +105,11 @@ public class SubjectService implements ISubjectService {
                 .totalPages(totalPages)
                 .responses(resultDTO)
                 .build();
+    }
+
+    @Override
+    public List<SubjectDTO> findAll() {
+        List<SubjectEntity> resultEntity = subjectRepository.findAll();
+        return resultEntity.stream().map(subjectMapper::toDTO).toList();
     }
 }

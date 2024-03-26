@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,11 +31,12 @@ public class StudentAPI {
     private final IAuthService authService;
 
     @PostMapping("/insert-from-excel")
-    public ResponseEntity<?> insert(@RequestBody @Valid StudentFromExcelInput studentFromExcelInput) {
+    @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
+    public ResponseEntity<?> insertFromExcel(@RequestBody @Valid StudentFromExcelInput studentFromExcelInput) {
         for (StudentInput studentInput : studentFromExcelInput.getStudents()) {
 
-            UserRequest userRequest = new UserRequest();
             String usernameAndPasswordDefault = studentInput.getMaSo();
+            UserRequest userRequest = new UserRequest();
             userRequest.setUsername(usernameAndPasswordDefault);
             userRequest.setPassword(usernameAndPasswordDefault);
             userRequest.setNameRoles(List.of("HỌC SINH"));
@@ -50,6 +52,7 @@ public class StudentAPI {
     }
 
     @PostMapping("/insert")
+    @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
     public ResponseEntity<?> insert(@RequestBody @Valid StudentInput studentInput) {
         StudentDTO studentDTO = studentService.findOneByMaSo(studentInput.getMaSo());
         if (studentDTO != null) {
@@ -59,17 +62,49 @@ public class StudentAPI {
         return new ResponseEntity<>(ApiResponse.builder().code(10000).result(new_studentDTO).build(), HttpStatus.CREATED);
     }
 
+    @PutMapping("/update")
+    @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM') or hasRole('STUDENT')")
+    public ResponseEntity<?> update(@RequestBody @Valid StudentInput studentInput) {
+        StudentDTO old_studentDTO = studentService.findOneByMaSo(studentInput.getMaSo());
+        if (old_studentDTO == null) {
+            StudentDTO new_studentDTO = studentService.insert(studentInput);
+            return new ResponseEntity<>(ApiResponse.builder().code(10000).result(new_studentDTO).build(), HttpStatus.CREATED);
+        }
+        StudentDTO updatedDTO = studentService.update(old_studentDTO, studentInput);
+        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(updatedDTO).build(), HttpStatus.OK);
+    }
+
     @DeleteMapping("/delete")
+    @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
     public ResponseEntity<?> delete(@RequestBody Long[] ids) {
         studentService.delete(ids);
         return new ResponseEntity<>(ApiResponse.builder().code(10000).message("Deleted Successfully !").build(), HttpStatus.OK);
     }
 
     @GetMapping("/showAll")
-    public ResponseEntity<?> showAll(@RequestBody @Valid ShowAllRequest showAllRequest) {
+    public ResponseEntity<?> showAll(@RequestParam(name = "page") Integer page,
+                                     @RequestParam(name = "limit") Integer limit,
+                                     @RequestParam(name = "orderBy") String orderBy,
+                                     @RequestParam(name = "orderDirection") String orderDirection) {
+        ShowAllRequest showAllRequest = ShowAllRequest.builder()
+                .page(page)
+                .limit(limit)
+                .orderBy(orderBy)
+                .orderDirection(orderDirection)
+                .build();
         ShowAllResponse<?> response = studentService.showAll(showAllRequest);
         return new ResponseEntity<>(ApiResponse.builder().code(10000).result(response).build(), HttpStatus.OK);
     }
+
+    @GetMapping("/showAll-no-params")
+    public ResponseEntity<?> showAll() {
+        List<StudentDTO> response = studentService.findAll();
+        if (response == null) {
+            return new ResponseEntity<>(ApiResponse.builder().code(10000).message("No search item !").build(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(response).build(), HttpStatus.OK);
+    }
+
 
     @GetMapping("/showOne")
     public ResponseEntity<?> showOne(@RequestParam(name = "maSo") String maSo) {

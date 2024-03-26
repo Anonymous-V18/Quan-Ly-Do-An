@@ -9,10 +9,11 @@ import lombok.Setter;
 @Setter
 public abstract class BaseAuthInput<T> {
 
-    @NotNull
+    @NotNull(message = "INVALID_USERNAME")
     @Size(min = 8, message = "INVALID_USERNAME")
     protected String username;
-    @NotNull
+
+    @NotNull(message = "INVALID_USERNAME")
     @Size(min = 8, message = "INVALID_PASSWORD")
     protected String password;
 

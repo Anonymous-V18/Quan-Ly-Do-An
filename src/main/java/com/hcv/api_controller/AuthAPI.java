@@ -1,5 +1,6 @@
 package com.hcv.api_controller;
 
+import com.hcv.dto.UserDTO;
 import com.hcv.dto.request.LogInInput;
 import com.hcv.dto.request.UpdateUserInput;
 import com.hcv.dto.request.UserRequest;
@@ -8,6 +9,7 @@ import com.hcv.dto.response.LoginOutput;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.service.IAuthService;
+import com.hcv.service.IUserService;
 import com.hcv.service.impl.CustomUserDetailsService;
 import com.hcv.util.JwtUtil;
 import jakarta.validation.Valid;
@@ -32,6 +34,7 @@ public class AuthAPI {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
+    private final IUserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<?> createdUser(@RequestBody @Valid UserRequest userRequest) {
@@ -49,9 +52,12 @@ public class AuthAPI {
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(authInput.getUsername());
         String token = jwtUtil.generateToken(userDetails.getUsername());
-        String allRole = userDetails.getAuthorities().toString();
-        LoginOutput loginOutput = new LoginOutput(token, allRole);
-
+        UserDTO userDTO = userService.findOneByUsername(userDetails.getUsername());
+        if (userDetails.getAuthorities().toString().contains("ROLE_STUDENT")) {
+            LoginOutput loginOutput = new LoginOutput(token, userDTO.getId(), userDTO.getStudents());
+            return new ResponseEntity<>(ApiResponse.builder().code(10000).result(loginOutput).build(), HttpStatus.OK);
+        }
+        LoginOutput loginOutput = new LoginOutput(token, userDTO.getId(), userDTO.getTeachers());
         return new ResponseEntity<>(ApiResponse.builder().code(10000).result(loginOutput).build(), HttpStatus.OK);
     }
 
@@ -62,14 +68,14 @@ public class AuthAPI {
     }
 
     @PutMapping("admin/update-user")
-    @PreAuthorize("hasRole('DEAN')")
+    @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
     public ResponseEntity<?> updateUserForAdmin(@RequestBody @Valid UserRequest updateUserInput) {
         authService.updateUserForAdmin(updateUserInput);
         return new ResponseEntity<>(ApiResponse.builder().code(10000).message("Update Successful !").build(), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete-user")
-    @PreAuthorize("hasRole('DEAN')")
+    @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
     public ResponseEntity<?> deleteUser(@RequestBody Long[] ids) {
         authService.deleteUser(ids);
         return new ResponseEntity<>(ApiResponse.builder().code(10000).message("Deleted Successfully !").build(), HttpStatus.OK);

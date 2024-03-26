@@ -23,6 +23,8 @@ public class JobEntity extends BaseEntity {
     private Date due;
     @Column(name = "send_to")
     private String sendTo;
+    @Column(name = "send_from")
+    private String sendFrom;
     @Column(name = "name")
     private String name;
     @Column(name = "details")

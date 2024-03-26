@@ -89,4 +89,9 @@ public class DepartmentService implements IDepartmentService {
                 .build();
     }
 
+    @Override
+    public List<DepartmentDTO> findAll() {
+        List<DepartmentEntity> resultEntity = departmentRepository.findAll();
+        return resultEntity.stream().map(departmentMapper::toDTO).toList();
+    }
 }

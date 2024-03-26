@@ -62,7 +62,9 @@ public class AuthService implements IAuthService {
 
     @Override
     public UserDTO updateUserForAdmin(UserRequest updateUserInput) {
-        List<RoleEntity> listRolesEntity = updateUserInput.getNameRoles().stream().map(roleRepository::findOneByName).collect(Collectors.toList());
+        List<RoleEntity> listRolesEntity = updateUserInput.getNameRoles().stream()
+                .map(roleRepository::findOneByName)
+                .collect(Collectors.toList());
         if (listRolesEntity.getFirst() == null) {
             throw new AppException(ErrorCode.INVALID_NAME_ROLE);
         }

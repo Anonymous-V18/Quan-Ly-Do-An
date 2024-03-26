@@ -9,4 +9,5 @@ public interface ISubjectMapper {
     SubjectDTO toDTO(SubjectEntity subjectEntity);
 
     SubjectEntity toEntity(SubjectDTO subjectDTO);
+
 }

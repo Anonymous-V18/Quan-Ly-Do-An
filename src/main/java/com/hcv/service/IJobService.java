@@ -13,4 +13,7 @@ public interface IJobService {
 
     List<JobDTO> showAllJobNotComplete(String maSoGV);
 
+    List<JobDTO> findAll();
+
+
 }

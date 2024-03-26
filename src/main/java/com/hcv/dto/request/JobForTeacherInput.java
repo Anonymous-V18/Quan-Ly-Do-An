@@ -16,6 +16,8 @@ public class JobForTeacherInput {
     @NotNull(message = "INVALID_JOB_FOR_TEACHER_PARAM")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private Date due;
+    @NotNull(message = "INVALID_JOB_FOR_TEACHER_PARAM")
+    @Size(min = 8, message = "INVALID_JOB_FOR_TEACHER_PARAM")
     private String sendTo;
     @NotNull(message = "INVALID_JOB_FOR_TEACHER_PARAM")
     @Size(min = 8, message = "INVALID_JOB_FOR_TEACHER_PARAM")

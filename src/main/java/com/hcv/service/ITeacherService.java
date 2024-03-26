@@ -5,11 +5,13 @@ import com.hcv.dto.request.ShowAllRequest;
 import com.hcv.dto.request.TeacherInput;
 import com.hcv.dto.response.ShowAllResponse;
 
+import java.util.List;
+
 public interface ITeacherService {
 
     TeacherDTO insert(TeacherInput teacherInput);
 
-    // void update(TeacherDTO old_teacherDTO, TeacherInput teacherInput);
+    TeacherDTO update(TeacherDTO old_teacherDTO, TeacherInput teacherInput);
 
     void delete(Long[] ids);
 
@@ -18,6 +20,8 @@ public interface ITeacherService {
     ShowAllResponse<TeacherDTO> showAll(ShowAllRequest showAllRequest);
 
     TeacherDTO findOneByMaSo(String maSo);
+
+    List<TeacherDTO> findAll();
 
 
 }
