@@ -1,89 +1,46 @@
 package com.hcv.api_controller;
 
-import com.hcv.dto.RoleDTO;
-import com.hcv.dto.UserDTO;
 import com.hcv.dto.request.LogInInput;
-import com.hcv.dto.request.UpdateUserInput;
-import com.hcv.dto.request.UserRequest;
 import com.hcv.dto.response.ApiResponse;
+import com.hcv.dto.response.IntrospectTokenResponse;
 import com.hcv.dto.response.LoginOutput;
-import com.hcv.exception.AppException;
-import com.hcv.exception.ErrorCode;
 import com.hcv.service.IAuthService;
-import com.hcv.service.IUserService;
-import com.hcv.service.impl.CustomUserDetailsService;
 import com.hcv.util.JwtUtil;
+import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.text.ParseException;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthAPI {
 
-    private final IAuthService authService;
-    private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
-    private final CustomUserDetailsService userDetailsService;
-    private final IUserService userService;
-
-    @PostMapping("/register")
-    public ResponseEntity<?> createdUser(@RequestBody @Valid UserRequest userRequest) {
-        authService.createUser(userRequest);
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).message("Successfully !").build(), HttpStatus.CREATED);
-    }
+    IAuthService authService;
+    JwtUtil jwtUtil;
 
     @PostMapping("/log-in")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody @Valid LogInInput authInput) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authInput.getUsername(), authInput.getPassword()));
-        } catch (UsernameNotFoundException | BadCredentialsException u) {
-            throw new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
-        }
-
-        UserDetails userDetails = userDetailsService.loadUserByUsername(authInput.getUsername());
-        String token = jwtUtil.generateToken(userDetails.getUsername());
-        UserDTO userDTO = userService.findOneByUsername(userDetails.getUsername());
-        if (userDetails.getAuthorities().toString().contains("ROLE_STUDENT")) {
-            LoginOutput loginOutput = new LoginOutput(token, userDTO.getId(), List.of("ROLE_STUDENT"), userDTO.getStudents());
-            return new ResponseEntity<>(ApiResponse.builder().code(10000).result(loginOutput).build(), HttpStatus.OK);
-        }
-        List<String> authorities = userDTO.getRoles().stream().map(RoleDTO::getName).toList();
-        LoginOutput loginOutput = new LoginOutput(token, userDTO.getId(), authorities, userDTO.getTeachers());
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(loginOutput).build(), HttpStatus.OK);
+    public ApiResponse<LoginOutput> createAuthenticationToken(@RequestBody @Valid LogInInput authInput) {
+        String accessToken = authService.authentication(authInput.getUsername(), authInput.getPassword());
+        LoginOutput response = new LoginOutput(accessToken, accessToken);
+        return ApiResponse.<LoginOutput>builder()
+                .result(response)
+                .build();
     }
 
-    @PutMapping("/update-user")
-    public ResponseEntity<?> updateUser(@RequestBody @Valid UpdateUserInput updateUserInput) {
-        authService.updateUser(updateUserInput);
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).message("Update Successful !").build(), HttpStatus.OK);
-    }
+    @PostMapping("/introspectToken")
+    public ApiResponse<IntrospectTokenResponse> authentication(@RequestParam("Token") String token) throws ParseException, JOSEException {
+        boolean isAuthenticated = jwtUtil.introspectToken(token);
+        IntrospectTokenResponse response = new IntrospectTokenResponse(isAuthenticated);
+        return ApiResponse.<IntrospectTokenResponse>builder()
+                .result(response)
+                .build();
 
-    @PutMapping("admin/update-user")
-    @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
-    public ResponseEntity<?> updateUserForAdmin(@RequestBody @Valid UserRequest updateUserInput) {
-        authService.updateUserForAdmin(updateUserInput);
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).message("Update Successful !").build(), HttpStatus.OK);
     }
-
-    @DeleteMapping("/delete-user")
-    @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
-    public ResponseEntity<?> deleteUser(@RequestBody Long[] ids) {
-        authService.deleteUser(ids);
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).message("Deleted Successfully !").build(), HttpStatus.OK);
-    }
-
 
 }

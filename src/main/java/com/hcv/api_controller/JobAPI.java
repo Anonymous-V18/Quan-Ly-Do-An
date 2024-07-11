@@ -9,9 +9,10 @@ import com.hcv.exception.ErrorCode;
 import com.hcv.service.IJobService;
 import com.hcv.service.IUserService;
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import lombok.experimental.FieldDefaults;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,46 +20,49 @@ import java.util.List;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/jobs")
 public class JobAPI {
 
-    private final IJobService jobService;
-
-    private final IUserService userService;
+    IJobService jobService;
+    IUserService userService;
 
     @PostMapping("/teacher-job/insert")
-    public ResponseEntity<?> addJobForTeacher(@RequestBody @Valid JobForTeacherInput jobForTeacherInput) {
+    @PreAuthorize("hasAnyRole('DEAN','HEAD_OF_DEPARTMENT')")
+    public ApiResponse<JobDTO> addJobForTeacher(@RequestBody @Valid JobForTeacherInput jobForTeacherInput) {
         UserDTO userDTO = userService.findOneByUsername(jobForTeacherInput.getSendFrom());
         if (userDTO == null) {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
         JobDTO jobDTO = jobService.insert(jobForTeacherInput);
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(jobDTO).build(), HttpStatus.CREATED);
+        return ApiResponse.<JobDTO>builder()
+                .result(jobDTO)
+                .build();
     }
 
     @DeleteMapping("/teacher-job/delete")
-    public ResponseEntity<?> deleteJobOfTeacherCompleted(@RequestBody Long[] ids) {
+    public ApiResponse<String> deleteJobOfTeacherCompleted(@RequestBody String[] ids) {
         jobService.deleteJobOfTeacherCompleted(ids);
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).message("Successfully !").build(), HttpStatus.OK);
+        return ApiResponse.<String>builder()
+                .message("Xóa công việc thành công !")
+                .build();
     }
 
     @GetMapping("/showAll-no-params")
-    public ResponseEntity<?> showAll() {
+    public ApiResponse<List<JobDTO>> showAll() {
         List<JobDTO> response = jobService.findAll();
-        if (response == null) {
-            return new ResponseEntity<>(ApiResponse.builder().code(10000).message("No search item !").build(), HttpStatus.OK);
-        }
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(response).build(), HttpStatus.OK);
+        return ApiResponse.<List<JobDTO>>builder()
+                .result(response)
+                .build();
     }
 
 
     @GetMapping("/teacher-job/show-job-not-complete")
-    public ResponseEntity<?> showJobNotComplete(@RequestParam(name = "maSo") String maSoGV) {
+    public ApiResponse<List<JobDTO>> showJobNotComplete(@RequestParam(name = "maSo") String maSoGV) {
         List<JobDTO> results = jobService.showAllJobNotComplete(maSoGV);
-        if (results.isEmpty()) {
-            return new ResponseEntity<>(ApiResponse.builder().code(10000).message("No job not completed !").build(), HttpStatus.CREATED);
-        }
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(results).build(), HttpStatus.CREATED);
+        return ApiResponse.<List<JobDTO>>builder()
+                .result(results)
+                .build();
     }
 
 }

@@ -11,38 +11,44 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> uncategorizedExceptionHandler(RuntimeException e) {
-        return ResponseEntity.badRequest().body(
-                ApiResponse.builder()
-                        .code(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode())
-                        .message(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage())
+    public ResponseEntity<ApiResponse<ErrorCode>> uncategorizedExceptionHandler(RuntimeException e) {
+        ErrorCode errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
+        return ResponseEntity
+                .status(errorCode.getHttpStatusCode())
+                .body(ApiResponse.<ErrorCode>builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
                         .build()
-        );
+                );
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<?> accessDeniedExceptionHandler(AccessDeniedException e) {
-        return ResponseEntity.badRequest().body(
-                ApiResponse.builder()
+    public ResponseEntity<ApiResponse<ErrorCode>> accessDeniedExceptionHandler(AccessDeniedException e) {
+        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+        return ResponseEntity
+                .status(errorCode.getHttpStatusCode())
+                .body(ApiResponse.<ErrorCode>builder()
                         .code(ErrorCode.UNAUTHORIZED.getCode())
                         .message(ErrorCode.UNAUTHORIZED.getMessage())
                         .build()
-        );
+                );
     }
 
 
     @ExceptionHandler(AppException.class)
-    public ResponseEntity<?> appExceptionHandler(AppException e) {
-        return ResponseEntity.badRequest().body(
-                ApiResponse.builder()
-                        .code(e.getErrorCode().getCode())
-                        .message(e.getErrorCode().getMessage())
+    public ResponseEntity<ApiResponse<ErrorCode>> appExceptionHandler(AppException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        return ResponseEntity
+                .status(errorCode.getHttpStatusCode())
+                .body(ApiResponse.<ErrorCode>builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
                         .build()
-        );
+                );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> validationExceptionHandler(MethodArgumentNotValidException e) {
+    public ResponseEntity<ApiResponse<ErrorCode>> validationExceptionHandler(MethodArgumentNotValidException e) {
         String key = e.getFieldError().getDefaultMessage();
         ErrorCode errorCode = ErrorCode.INVALID_KEY;
 
@@ -51,12 +57,14 @@ public class GlobalExceptionHandler {
         } catch (IllegalArgumentException ignored) {
 
         }
-        return ResponseEntity.badRequest().body(
-                ApiResponse.builder()
+        
+        return ResponseEntity
+                .status(errorCode.getHttpStatusCode())
+                .body(ApiResponse.<ErrorCode>builder()
                         .code(errorCode.getCode())
                         .message(errorCode.getMessage())
                         .build()
-        );
+                );
     }
 
 

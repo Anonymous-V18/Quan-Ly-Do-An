@@ -12,9 +12,9 @@ public interface IDepartmentService {
 
     DepartmentDTO update(DepartmentDTO new_departmentDTO, DepartmentDTO old_departmentDTO);
 
-    void delete(Long[] ids);
+    void delete(String[] ids);
 
-    DepartmentDTO findOneById(Long id);
+    DepartmentDTO findOneById(String id);
 
     DepartmentDTO findOneByName(String name);
 

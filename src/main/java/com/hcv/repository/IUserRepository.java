@@ -3,9 +3,9 @@ package com.hcv.repository;
 import com.hcv.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface IUserRepository extends JpaRepository<UserEntity, Long> {
+public interface IUserRepository extends JpaRepository<UserEntity, String> {
     UserEntity findOneByUsername(String username);
 
-    UserEntity findOneById(Long id);
+    UserEntity findOneById(String id);
 
 }

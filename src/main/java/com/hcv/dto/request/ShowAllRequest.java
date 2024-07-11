@@ -7,7 +7,6 @@ import lombok.Data;
 @Builder
 public class ShowAllRequest {
 
-
     private Integer page;
     private Integer limit;
     private String orderBy;

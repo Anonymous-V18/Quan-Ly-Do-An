@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserDTO extends BaseDTO<UserDTO> {
+public class UserDTO extends BaseDTO {
 
     private String username;
 

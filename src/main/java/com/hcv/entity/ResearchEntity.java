@@ -30,6 +30,11 @@ public class ResearchEntity extends BaseEntity {
     private String maSo_GVHD;
     @Column(name = "ma_so_gvpb")
     private String maSo_GVPB;
+    @Column(name = "dot_dang_ky")
+    private String dotDangKy;
+    @Column(name = "nam_hoc")
+    private String namHoc;
+
 
     @ManyToMany(mappedBy = "researches")
     private List<TeacherEntity> teachers = new ArrayList<>();

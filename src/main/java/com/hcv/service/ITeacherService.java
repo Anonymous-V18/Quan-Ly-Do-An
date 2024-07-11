@@ -2,6 +2,7 @@ package com.hcv.service;
 
 import com.hcv.dto.TeacherDTO;
 import com.hcv.dto.request.ShowAllRequest;
+import com.hcv.dto.request.TeacherFromExcelInput;
 import com.hcv.dto.request.TeacherInput;
 import com.hcv.dto.response.ShowAllResponse;
 
@@ -9,11 +10,13 @@ import java.util.List;
 
 public interface ITeacherService {
 
+    void checkDataBeforeInsert(TeacherFromExcelInput teacherFromExcelInput);
+
     TeacherDTO insert(TeacherInput teacherInput);
 
     TeacherDTO update(TeacherDTO old_teacherDTO, TeacherInput teacherInput);
 
-    void delete(Long[] ids);
+    void delete(String[] ids);
 
     int countAll();
 
@@ -21,7 +24,7 @@ public interface ITeacherService {
 
     TeacherDTO findOneByMaSo(String maSo);
 
-    TeacherDTO findOneById(Long id);
+    TeacherDTO findOneById(String id);
 
     List<TeacherDTO> findAll();
 

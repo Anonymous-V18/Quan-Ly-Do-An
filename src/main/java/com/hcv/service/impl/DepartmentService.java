@@ -48,14 +48,14 @@ public class DepartmentService implements IDepartmentService {
     }
 
     @Override
-    public void delete(Long[] ids) {
-        for (Long id : ids) {
+    public void delete(String[] ids) {
+        for (String id : ids) {
             departmentRepository.deleteById(id);
         }
     }
 
     @Override
-    public DepartmentDTO findOneById(Long id) {
+    public DepartmentDTO findOneById(String id) {
         DepartmentEntity departmentEntity = departmentRepository.findOneById(id);
         return departmentMapper.toDTO(departmentEntity);
     }
@@ -83,9 +83,7 @@ public class DepartmentService implements IDepartmentService {
                 Sort.by(Sort.Direction.fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
         );
         Page<DepartmentEntity> departmentEntityList = departmentRepository.findAll(paging);
-
         List<DepartmentEntity> resultEntity = departmentEntityList.getContent();
-
         List<DepartmentDTO> resultDTO = resultEntity.stream().map(departmentMapper::toDTO).toList();
 
         return ShowAllResponse.<DepartmentDTO>builder()

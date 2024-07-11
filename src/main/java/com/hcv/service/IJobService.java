@@ -9,7 +9,7 @@ public interface IJobService {
 
     JobDTO insert(JobForTeacherInput jobForTeacherInput);
 
-    void deleteJobOfTeacherCompleted(Long[] ids);
+    void deleteJobOfTeacherCompleted(String[] ids);
 
     List<JobDTO> showAllJobNotComplete(String maSoGV);
 

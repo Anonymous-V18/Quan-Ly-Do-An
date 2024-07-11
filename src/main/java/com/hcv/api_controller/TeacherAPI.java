@@ -8,12 +8,12 @@ import com.hcv.dto.request.TeacherInput;
 import com.hcv.dto.request.UserRequest;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.ShowAllResponse;
-import com.hcv.service.IAuthService;
 import com.hcv.service.ITeacherService;
+import com.hcv.service.IUserService;
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,92 +22,104 @@ import java.util.List;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/teachers")
 public class TeacherAPI {
 
-    private final IAuthService authService;
-    private final ITeacherService teacherService;
+    IUserService userService;
+    ITeacherService teacherService;
 
 
     @PostMapping("/insert-from-excel")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
-    public ResponseEntity<?> insertFromExcel(@RequestBody @Valid TeacherFromExcelInput teacherFromExcelInput) {
+    public ApiResponse<String> insertFromExcel(@RequestBody @Valid TeacherFromExcelInput teacherFromExcelInput) {
+        teacherService.checkDataBeforeInsert(teacherFromExcelInput);
         for (TeacherInput teacherInput : teacherFromExcelInput.getTeachers()) {
 
-            String usernameAndPasswordDefault = teacherInput.getMaSo();
+            String usernameAndPasswordDefault = teacherInput.getMaSo().trim();
             UserRequest userRequest = new UserRequest();
             userRequest.setUsername(usernameAndPasswordDefault);
             userRequest.setPassword(usernameAndPasswordDefault);
             userRequest.setNameRoles(List.of(teacherInput.getChucVu()));
 
-            UserDTO userDTO = authService.createUser(userRequest);
+            UserDTO userDTO = userService.createUser(userRequest);
 
             teacherInput.setUser_id(userDTO.getId());
 
             teacherService.insert(teacherInput);
         }
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).message("Successfully !").build(), HttpStatus.CREATED);
-
+        return ApiResponse.<String>builder()
+                .message("Thêm danh sách giảng viên thành công !")
+                .build();
+        
     }
 
     @PostMapping("/insert")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
-    public ResponseEntity<?> insert(@RequestBody @Valid TeacherInput teacherInput) {
-        TeacherDTO new_TeacherDTO = teacherService.insert(teacherInput);
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(new_TeacherDTO).build(), HttpStatus.OK);
+    public ApiResponse<TeacherDTO> insert(@RequestBody @Valid TeacherInput teacherInput) {
+        TeacherDTO newTeacherDTO = teacherService.insert(teacherInput);
+        return ApiResponse.<TeacherDTO>builder()
+                .result(newTeacherDTO)
+                .build();
     }
 
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM') or hasRole('TEACHER') or hasRole('HEAD_OF_DEPARTMENT')")
-    public ResponseEntity<?> update(@PathVariable(value = "id") Long id,
-                                    @RequestBody @Valid TeacherInput teacherInput) {
-        TeacherDTO old_teacherDTO = teacherService.findOneById(id);
-        if (old_teacherDTO == null) {
-            TeacherDTO new_teacherDTO = teacherService.insert(teacherInput);
-            return new ResponseEntity<>(ApiResponse.builder().code(10000).result(new_teacherDTO).build(), HttpStatus.CREATED);
+    public ApiResponse<TeacherDTO> update(@PathVariable(value = "id") String id,
+                                          @RequestBody @Valid TeacherInput teacherInput) {
+        TeacherDTO oldTeacherDTO = teacherService.findOneById(id);
+        if (oldTeacherDTO == null) {
+            TeacherDTO newTeacherDTO = teacherService.insert(teacherInput);
+            return ApiResponse.<TeacherDTO>builder()
+                    .result(newTeacherDTO)
+                    .build();
         }
-        TeacherDTO updatedDTO = teacherService.update(old_teacherDTO, teacherInput);
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(updatedDTO).build(), HttpStatus.OK);
+        TeacherDTO updatedDTO = teacherService.update(oldTeacherDTO, teacherInput);
+        return ApiResponse.<TeacherDTO>builder()
+                .result(updatedDTO)
+                .build();
     }
 
     @DeleteMapping("/delete")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
-    public ResponseEntity<?> delete(@RequestBody Long[] ids) {
+    public ApiResponse<String> delete(@RequestBody String[] ids) {
         teacherService.delete(ids);
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).message("Deleted Successfully !").build(), HttpStatus.OK);
+        return ApiResponse.<String>builder()
+                .message("Xóa giảng viên thành công !")
+                .build();
     }
 
     @GetMapping("/showAll")
-    public ResponseEntity<?> showAll(@RequestParam(name = "page") Integer page,
-                                     @RequestParam(name = "limit") Integer limit,
-                                     @RequestParam(name = "orderBy") String orderBy,
-                                     @RequestParam(name = "orderDirection") String orderDirection) {
+    public ApiResponse<ShowAllResponse<TeacherDTO>> showAll(@RequestParam(name = "page") Integer page,
+                                                            @RequestParam(name = "limit") Integer limit,
+                                                            @RequestParam(name = "orderBy") String orderBy,
+                                                            @RequestParam(name = "orderDirection") String orderDirection) {
         ShowAllRequest showAllRequest = ShowAllRequest.builder()
                 .page(page)
                 .limit(limit)
                 .orderBy(orderBy)
                 .orderDirection(orderDirection)
                 .build();
-        ShowAllResponse<?> response = teacherService.showAll(showAllRequest);
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(response).build(), HttpStatus.OK);
+        ShowAllResponse<TeacherDTO> response = teacherService.showAll(showAllRequest);
+        return ApiResponse.<ShowAllResponse<TeacherDTO>>builder()
+                .result(response)
+                .build();
     }
 
     @GetMapping("/showAll-no-params")
-    public ResponseEntity<?> showAll() {
+    public ApiResponse<List<TeacherDTO>> showAll() {
         List<TeacherDTO> response = teacherService.findAll();
-        if (response.isEmpty()) {
-            return new ResponseEntity<>(ApiResponse.builder().code(10000).message("No search item !").build(), HttpStatus.OK);
-        }
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(response).build(), HttpStatus.OK);
+        return ApiResponse.<List<TeacherDTO>>builder()
+                .result(response)
+                .build();
     }
 
     @GetMapping("/showOne")
-    public ResponseEntity<?> showOne(@RequestParam(name = "maSo") String maSo) {
+    public ApiResponse<TeacherDTO> showOne(@RequestParam(name = "maSo") String maSo) {
         TeacherDTO teacherDTO = teacherService.findOneByMaSo(maSo);
-        if (teacherDTO == null) {
-            return new ResponseEntity<>(ApiResponse.builder().code(10000).message("No search item !").build(), HttpStatus.OK);
-        }
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(teacherDTO).build(), HttpStatus.OK);
+        return ApiResponse.<TeacherDTO>builder()
+                .result(teacherDTO)
+                .build();
     }
 
 

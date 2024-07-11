@@ -51,25 +51,29 @@ public class SubjectService implements ISubjectService {
     @Override
     public SubjectDTO update(SubjectDTO old_subjectDTO, SubjectInput subjectInput) {
         old_subjectDTO.setName(subjectInput.getName());
+
         SubjectEntity subjectEntityUpdate = subjectMapper.toEntity(old_subjectDTO);
+
         DepartmentEntity departmentEntity = departmentRepository.findOneByName(subjectInput.getNameDepartment());
         if (departmentEntity == null) {
             throw new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED);
         }
         subjectEntityUpdate.setDepartments(departmentEntity);
+
         subjectRepository.save(subjectEntityUpdate);
+
         return subjectMapper.toDTO(subjectEntityUpdate);
     }
 
     @Override
-    public void delete(Long[] ids) {
-        for (Long id : ids) {
+    public void delete(String[] ids) {
+        for (String id : ids) {
             subjectRepository.deleteById(id);
         }
     }
 
     @Override
-    public SubjectDTO findOneById(Long id) {
+    public SubjectDTO findOneById(String id) {
         SubjectEntity subjectEntity = subjectRepository.findOneById(id);
         return subjectEntity == null ? null : subjectMapper.toDTO(subjectEntity);
     }
@@ -97,9 +101,7 @@ public class SubjectService implements ISubjectService {
                 Sort.by(Sort.Direction.fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
         );
         Page<SubjectEntity> subjectEntityList = subjectRepository.findAll(paging);
-
         List<SubjectEntity> resultEntity = subjectEntityList.getContent();
-
         List<SubjectDTO> resultDTO = resultEntity.stream().map(subjectMapper::toDTO).toList();
 
         return ShowAllResponse.<SubjectDTO>builder()

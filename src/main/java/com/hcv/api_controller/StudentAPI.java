@@ -8,12 +8,12 @@ import com.hcv.dto.request.StudentInput;
 import com.hcv.dto.request.UserRequest;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.ShowAllResponse;
-import com.hcv.service.IAuthService;
 import com.hcv.service.IStudentService;
+import com.hcv.service.IUserService;
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,91 +22,102 @@ import java.util.List;
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/students")
 public class StudentAPI {
 
-    private final IStudentService studentService;
-    private final IAuthService authService;
+    IStudentService studentService;
+    IUserService userService;
 
     @PostMapping("/insert-from-excel")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
-    public ResponseEntity<?> insertFromExcel(@RequestBody @Valid StudentFromExcelInput studentFromExcelInput) {
+    public ApiResponse<String> insertFromExcel(@RequestBody @Valid StudentFromExcelInput studentFromExcelInput) {
+        studentService.checkDataBeforeInsert(studentFromExcelInput);
         for (StudentInput studentInput : studentFromExcelInput.getStudents()) {
 
-            String usernameAndPasswordDefault = studentInput.getMaSo();
+            String usernameAndPasswordDefault = studentInput.getMaSo().trim();
             UserRequest userRequest = new UserRequest();
             userRequest.setUsername(usernameAndPasswordDefault);
             userRequest.setPassword(usernameAndPasswordDefault);
-            userRequest.setNameRoles(List.of("HỌC SINH"));
+            userRequest.setNameRoles(List.of("SINH VIÊN"));
 
-            UserDTO userDTO = authService.createUser(userRequest);
+            UserDTO userDTO = userService.createUser(userRequest);
 
             studentInput.setUser_id(userDTO.getId());
 
             studentService.insert(studentInput);
         }
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).message("Successfully !").build(), HttpStatus.CREATED);
+        return ApiResponse.<String>builder()
+                .message("Thêm danh sách sinh viên thành công !")
+                .build();
 
     }
 
     @PostMapping("/insert")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
-    public ResponseEntity<?> insert(@RequestBody @Valid StudentInput studentInput) {
-        StudentDTO new_studentDTO = studentService.insert(studentInput);
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(new_studentDTO).build(), HttpStatus.CREATED);
+    public ApiResponse<StudentDTO> insert(@RequestBody @Valid StudentInput studentInput) {
+        StudentDTO newStudentDTO = studentService.insert(studentInput);
+        return ApiResponse.<StudentDTO>builder()
+                .result(newStudentDTO)
+                .build();
     }
 
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM') or hasRole('STUDENT')")
-    public ResponseEntity<?> update(@PathVariable(value = "id") Long id,
-                                    @RequestBody @Valid StudentInput studentInput) {
-        StudentDTO old_studentDTO = studentService.findOneById(id);
-        if (old_studentDTO == null) {
-            StudentDTO new_studentDTO = studentService.insert(studentInput);
-            return new ResponseEntity<>(ApiResponse.builder().code(10000).result(new_studentDTO).build(), HttpStatus.CREATED);
+    public ApiResponse<StudentDTO> update(@PathVariable(value = "id") String id,
+                                          @RequestBody @Valid StudentInput studentInput) {
+        StudentDTO oldStudentDTO = studentService.findOneById(id);
+        if (oldStudentDTO == null) {
+            StudentDTO newStudentDTO = studentService.insert(studentInput);
+            return ApiResponse.<StudentDTO>builder()
+                    .result(newStudentDTO)
+                    .build();
         }
-        StudentDTO updatedDTO = studentService.update(old_studentDTO, studentInput);
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(updatedDTO).build(), HttpStatus.OK);
+        StudentDTO updatedDTO = studentService.update(oldStudentDTO, studentInput);
+        return ApiResponse.<StudentDTO>builder()
+                .result(updatedDTO)
+                .build();
     }
 
     @DeleteMapping("/delete")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
-    public ResponseEntity<?> delete(@RequestBody Long[] ids) {
+    public ApiResponse<String> delete(@RequestBody String[] ids) {
         studentService.delete(ids);
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).message("Deleted Successfully !").build(), HttpStatus.OK);
+        return ApiResponse.<String>builder()
+                .message("Xóa sinh viên thành công !")
+                .build();
     }
 
     @GetMapping("/showAll")
-    public ResponseEntity<?> showAll(@RequestParam(name = "page") Integer page,
-                                     @RequestParam(name = "limit") Integer limit,
-                                     @RequestParam(name = "orderBy") String orderBy,
-                                     @RequestParam(name = "orderDirection") String orderDirection) {
+    public ApiResponse<ShowAllResponse<StudentDTO>> showAll(@RequestParam(name = "page") Integer page,
+                                                            @RequestParam(name = "limit") Integer limit,
+                                                            @RequestParam(name = "orderBy") String orderBy,
+                                                            @RequestParam(name = "orderDirection") String orderDirection) {
         ShowAllRequest showAllRequest = ShowAllRequest.builder()
                 .page(page)
                 .limit(limit)
                 .orderBy(orderBy)
                 .orderDirection(orderDirection)
                 .build();
-        ShowAllResponse<?> response = studentService.showAll(showAllRequest);
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(response).build(), HttpStatus.OK);
+        ShowAllResponse<StudentDTO> response = studentService.showAll(showAllRequest);
+        return ApiResponse.<ShowAllResponse<StudentDTO>>builder()
+                .result(response)
+                .build();
     }
 
     @GetMapping("/showAll-no-params")
-    public ResponseEntity<?> showAll() {
+    public ApiResponse<List<StudentDTO>> showAll() {
         List<StudentDTO> response = studentService.findAll();
-        if (response == null) {
-            return new ResponseEntity<>(ApiResponse.builder().code(10000).message("No search item !").build(), HttpStatus.OK);
-        }
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(response).build(), HttpStatus.OK);
+        return ApiResponse.<List<StudentDTO>>builder()
+                .result(response)
+                .build();
     }
 
-
     @GetMapping("/showOne")
-    public ResponseEntity<?> showOne(@RequestParam(name = "maSo") String maSo) {
+    public ApiResponse<StudentDTO> showOne(@RequestParam(name = "maSo") String maSo) {
         StudentDTO studentDTO = studentService.findOneByMaSo(maSo);
-        if (studentDTO == null) {
-            return new ResponseEntity<>(ApiResponse.builder().code(10000).message("No search item !").build(), HttpStatus.OK);
-        }
-        return new ResponseEntity<>(ApiResponse.builder().code(10000).result(studentDTO).build(), HttpStatus.OK);
+        return ApiResponse.<StudentDTO>builder()
+                .result(studentDTO)
+                .build();
     }
 }

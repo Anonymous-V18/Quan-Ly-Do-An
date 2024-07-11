@@ -2,13 +2,15 @@ package com.hcv.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
-    private int code;
+
+    @Builder.Default
+    private int code = 10000;
     private String message;
     private T result;
 

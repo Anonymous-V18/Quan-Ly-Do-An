@@ -4,6 +4,7 @@ import com.hcv.converter.ITeacherMapper;
 import com.hcv.dto.SubjectDTO;
 import com.hcv.dto.TeacherDTO;
 import com.hcv.dto.request.ShowAllRequest;
+import com.hcv.dto.request.TeacherFromExcelInput;
 import com.hcv.dto.request.TeacherInput;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.entity.DepartmentEntity;
@@ -39,6 +40,19 @@ public class TeacherService implements ITeacherService {
     ISubjectRepository subjectRepository;
     ISubjectService subjectService;
 
+    @Override
+    public void checkDataBeforeInsert(TeacherFromExcelInput teacherFromExcelInput) {
+        for (TeacherInput teacherInput : teacherFromExcelInput.getTeachers()) {
+            boolean isTeacherExisted = teacherRepository.existsByMaSo(teacherInput.getMaSo().trim());
+            if (isTeacherExisted) {
+                throw new AppException(ErrorCode.TEACHER_EXISTED);
+            }
+            boolean isSubjectExisted = subjectRepository.existsByName(teacherInput.getSubjectName().trim());
+            if (!isSubjectExisted) {
+                throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
+            }
+        }
+    }
 
     @Override
     public TeacherDTO insert(TeacherInput teacherInput) {
@@ -89,8 +103,8 @@ public class TeacherService implements ITeacherService {
     }
 
     @Override
-    public void delete(Long[] ids) {
-        for (Long id : ids) {
+    public void delete(String[] ids) {
+        for (String id : ids) {
             teacherRepository.deleteById(id);
         }
     }
@@ -112,9 +126,7 @@ public class TeacherService implements ITeacherService {
                 Sort.by(Sort.Direction.fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
         );
         Page<TeacherEntity> teacherEntityList = teacherRepository.findAll(paging);
-
         List<TeacherEntity> resultEntity = teacherEntityList.getContent();
-
         List<TeacherDTO> resultDTO = resultEntity.stream().map(teacherMapper::toDTO).toList();
 
         return ShowAllResponse.<TeacherDTO>builder()
@@ -131,7 +143,7 @@ public class TeacherService implements ITeacherService {
     }
 
     @Override
-    public TeacherDTO findOneById(Long id) {
+    public TeacherDTO findOneById(String id) {
         TeacherEntity teacher = teacherRepository.findOneById(id);
         return teacher == null ? null : teacherMapper.toDTO(teacher);
     }

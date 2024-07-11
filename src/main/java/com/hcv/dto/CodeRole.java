@@ -2,7 +2,6 @@ package com.hcv.dto;
 
 public enum CodeRole {
     DEAN,
-    VICE_DEAN,
     HEAD_OF_DEPARTMENT,
     CATECHISM,
     INSTRUCTOR,

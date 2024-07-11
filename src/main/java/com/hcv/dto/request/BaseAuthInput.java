@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public abstract class BaseAuthInput<T> {
+public abstract class BaseAuthInput {
 
     @NotNull(message = "INVALID_USERNAME")
     @Size(min = 8, message = "INVALID_USERNAME")

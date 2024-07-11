@@ -9,7 +9,6 @@ import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IJobRepository;
 import com.hcv.repository.ITeacherRepository;
-import com.hcv.repository.IUserRepository;
 import com.hcv.service.IJobService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +25,6 @@ public class JobService implements IJobService {
     IJobRepository jobRepository;
     IJobMapper jobMapper;
     ITeacherRepository teacherRepository;
-    IUserRepository userRepository;
 
     @Override
     public JobDTO insert(JobForTeacherInput jobForTeacherInput) {
@@ -45,8 +43,8 @@ public class JobService implements IJobService {
     }
 
     @Override
-    public void deleteJobOfTeacherCompleted(Long[] ids) {
-        for (Long id : ids) {
+    public void deleteJobOfTeacherCompleted(String[] ids) {
+        for (String id : ids) {
             jobRepository.deleteById(id);
         }
     }
@@ -68,4 +66,6 @@ public class JobService implements IJobService {
         List<JobEntity> resultEntity = jobRepository.findAll();
         return resultEntity.stream().map(jobMapper::toDTO).toList();
     }
+
+
 }

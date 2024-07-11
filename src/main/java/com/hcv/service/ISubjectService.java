@@ -13,9 +13,9 @@ public interface ISubjectService {
 
     SubjectDTO update(SubjectDTO old_subjectDTO, SubjectInput subjectInput);
 
-    void delete(Long[] ids);
+    void delete(String[] ids);
 
-    SubjectDTO findOneById(Long id);
+    SubjectDTO findOneById(String id);
 
     SubjectDTO findOneByName(String name);
 

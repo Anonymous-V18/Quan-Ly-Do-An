@@ -8,8 +8,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class UserRequest extends BaseAuthInput<UserRequest> {
-
+public class UserRequest extends BaseAuthInput {
 
     private List<String> nameRoles = new ArrayList<>();
     private Integer isGraduate = 0;

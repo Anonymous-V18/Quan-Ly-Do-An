@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TeacherDTO extends BaseDTO<TeacherDTO> {
+public class TeacherDTO extends BaseDTO {
 
     private String maSo;
     private String name;

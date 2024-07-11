@@ -10,7 +10,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class JobDTO extends BaseDTO<JobDTO> {
+public class JobDTO extends BaseDTO {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private Date from;
