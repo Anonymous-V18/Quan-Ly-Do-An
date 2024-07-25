@@ -11,7 +11,7 @@ public interface ISubjectService {
 
     SubjectDTO insert(SubjectInput subjectInput);
 
-    SubjectDTO update(SubjectDTO old_subjectDTO, SubjectInput subjectInput);
+    SubjectDTO update(SubjectDTO oldSubjectDTO, SubjectInput subjectInput);
 
     void delete(String[] ids);
 

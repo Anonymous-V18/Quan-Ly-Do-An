@@ -3,8 +3,8 @@ package com.hcv.service.impl;
 import com.hcv.converter.IUserMapper;
 import com.hcv.dto.UserDTO;
 import com.hcv.dto.request.ShowAllRequest;
-import com.hcv.dto.request.UpdateUserInput;
 import com.hcv.dto.request.UserRequest;
+import com.hcv.dto.request.UserUpdateInput;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.entity.RoleEntity;
 import com.hcv.entity.UserEntity;
@@ -36,7 +36,7 @@ public class UserService implements IUserService {
     PasswordEncoder passwordEncoder;
 
     @Override
-    public UserDTO createUser(UserRequest userRequest) {
+    public UserDTO create(UserRequest userRequest) {
         UserDTO checkUserNameExist = this.findOneByUsername(userRequest.getUsername());
         if (checkUserNameExist != null) {
             throw new AppException(ErrorCode.USER_EXISTED);
@@ -54,7 +54,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserDTO updateUser(UpdateUserInput updateUserInput) {
+    public UserDTO update(UserUpdateInput updateUserInput) {
         UserEntity userEntity = userRepository.findOneByUsername(updateUserInput.getUsername());
         if (userEntity == null) {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
@@ -66,7 +66,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserDTO updateUserForAdmin(UserRequest updateUserInput) {
+    public UserDTO updateForAdmin(UserRequest updateUserInput) {
         List<RoleEntity> listRolesEntity = updateUserInput.getNameRoles().stream()
                 .map(roleRepository::findOneByName)
                 .toList();
@@ -85,7 +85,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public void deleteUser(String[] ids) {
+    public void delete(String[] ids) {
         for (String id : ids) {
             userRepository.deleteById(id);
         }
@@ -112,7 +112,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public ShowAllResponse<UserDTO> showAllUserResponse(ShowAllRequest showAllRequest) {
+    public ShowAllResponse<UserDTO> showAll(ShowAllRequest showAllRequest) {
         int page = showAllRequest.getPage();
         int limit = showAllRequest.getLimit();
         int totalPages = (int) Math.ceil((1.0 * countAll()) / limit);

@@ -41,7 +41,7 @@ public class StudentAPI {
             userRequest.setPassword(usernameAndPasswordDefault);
             userRequest.setNameRoles(List.of("SINH VIÊN"));
 
-            UserDTO userDTO = userService.createUser(userRequest);
+            UserDTO userDTO = userService.create(userRequest);
 
             studentInput.setUser_id(userDTO.getId());
 

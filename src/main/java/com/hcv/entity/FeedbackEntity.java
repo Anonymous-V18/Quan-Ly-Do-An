@@ -1,24 +1,23 @@
 package com.hcv.entity;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 @Entity
 @Table(name = "feedback")
 public class FeedbackEntity extends BaseEntity {
 
-    @Column(name = "message")
     private String message;
-    @Column(name = "send_to")
     private String sendTo;
-    @Column(name = "send_from")
     private String sendFrom;
-    @Column(name = "is_read")
-    private String is_Read;
-
 
     @ManyToOne
     @JoinColumn(name = "teacher_id")

@@ -1,29 +1,25 @@
 package com.hcv.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "teacher")
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 public class TeacherEntity extends BaseEntity {
 
-    @Column(name = "ma_so")
     private String maSo;
-    @Column(name = "name")
     private String name;
-    @Column(name = "hoc_vi")
     private String hocVi;
-    @Column(name = "email")
     private String email;
-    @Column(name = "phone_number")
     private String phoneNumber;
-    @Column(name = "chuc_vu")
     private String chucVu;
 
     @OneToOne
@@ -33,10 +29,7 @@ public class TeacherEntity extends BaseEntity {
     @OneToMany(mappedBy = "teachers")
     private List<FeedbackEntity> feedbacks = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(name = "teacher_research"
-            , joinColumns = @JoinColumn(name = "teacher_id")
-            , inverseJoinColumns = @JoinColumn(name = "research_id"))
+    @ManyToMany(mappedBy = "teachers")
     private List<ResearchEntity> researches = new ArrayList<>();
 
     @ManyToOne

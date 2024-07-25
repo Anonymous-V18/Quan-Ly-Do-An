@@ -42,16 +42,16 @@ public class TeacherAPI {
             userRequest.setPassword(usernameAndPasswordDefault);
             userRequest.setNameRoles(List.of(teacherInput.getChucVu()));
 
-            UserDTO userDTO = userService.createUser(userRequest);
+            UserDTO userDTO = userService.create(userRequest);
 
-            teacherInput.setUser_id(userDTO.getId());
+            teacherInput.setUserId(userDTO.getId());
 
             teacherService.insert(teacherInput);
         }
         return ApiResponse.<String>builder()
                 .message("Thêm danh sách giảng viên thành công !")
                 .build();
-        
+
     }
 
     @PostMapping("/insert")
@@ -68,13 +68,12 @@ public class TeacherAPI {
     public ApiResponse<TeacherDTO> update(@PathVariable(value = "id") String id,
                                           @RequestBody @Valid TeacherInput teacherInput) {
         TeacherDTO oldTeacherDTO = teacherService.findOneById(id);
+        TeacherDTO updatedDTO;
         if (oldTeacherDTO == null) {
-            TeacherDTO newTeacherDTO = teacherService.insert(teacherInput);
-            return ApiResponse.<TeacherDTO>builder()
-                    .result(newTeacherDTO)
-                    .build();
+            updatedDTO = teacherService.insert(teacherInput);
+        } else {
+            updatedDTO = teacherService.update(oldTeacherDTO, teacherInput);
         }
-        TeacherDTO updatedDTO = teacherService.update(oldTeacherDTO, teacherInput);
         return ApiResponse.<TeacherDTO>builder()
                 .result(updatedDTO)
                 .build();

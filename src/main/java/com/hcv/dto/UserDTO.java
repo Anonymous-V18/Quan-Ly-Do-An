@@ -1,5 +1,6 @@
 package com.hcv.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +15,7 @@ public class UserDTO extends BaseDTO {
 
     private String username;
 
+    @JsonIgnore
     private String password;
 
     private Integer isGraduate;

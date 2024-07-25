@@ -86,16 +86,16 @@ public class StudentService implements IStudentService {
     }
 
     @Override
-    public StudentDTO update(StudentDTO old_studentDTO, StudentInput studentInput) {
-        old_studentDTO = studentMapper.toDTO(old_studentDTO, studentInput);
+    public StudentDTO update(StudentDTO oldStudentDTO, StudentInput studentInput) {
+        oldStudentDTO = studentMapper.toDTO(oldStudentDTO, studentInput);
 
         SubjectDTO subjectDTO = subjectService.findOneByName(studentInput.getSubjectName());
         if (subjectDTO == null) {
             throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
         }
-        old_studentDTO.setSubjects(subjectDTO);
+        oldStudentDTO.setSubjects(subjectDTO);
 
-        StudentEntity studentEntity = studentMapper.toEntity(old_studentDTO);
+        StudentEntity studentEntity = studentMapper.toEntity(oldStudentDTO);
         studentEntity.setDepartments(studentEntity.getSubjects().getDepartments());
 
         studentRepository.save(studentEntity);
@@ -155,5 +155,11 @@ public class StudentService implements IStudentService {
     public List<StudentDTO> findAll() {
         List<StudentEntity> resultEntity = studentRepository.findAll();
         return resultEntity.stream().map(studentMapper::toDTO).toList();
+    }
+
+    @Override
+    public List<StudentDTO> findAllById(List<String> ids) {
+        List<StudentEntity> studentEntityList = studentRepository.findAllById(ids);
+        return studentEntityList.stream().map(studentMapper::toDTO).toList();
     }
 }

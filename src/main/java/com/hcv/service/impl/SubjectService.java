@@ -49,10 +49,10 @@ public class SubjectService implements ISubjectService {
     }
 
     @Override
-    public SubjectDTO update(SubjectDTO old_subjectDTO, SubjectInput subjectInput) {
-        old_subjectDTO.setName(subjectInput.getName());
+    public SubjectDTO update(SubjectDTO oldSubjectDTO, SubjectInput subjectInput) {
+        oldSubjectDTO.setName(subjectInput.getName());
 
-        SubjectEntity subjectEntityUpdate = subjectMapper.toEntity(old_subjectDTO);
+        SubjectEntity subjectEntityUpdate = subjectMapper.toEntity(oldSubjectDTO);
 
         DepartmentEntity departmentEntity = departmentRepository.findOneByName(subjectInput.getNameDepartment());
         if (departmentEntity == null) {

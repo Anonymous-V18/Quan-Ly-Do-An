@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public abstract class BaseDTO {
+public class BaseDTO {
 
     protected String id;
 

@@ -35,15 +35,14 @@ public class DepartmentAPI {
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
     public ApiResponse<DepartmentDTO> update(@PathVariable(value = "id") String id,
-                                             @RequestBody @Valid DepartmentDTO new_departmentDTO) {
+                                             @RequestBody @Valid DepartmentDTO newDepartmentDTO) {
         DepartmentDTO oldDepartmentDTO = departmentService.findOneById(id);
+        DepartmentDTO updatedDTO;
         if (oldDepartmentDTO == null) {
-            DepartmentDTO newDepartmentDTO = departmentService.insert(new_departmentDTO);
-            return ApiResponse.<DepartmentDTO>builder()
-                    .result(newDepartmentDTO)
-                    .build();
+            updatedDTO = departmentService.insert(newDepartmentDTO);
+        } else {
+            updatedDTO = departmentService.update(newDepartmentDTO, oldDepartmentDTO);
         }
-        DepartmentDTO updatedDTO = departmentService.update(new_departmentDTO, oldDepartmentDTO);
         return ApiResponse.<DepartmentDTO>builder()
                 .result(updatedDTO)
                 .build();

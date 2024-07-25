@@ -64,7 +64,7 @@ public class TeacherService implements ITeacherService {
 
         teacherEntity = teacherMapper.toEntity(teacherInput);
 
-        UserEntity userEntity = userRepository.findOneById(teacherInput.getUser_id());
+        UserEntity userEntity = userRepository.findOneById(teacherInput.getUserId());
         if (userEntity == null) {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
@@ -85,16 +85,16 @@ public class TeacherService implements ITeacherService {
     }
 
     @Override
-    public TeacherDTO update(TeacherDTO old_teacherDTO, TeacherInput teacherInput) {
-        old_teacherDTO = teacherMapper.toDTO(old_teacherDTO, teacherInput);
+    public TeacherDTO update(TeacherDTO oldTeacherDTO, TeacherInput teacherInput) {
+        oldTeacherDTO = teacherMapper.toDTO(oldTeacherDTO, teacherInput);
 
         SubjectDTO subjectDTO = subjectService.findOneByName(teacherInput.getSubjectName());
         if (subjectDTO == null) {
             throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
         }
-        old_teacherDTO.setSubjects(subjectDTO);
+        oldTeacherDTO.setSubjects(subjectDTO);
 
-        TeacherEntity teacherEntity = teacherMapper.toEntity(old_teacherDTO);
+        TeacherEntity teacherEntity = teacherMapper.toEntity(oldTeacherDTO);
         teacherEntity.setDepartments(teacherEntity.getSubjects().getDepartments());
 
         teacherRepository.save(teacherEntity);

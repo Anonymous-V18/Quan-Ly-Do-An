@@ -1,21 +1,23 @@
 package com.hcv.entity;
 
-import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "point")
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 public class PointEntity extends BaseEntity {
 
-    @Column(name = "point")
     private Double point;
-    @Column(name = "type")
     private String type;
-    @Column(name = "ma_so_gv")
-    private String maSo_GV;
+    private String maSoGV;
 
     @ManyToOne
     @JoinColumn(name = "student_id")

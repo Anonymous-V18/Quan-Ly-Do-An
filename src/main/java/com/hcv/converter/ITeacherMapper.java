@@ -12,7 +12,7 @@ public interface ITeacherMapper {
 
     TeacherDTO toDTO(TeacherInput teacherInput);
 
-    TeacherDTO toDTO(@MappingTarget TeacherDTO old_teacherDTO, TeacherInput teacherInput);
+    TeacherDTO toDTO(@MappingTarget TeacherDTO oldTeacherDTO, TeacherInput teacherInput);
 
 
     TeacherEntity toEntity(TeacherDTO teacherDTO);

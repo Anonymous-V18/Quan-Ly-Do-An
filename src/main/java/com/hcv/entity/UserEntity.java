@@ -1,25 +1,22 @@
 package com.hcv.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 @Entity
 @Table(name = "user")
 public class UserEntity extends BaseEntity {
-
-    @Column(name = "username")
+    
     private String username;
-
-    @Column(name = "password")
     private String password;
-
-    @Column(name = "is_graduate")
     private Integer isGraduate;
 
     @ManyToMany

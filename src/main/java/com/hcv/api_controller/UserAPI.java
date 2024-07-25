@@ -2,8 +2,8 @@ package com.hcv.api_controller;
 
 import com.hcv.dto.UserDTO;
 import com.hcv.dto.request.ShowAllRequest;
-import com.hcv.dto.request.UpdateUserInput;
 import com.hcv.dto.request.UserRequest;
+import com.hcv.dto.request.UserUpdateInput;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.service.IUserService;
@@ -26,34 +26,34 @@ public class UserAPI {
     IUserService userService;
 
     @PostMapping("/register")
-    public ApiResponse<String> createdUser(@RequestBody @Valid UserRequest userRequest) {
-        userService.createUser(userRequest);
-        return ApiResponse.<String>builder()
-                .message("Tạo tài khoản thành công !")
+    public ApiResponse<UserDTO> createdUser(@RequestBody @Valid UserRequest userRequest) {
+        UserDTO userDTO = userService.create(userRequest);
+        return ApiResponse.<UserDTO>builder()
+                .result(userDTO)
                 .build();
     }
 
     @PutMapping("/update-user")
-    public ApiResponse<String> updateUser(@RequestBody @Valid UpdateUserInput updateUserInput) {
-        userService.updateUser(updateUserInput);
-        return ApiResponse.<String>builder()
-                .message("Cập nhật tài khoản thành công !")
+    public ApiResponse<UserDTO> updateUser(@RequestBody @Valid UserUpdateInput updateUserInput) {
+        UserDTO response = userService.update(updateUserInput);
+        return ApiResponse.<UserDTO>builder()
+                .result(response)
                 .build();
     }
 
     @PutMapping("admin/update-user")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
-    public ApiResponse<String> updateUserForAdmin(@RequestBody @Valid UserRequest updateUserInput) {
-        userService.updateUserForAdmin(updateUserInput);
-        return ApiResponse.<String>builder()
-                .message("Cập nhật tài khoản thành công !")
+    public ApiResponse<UserDTO> updateUserForAdmin(@RequestBody @Valid UserRequest updateUserInput) {
+        UserDTO response = userService.updateForAdmin(updateUserInput);
+        return ApiResponse.<UserDTO>builder()
+                .result(response)
                 .build();
     }
 
     @DeleteMapping("/delete-user")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
     public ApiResponse<String> deleteUser(@RequestBody String[] ids) {
-        userService.deleteUser(ids);
+        userService.delete(ids);
         return ApiResponse.<String>builder()
                 .message("Xóa tài khoản thành công !")
                 .build();
@@ -70,7 +70,7 @@ public class UserAPI {
                 .orderBy(orderBy)
                 .orderDirection(orderDirection)
                 .build();
-        ShowAllResponse<UserDTO> response = userService.showAllUserResponse(showAllRequest);
+        ShowAllResponse<UserDTO> response = userService.showAll(showAllRequest);
         return ApiResponse.<ShowAllResponse<UserDTO>>builder()
                 .result(response)
                 .build();

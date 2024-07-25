@@ -1,46 +1,42 @@
 package com.hcv.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "research")
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 public class ResearchEntity extends BaseEntity {
-    @Column(name = "name")
+
     private String name;
-    @Column(name = "ma_de_tai")
     private String maDeTai;
-    @Column(name = "detail")
     private String detail;
-    @Column(name = "old_detail")
-    private String old_detail;
-    @Column(name = "notes")
+    private String oldDetail;
     private String notes;
-    @Column(name = "max_members")
     private Integer maxMembers;
-    @Column(name = "min_members")
     private Integer minMembers;
-    @Column(name = "ma_so_gvhd")
-    private String maSo_GVHD;
-    @Column(name = "ma_so_gvpb")
-    private String maSo_GVPB;
-    @Column(name = "dot_dang_ky")
+    private String gvhd;
+    private String gvpb;
     private String dotDangKy;
-    @Column(name = "nam_hoc")
     private String namHoc;
+    private Integer isApproved;
 
 
-    @ManyToMany(mappedBy = "researches")
+    @ManyToMany
+    @JoinTable(name = "research_teacher"
+            , joinColumns = @JoinColumn(name = "research_id")
+            , inverseJoinColumns = @JoinColumn(name = "teacher_id"))
     private List<TeacherEntity> teachers = new ArrayList<>();
 
     @OneToMany(mappedBy = "researches")
-    private List<FeedbackEntity> feedbacks;
+    private List<FeedbackEntity> feedbacks = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(name = "research_subject"

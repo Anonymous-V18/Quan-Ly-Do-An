@@ -14,7 +14,7 @@ public interface IStudentService {
 
     StudentDTO insert(StudentInput studentInput);
 
-    StudentDTO update(StudentDTO old_studentDTO, StudentInput studentInput);
+    StudentDTO update(StudentDTO oldStudentDTO, StudentInput studentInput);
 
     void delete(String[] ids);
 
@@ -27,4 +27,6 @@ public interface IStudentService {
     ShowAllResponse<StudentDTO> showAll(ShowAllRequest showAllRequest);
 
     List<StudentDTO> findAll();
+
+    List<StudentDTO> findAllById(List<String> ids);
 }

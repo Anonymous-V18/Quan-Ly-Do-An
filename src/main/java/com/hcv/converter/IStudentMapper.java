@@ -16,5 +16,5 @@ public interface IStudentMapper {
 
     StudentEntity toEntity(StudentInput studentInput);
 
-    StudentDTO toDTO(@MappingTarget StudentDTO old_studentDTO, StudentInput studentInput);
+    StudentDTO toDTO(@MappingTarget StudentDTO oldStudentDTO, StudentInput studentInput);
 }

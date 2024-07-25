@@ -14,7 +14,7 @@ public interface ITeacherService {
 
     TeacherDTO insert(TeacherInput teacherInput);
 
-    TeacherDTO update(TeacherDTO old_teacherDTO, TeacherInput teacherInput);
+    TeacherDTO update(TeacherDTO oldTeacherDTO, TeacherInput teacherInput);
 
     void delete(String[] ids);
 

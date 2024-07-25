@@ -38,13 +38,12 @@ public class SubjectAPI {
     public ApiResponse<SubjectDTO> update(@PathVariable(name = "id") String id,
                                           @RequestBody @Valid SubjectInput subjectInput) {
         SubjectDTO oldSubjectDTO = subjectService.findOneById(id);
+        SubjectDTO updatedDTO;
         if (oldSubjectDTO == null) {
-            SubjectDTO newSubjectDTO = subjectService.insert(subjectInput);
-            return ApiResponse.<SubjectDTO>builder()
-                    .result(newSubjectDTO)
-                    .build();
+            updatedDTO = subjectService.insert(subjectInput);
+        } else {
+            updatedDTO = subjectService.update(oldSubjectDTO, subjectInput);
         }
-        SubjectDTO updatedDTO = subjectService.update(oldSubjectDTO, subjectInput);
         return ApiResponse.<SubjectDTO>builder()
                 .result(updatedDTO)
                 .build();

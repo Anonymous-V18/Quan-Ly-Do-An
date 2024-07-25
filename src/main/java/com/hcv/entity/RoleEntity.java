@@ -2,22 +2,22 @@ package com.hcv.entity;
 
 import com.hcv.dto.CodeRole;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 @Entity
 @Table(name = "role")
 public class RoleEntity extends BaseEntity {
 
-    @Column(name = "name")
     private String name;
 
-    @Column(name = "code")
     @Enumerated(EnumType.STRING)
     private CodeRole code;
 

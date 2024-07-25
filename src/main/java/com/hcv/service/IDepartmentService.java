@@ -10,7 +10,7 @@ public interface IDepartmentService {
 
     DepartmentDTO insert(DepartmentDTO departmentDTO);
 
-    DepartmentDTO update(DepartmentDTO new_departmentDTO, DepartmentDTO old_departmentDTO);
+    DepartmentDTO update(DepartmentDTO newDepartmentDTO, DepartmentDTO oldDepartmentDTO);
 
     void delete(String[] ids);
 

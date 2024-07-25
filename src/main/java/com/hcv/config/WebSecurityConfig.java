@@ -31,7 +31,8 @@ public class WebSecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
             "/log-in", "/introspectToken", "/register", "/log-out",
-            "/subjects/**", "/departments/**", "/teachers/**", "/students/**", "/jobs/**", "/users/**"
+            "/subjects/**", "/departments/**", "/teachers/**", "/students/**", "/jobs/**", "/users/**",
+            "/researches/**", "/feedbacks/**", "/groups/**"
     };
 
     @Bean

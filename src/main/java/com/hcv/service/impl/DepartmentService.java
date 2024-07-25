@@ -40,9 +40,9 @@ public class DepartmentService implements IDepartmentService {
     }
 
     @Override
-    public DepartmentDTO update(DepartmentDTO new_departmentDTO, DepartmentDTO old_departmentDTO) {
-        old_departmentDTO.setName(new_departmentDTO.getName());
-        DepartmentEntity departmentEntityUpdate = departmentMapper.toEntity(old_departmentDTO);
+    public DepartmentDTO update(DepartmentDTO newDepartmentDTO, DepartmentDTO oldDepartmentDTO) {
+        oldDepartmentDTO.setName(newDepartmentDTO.getName());
+        DepartmentEntity departmentEntityUpdate = departmentMapper.toEntity(oldDepartmentDTO);
         departmentRepository.save(departmentEntityUpdate);
         return departmentMapper.toDTO(departmentEntityUpdate);
     }
