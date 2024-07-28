@@ -40,11 +40,11 @@ public class StudentEntity extends BaseEntity {
     @JoinColumn(name = "department_id")
     private DepartmentEntity departments;
 
-    @ManyToMany
-    @JoinTable(name = "student_job",
-            joinColumns = @JoinColumn(name = "student_id"),
-            inverseJoinColumns = @JoinColumn(name = "job_id"))
-    private List<JobEntity> jobs = new ArrayList<>();
+//    @ManyToMany
+//    @JoinTable(name = "student_job",
+//            joinColumns = @JoinColumn(name = "student_id"),
+//            inverseJoinColumns = @JoinColumn(name = "job_id"))
+//    private List<JobEntity> jobs = new ArrayList<>();
 
     @OneToMany(mappedBy = "students")
     private List<PointEntity> points = new ArrayList<>();

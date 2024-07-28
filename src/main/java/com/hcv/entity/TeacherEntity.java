@@ -40,10 +40,6 @@ public class TeacherEntity extends BaseEntity {
     @JoinColumn(name = "subject_id")
     private SubjectEntity subjects;
 
-    @OneToMany(mappedBy = "teachers")
-    private List<GroupEntity> groups = new ArrayList<>();
-
-
     @ManyToMany(mappedBy = "teachers")
     private List<JobEntity> jobs = new ArrayList<>();
 

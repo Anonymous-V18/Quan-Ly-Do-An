@@ -20,6 +20,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +38,7 @@ public class UserService implements IUserService {
     IUserRepository userRepository;
     PasswordEncoder passwordEncoder;
 
+
     @Override
     public UserDTO create(UserRequest userRequest) {
         UserDTO checkUserNameExist = this.findOneByUsername(userRequest.getUsername());
@@ -45,7 +49,7 @@ public class UserService implements IUserService {
         List<RoleEntity> listRolesEntity = userRequest.getNameRoles().stream()
                 .map(roleRepository::findOneByName)
                 .toList();
-        if (listRolesEntity.getFirst() == null) {
+        if (listRolesEntity.contains(null)) {
             throw new AppException(ErrorCode.INVALID_NAME_ROLE);
         }
         userEntity.setRoles(listRolesEntity);
@@ -98,6 +102,16 @@ public class UserService implements IUserService {
             return null;
         }
         return userMapper.toDTO(userEntity);
+    }
+
+    @Override
+    public String getSubToken() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserName = " ";
+        if (!(authentication instanceof AnonymousAuthenticationToken)) {
+            currentUserName = authentication.getName();
+        }
+        return currentUserName;
     }
 
     @Override

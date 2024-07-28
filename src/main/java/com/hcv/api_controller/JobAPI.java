@@ -1,13 +1,9 @@
 package com.hcv.api_controller;
 
 import com.hcv.dto.JobDTO;
-import com.hcv.dto.UserDTO;
-import com.hcv.dto.request.JobForTeacherInput;
+import com.hcv.dto.request.JobInput;
 import com.hcv.dto.response.ApiResponse;
-import com.hcv.exception.AppException;
-import com.hcv.exception.ErrorCode;
 import com.hcv.service.IJobService;
-import com.hcv.service.IUserService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,23 +21,27 @@ import java.util.List;
 public class JobAPI {
 
     IJobService jobService;
-    IUserService userService;
 
     @PostMapping("/teacher-job/insert")
     @PreAuthorize("hasAnyRole('DEAN','HEAD_OF_DEPARTMENT')")
-    public ApiResponse<JobDTO> addJobForTeacher(@RequestBody @Valid JobForTeacherInput jobForTeacherInput) {
-        UserDTO userDTO = userService.findOneByUsername(jobForTeacherInput.getSendFrom());
-        if (userDTO == null) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
-        }
-        JobDTO jobDTO = jobService.insert(jobForTeacherInput);
+    public ApiResponse<JobDTO> insert(@RequestBody @Valid JobInput jobInput) {
+        JobDTO jobDTO = jobService.insert(jobInput);
+        return ApiResponse.<JobDTO>builder()
+                .result(jobDTO)
+                .build();
+    }
+
+    @PostMapping("/researchers-job/insert")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ApiResponse<JobDTO> insertJobForResearchers(@RequestBody @Valid JobInput jobInput) {
+        JobDTO jobDTO = jobService.insert(jobInput);
         return ApiResponse.<JobDTO>builder()
                 .result(jobDTO)
                 .build();
     }
 
     @DeleteMapping("/teacher-job/delete")
-    public ApiResponse<String> deleteJobOfTeacherCompleted(@RequestBody String[] ids) {
+    public ApiResponse<String> delete(@RequestBody String[] ids) {
         jobService.deleteJobOfTeacherCompleted(ids);
         return ApiResponse.<String>builder()
                 .message("Xóa công việc thành công !")

@@ -6,12 +6,16 @@ import com.hcv.dto.ResearchDTO;
 import com.hcv.dto.TeacherDTO;
 import com.hcv.dto.request.FeedbackForResearchInput;
 import com.hcv.entity.FeedbackEntity;
+import com.hcv.entity.TeacherEntity;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IFeedbackRepository;
+import com.hcv.repository.ITeacherRepository;
+import com.hcv.repository.IUserRepository;
 import com.hcv.service.IFeedbackService;
 import com.hcv.service.IResearchService;
 import com.hcv.service.ITeacherService;
+import com.hcv.service.IUserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,20 +28,27 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class FeedbackService implements IFeedbackService {
 
+    ITeacherRepository teacherRepository;
     ITeacherService teacherService;
     IResearchService researchService;
     IFeedbackRepository feedbackRepository;
     IFeedbackMapper feedbackMapper;
+    IUserRepository userRepository;
+    IUserService userService;
 
     @Override
     public FeedbackDTO insert(FeedbackForResearchInput feedbackForResearchInput) {
         FeedbackDTO feedbackDTO = feedbackMapper.toDTO(feedbackForResearchInput);
 
-        TeacherDTO sendTo = teacherService.findOneById(feedbackDTO.getSendTo());
-        TeacherDTO sendFrom = teacherService.findOneById(feedbackDTO.getSendFrom());
-        if (sendTo == null || sendFrom == null) {
+        String senderId = userService.getSubToken();
+        boolean isTeacherExsisted = teacherRepository.existsById(senderId);
+        feedbackDTO.setSendFrom(senderId);
+
+        TeacherEntity receiver = teacherRepository.findOneById(feedbackDTO.getSendTo());
+        if (receiver == null || !isTeacherExsisted) {
             throw new AppException(ErrorCode.TEACHER_NOT_EXISTED);
         }
+        feedbackDTO.setSendTo(receiver.getId());
 
         String researchId = feedbackForResearchInput.getResearchID();
         ResearchDTO researchDTO = researchService.findOneById(researchId);

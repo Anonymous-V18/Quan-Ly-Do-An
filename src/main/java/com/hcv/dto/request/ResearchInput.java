@@ -17,8 +17,6 @@ public class ResearchInput {
     @NotNull(message = "NAME_PARAM_RESEARCH_INVALID")
     @Size(min = 3, message = "NAME_PARAM_RESEARCH_INVALID")
     private String name;
-    @NotNull(message = "MADETAI_PARAM_RESEARCH_INVALID")
-    @Size(min = 8, message = "MADETAI_PARAM_RESEARCH_INVALID")
     private String maDeTai;
     @NotNull(message = "DETAIL_PARAM_RESEARCH_INVALID")
     @Size(min = 3, message = "DETAIL_PARAM_RESEARCH_INVALID")

@@ -22,9 +22,5 @@ public class UserDTO extends BaseDTO {
 
     private List<RoleDTO> roles = new ArrayList<>();
 
-    private TeacherDTO teachers;
-
-    private StudentDTO students;
-
 
 }

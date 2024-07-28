@@ -1,6 +1,9 @@
 package com.hcv.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -15,13 +18,13 @@ import java.util.List;
 @Table(name = "group")
 public class GroupEntity extends BaseEntity {
 
-    @ManyToOne
-    @JoinColumn(name = "teacher_id")
-    private TeacherEntity teachers;
-
     @OneToOne(mappedBy = "groups")
     private ResearchEntity researches;
 
     @OneToMany(mappedBy = "groups")
     private List<StudentEntity> students = new ArrayList<>();
+
+    @OneToMany(mappedBy = "groups")
+    private List<JobEntity> jobs = new ArrayList<>();
+    
 }

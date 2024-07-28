@@ -17,6 +17,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -40,7 +41,7 @@ public class TeacherAPI {
             UserRequest userRequest = new UserRequest();
             userRequest.setUsername(usernameAndPasswordDefault);
             userRequest.setPassword(usernameAndPasswordDefault);
-            userRequest.setNameRoles(List.of(teacherInput.getChucVu()));
+            userRequest.setNameRoles(Arrays.stream(teacherInput.getChucVu().split(",")).toList());
 
             UserDTO userDTO = userService.create(userRequest);
 

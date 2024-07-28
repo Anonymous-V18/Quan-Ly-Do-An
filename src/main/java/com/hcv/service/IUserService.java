@@ -20,6 +20,8 @@ public interface IUserService {
 
     UserDTO findOneByUsername(String username);
 
+    String getSubToken();
+
     List<UserDTO> findAll();
 
     int countAll();

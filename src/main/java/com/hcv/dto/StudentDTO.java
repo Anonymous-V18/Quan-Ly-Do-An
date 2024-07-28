@@ -13,5 +13,6 @@ public class StudentDTO extends BaseDTO {
     private String email;
     private String phoneNumber;
     private SubjectDTO subjects;
+    private UserDTO users;
 
 }

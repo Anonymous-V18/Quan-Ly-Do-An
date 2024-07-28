@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 import java.util.StringJoiner;
 import java.util.UUID;
 
@@ -26,13 +27,15 @@ public class JwtUtil {
     public String generateToken(UserEntity userEntity) {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 
+        // Gửi id
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(userEntity.getUsername())
+                .subject(getTeacherOrStudentID(userEntity))
                 .issuer("qlda-hcv.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(userEntity))
+                .claim("username", userEntity.getUsername())
                 .build();
 
         Payload payload = jwtClaimsSet.toPayload();
@@ -45,6 +48,19 @@ public class JwtUtil {
         } catch (JOSEException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String getTeacherOrStudentID(UserEntity userEntity) {
+        List<String> roleName = userEntity.getRoles().stream()
+                .map(roleEntity -> roleEntity.getCode().name())
+                .toList();
+        String id = "";
+        if (roleName.contains("STUDENT")) {
+            id = userEntity.getStudents().getId();
+        } else {
+            id = userEntity.getTeachers().getId();
+        }
+        return id;
     }
 
     private String buildScope(UserEntity userEntity) {

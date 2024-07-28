@@ -1,7 +1,7 @@
 package com.hcv.converter;
 
 import com.hcv.dto.JobDTO;
-import com.hcv.dto.request.JobForTeacherInput;
+import com.hcv.dto.request.JobInput;
 import com.hcv.entity.JobEntity;
 import org.mapstruct.Mapper;
 
@@ -11,7 +11,7 @@ public interface IJobMapper {
 
     JobEntity toEntity(JobDTO jobDTO);
 
-    JobEntity toEntity(JobForTeacherInput jobForTeacherInput);
+    JobEntity toEntity(JobInput jobInput);
 
-    JobDTO toDTO(JobForTeacherInput jobForTeacherInput);
+    JobDTO toDTO(JobInput jobInput);
 }

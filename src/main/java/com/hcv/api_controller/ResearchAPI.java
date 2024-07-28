@@ -85,7 +85,7 @@ public class ResearchAPI {
                 .build();
     }
 
-    @PostMapping("/cancel-registration")
+    @DeleteMapping("/cancel-registration")
     @PreAuthorize("hasRole('STUDENT')")
     public ApiResponse<String> cancelRegistration(@RequestBody CancelRegistrationResearchInput cancelRegistrationResearchInput) {
         researchService.cancelRegistrationResearch(cancelRegistrationResearchInput);

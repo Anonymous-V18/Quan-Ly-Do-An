@@ -17,9 +17,9 @@ import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IResearchRepository;
 import com.hcv.repository.IStudentRepository;
 import com.hcv.service.IResearchService;
-import com.hcv.service.IStudentService;
 import com.hcv.service.ISubjectService;
 import com.hcv.service.ITeacherService;
+import com.hcv.service.IUserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -31,21 +31,26 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ResearchService implements IResearchService {
 
-    IStudentService studentService;
     ITeacherService teacherService;
     ISubjectService subjectService;
     IResearchRepository researchRepository;
     IResearchMapper mapper;
     IStudentRepository studentRepository;
+    IUserService userService;
 
     @Override
     public ResearchDTO insert(ResearchInput researchInput) {
+        if (researchInput.getMaDeTai().isBlank()) {
+            researchInput.setMaDeTai(UUID.randomUUID().toString());
+        }
+
         ResearchDTO researchDTO = mapper.toDTO(researchInput);
 
         List<String> teachersID = List.of(researchInput.getGvhd(), researchInput.getGvpb());
@@ -144,6 +149,8 @@ public class ResearchService implements IResearchService {
 
     @Override
     public void registerResearch(RegisterResearchInput registerResearchInput) {
+        registerResearchInput.setStudentID(userService.getSubToken());
+
         String researchID = registerResearchInput.getResearchID();
         ResearchEntity researchEntity = researchRepository.findOneById(researchID);
         if (researchEntity == null) {
@@ -153,7 +160,7 @@ public class ResearchService implements IResearchService {
         String studentID = registerResearchInput.getStudentID();
         StudentEntity studentEntity = studentRepository.findOneById(studentID);
         if (studentEntity == null) {
-            throw new AppException(ErrorCode.RESEARCH_NOT_EXISTED);
+            throw new AppException(ErrorCode.STUDENT_NOT_EXIST);
         }
         researchEntity.setGroups(studentEntity.getGroups());
         researchRepository.save(researchEntity);

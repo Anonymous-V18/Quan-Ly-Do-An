@@ -8,7 +8,7 @@ import lombok.Getter;
 import java.util.Date;
 
 @Getter
-public class JobForTeacherInput {
+public class JobInput {
 
     @NotNull(message = "INVALID_JOB_FOR_TEACHER_PARAM")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
@@ -19,8 +19,6 @@ public class JobForTeacherInput {
     @NotNull(message = "INVALID_JOB_FOR_TEACHER_PARAM")
     @Size(min = 8, message = "INVALID_JOB_FOR_TEACHER_PARAM")
     private String sendTo;
-    @NotNull(message = "INVALID_JOB_FOR_TEACHER_PARAM")
-    @Size(min = 8, message = "INVALID_JOB_FOR_TEACHER_PARAM")
     private String sendFrom;
     @NotNull(message = "INVALID_JOB_FOR_TEACHER_PARAM")
     @Size(min = 8, message = "INVALID_JOB_FOR_TEACHER_PARAM")

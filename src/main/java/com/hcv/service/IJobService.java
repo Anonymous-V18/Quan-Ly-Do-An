@@ -1,13 +1,13 @@
 package com.hcv.service;
 
 import com.hcv.dto.JobDTO;
-import com.hcv.dto.request.JobForTeacherInput;
+import com.hcv.dto.request.JobInput;
 
 import java.util.List;
 
 public interface IJobService {
 
-    JobDTO insert(JobForTeacherInput jobForTeacherInput);
+    JobDTO insert(JobInput jobInput);
 
     void deleteJobOfTeacherCompleted(String[] ids);
 

@@ -10,4 +10,7 @@ public interface ITeacherRepository extends JpaRepository<TeacherEntity, String>
 
     boolean existsByMaSo(String maSo);
 
+    boolean existsByUsers_Roles_Name(String name);
+
+
 }

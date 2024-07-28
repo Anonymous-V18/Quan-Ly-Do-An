@@ -1,5 +1,6 @@
 package com.hcv.service.impl;
 
+import com.hcv.constant.TeacherPositionConst;
 import com.hcv.converter.ITeacherMapper;
 import com.hcv.dto.SubjectDTO;
 import com.hcv.dto.TeacherDTO;
@@ -27,7 +28,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +54,15 @@ public class TeacherService implements ITeacherService {
             boolean isSubjectExisted = subjectRepository.existsByName(teacherInput.getSubjectName().trim());
             if (!isSubjectExisted) {
                 throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
+            }
+
+            List<String> listNameRole = List.of(teacherInput.getChucVu().split(","));
+            boolean checkNameRoleContain = List.of(TeacherPositionConst.TEACHER, TeacherPositionConst.DEAN,
+                            TeacherPositionConst.CATECHISM, TeacherPositionConst.STUDENT,
+                            TeacherPositionConst.HEAD_OF_DEPARTMENT)
+                    .containsAll(listNameRole);
+            if (!checkNameRoleContain) {
+                throw new AppException(ErrorCode.INVALID_NAME_ROLE);
             }
         }
     }
@@ -104,9 +117,15 @@ public class TeacherService implements ITeacherService {
 
     @Override
     public void delete(String[] ids) {
-        for (String id : ids) {
-            teacherRepository.deleteById(id);
-        }
+        List<TeacherEntity> teacherEntityList = teacherRepository.findAllById(Arrays.stream(ids).toList());
+        teacherEntityList = teacherEntityList.stream().filter(Objects::nonNull).toList();
+
+        List<UserEntity> userEntityList = new ArrayList<>();
+        teacherEntityList.forEach(teacherEntity -> userEntityList.add(teacherEntity.getUsers()));
+
+        teacherRepository.deleteAll(teacherEntityList);
+        userRepository.deleteAll(userEntityList);
+
     }
 
     @Override
