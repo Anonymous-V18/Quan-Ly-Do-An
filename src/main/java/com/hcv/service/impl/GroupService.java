@@ -4,6 +4,7 @@ import com.hcv.converter.IGroupMapper;
 import com.hcv.dto.GroupDTO;
 import com.hcv.dto.request.GroupInput;
 import com.hcv.dto.request.ShowAllRequest;
+import com.hcv.dto.response.GroupResponse;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.entity.GroupEntity;
 import com.hcv.entity.StudentEntity;
@@ -111,7 +112,7 @@ public class GroupService implements IGroupService {
     }
 
     @Override
-    public ShowAllResponse<GroupDTO> showAll(ShowAllRequest showAllRequest) {
+    public ShowAllResponse<GroupResponse> showAll(ShowAllRequest showAllRequest) {
         int page = showAllRequest.getPage();
         int limit = showAllRequest.getLimit();
         int totalPages = (int) Math.ceil((1.0 * countAll()) / limit);
@@ -123,9 +124,9 @@ public class GroupService implements IGroupService {
         );
         Page<GroupEntity> researchEntityList = groupRepository.findAll(paging);
         List<GroupEntity> resultEntity = researchEntityList.getContent();
-        List<GroupDTO> resultDTO = resultEntity.stream().map(mapper::toDTO).toList();
+        List<GroupResponse> resultDTO = resultEntity.stream().map(mapper::toShowDTO).toList();
 
-        return ShowAllResponse.<GroupDTO>builder()
+        return ShowAllResponse.<GroupResponse>builder()
                 .page(page)
                 .totalPages(totalPages)
                 .responses(resultDTO)

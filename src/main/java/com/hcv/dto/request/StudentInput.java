@@ -12,30 +12,30 @@ public class StudentInput {
     @Setter
     private String user_id;
 
-    @NotNull(message = "INVALID_STUDENT_INPUT_PARAM")
-    @Size(min = 8, message = "INVALID_STUDENT_INPUT_PARAM")
+    @NotNull(message = "MASO_INVALID")
+    @Size(min = 8, message = "MASO_INVALID")
     private String maSo;
 
-    @NotNull(message = "INVALID_STUDENT_INPUT_PARAM")
-    @Size(min = 4, message = "INVALID_STUDENT_INPUT_PARAM")
+    @NotNull(message = "NAME_INVALID")
+    @Size(min = 4, message = "NAME_INVALID")
     private String name;
 
-    @NotNull(message = "INVALID_STUDENT_INPUT_PARAM")
-    @Size(min = 4, message = "INVALID_STUDENT_INPUT_PARAM")
+    @NotNull(message = "MY_CLASS_INVALID")
+    @Size(min = 4, message = "MY_CLASS_INVALID")
     private String myClass;
 
-    @NotNull(message = "INVALID_STUDENT_INPUT_PARAM")
-    @Email(message = "INVALID_STUDENT_INPUT_PARAM")
+    @NotNull(message = "EMAIL_INVALID")
+    @Email(message = "EMAIL_INVALID")
     private String email;
 
-    @NotNull(message = "INVALID_STUDENT_INPUT_PARAM")
-    @Size(min = 10, message = "INVALID_STUDENT_INPUT_PARAM")
+    @NotNull(message = "PHONE_NUMBER_INVALID")
+    @Size(min = 9, message = "PHONE_NUMBER_INVALID")
     private String phoneNumber;
 
     private String departmentName;
 
-    @NotNull(message = "INVALID_STUDENT_INPUT_PARAM")
-    @Size(min = 4, message = "INVALID_STUDENT_INPUT_PARAM")
+    @NotNull(message = "SUBJECT_NAME_INVALID")
+    @Size(min = 4, message = "SUBJECT_NAME_INVALID")
     private String subjectName;
 
 }

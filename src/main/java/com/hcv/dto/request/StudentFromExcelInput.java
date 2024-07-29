@@ -11,8 +11,8 @@ import java.util.List;
 @Getter
 public class StudentFromExcelInput {
 
-    @NotNull(message = "INVALID_LIST_STUDENT")
-    @Size(min = 1, message = "INVALID_LIST_STUDENT")
+    @NotNull(message = "INVALID_LIST_TEACHER")
+    @Size(min = 1, message = "INVALID_LIST_TEACHER")
     @Valid
     private List<StudentInput> students = new ArrayList<>();
 }

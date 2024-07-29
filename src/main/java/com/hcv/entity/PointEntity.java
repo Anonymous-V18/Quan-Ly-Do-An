@@ -17,7 +17,7 @@ public class PointEntity extends BaseEntity {
 
     private Double point;
     private String type;
-    private String maSoGV;
+    private String teacherId;
 
     @ManyToOne
     @JoinColumn(name = "student_id")

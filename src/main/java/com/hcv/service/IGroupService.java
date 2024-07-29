@@ -3,6 +3,7 @@ package com.hcv.service;
 import com.hcv.dto.GroupDTO;
 import com.hcv.dto.request.GroupInput;
 import com.hcv.dto.request.ShowAllRequest;
+import com.hcv.dto.response.GroupResponse;
 import com.hcv.dto.response.ShowAllResponse;
 
 public interface IGroupService {
@@ -17,5 +18,5 @@ public interface IGroupService {
 
     GroupDTO findOneById(String id);
 
-    ShowAllResponse<GroupDTO> showAll(ShowAllRequest showAllRequest);
+    ShowAllResponse<GroupResponse> showAll(ShowAllRequest showAllRequest);
 }

@@ -53,15 +53,6 @@ public class StudentAPI {
 
     }
 
-    @PostMapping("/insert")
-    @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
-    public ApiResponse<StudentDTO> insert(@RequestBody @Valid StudentInput studentInput) {
-        StudentDTO newStudentDTO = studentService.insert(studentInput);
-        return ApiResponse.<StudentDTO>builder()
-                .result(newStudentDTO)
-                .build();
-    }
-
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM') or hasRole('STUDENT')")
     public ApiResponse<StudentDTO> update(@PathVariable(value = "id") String id,

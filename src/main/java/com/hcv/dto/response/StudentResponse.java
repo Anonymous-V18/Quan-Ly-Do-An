@@ -1,5 +1,8 @@
-package com.hcv.dto;
+package com.hcv.dto.response;
 
+import com.hcv.dto.BaseDTO;
+import com.hcv.dto.SubjectDTO;
+import com.hcv.dto.UserDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,15 +11,13 @@ import java.util.List;
 
 @Getter
 @Setter
-public class StudentDTO extends BaseDTO {
-
+public class StudentResponse extends BaseDTO {
     private String maSo;
     private String name;
     private String myClass;
     private String email;
     private String phoneNumber;
     private SubjectDTO subjects;
-    private List<PointDTO> points = new ArrayList<>();
+    private List<PointResponse> points = new ArrayList<>();
     private UserDTO users;
-
 }

@@ -55,15 +55,6 @@ public class TeacherAPI {
 
     }
 
-    @PostMapping("/insert")
-    @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
-    public ApiResponse<TeacherDTO> insert(@RequestBody @Valid TeacherInput teacherInput) {
-        TeacherDTO newTeacherDTO = teacherService.insert(teacherInput);
-        return ApiResponse.<TeacherDTO>builder()
-                .result(newTeacherDTO)
-                .build();
-    }
-
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM') or hasRole('TEACHER') or hasRole('HEAD_OF_DEPARTMENT')")
     public ApiResponse<TeacherDTO> update(@PathVariable(value = "id") String id,

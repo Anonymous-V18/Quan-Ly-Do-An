@@ -4,6 +4,7 @@ import com.hcv.dto.GroupDTO;
 import com.hcv.dto.request.GroupInput;
 import com.hcv.dto.request.ShowAllRequest;
 import com.hcv.dto.response.ApiResponse;
+import com.hcv.dto.response.GroupResponse;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.service.IGroupService;
 import lombok.AccessLevel;
@@ -56,18 +57,18 @@ public class GroupAPI {
     }
 
     @GetMapping("/showAll")
-    public ApiResponse<ShowAllResponse<GroupDTO>> showAll(@RequestParam(name = "page") Integer page,
-                                                          @RequestParam(name = "limit") Integer limit,
-                                                          @RequestParam(name = "orderBy") String orderBy,
-                                                          @RequestParam(name = "orderDirection") String orderDirection) {
+    public ApiResponse<ShowAllResponse<GroupResponse>> showAll(@RequestParam(name = "page") Integer page,
+                                                               @RequestParam(name = "limit") Integer limit,
+                                                               @RequestParam(name = "orderBy") String orderBy,
+                                                               @RequestParam(name = "orderDirection") String orderDirection) {
         ShowAllRequest showAllRequest = ShowAllRequest.builder()
                 .page(page)
                 .limit(limit)
                 .orderBy(orderBy)
                 .orderDirection(orderDirection)
                 .build();
-        ShowAllResponse<GroupDTO> response = groupService.showAll(showAllRequest);
-        return ApiResponse.<ShowAllResponse<GroupDTO>>builder()
+        ShowAllResponse<GroupResponse> response = groupService.showAll(showAllRequest);
+        return ApiResponse.<ShowAllResponse<GroupResponse>>builder()
                 .result(response)
                 .build();
     }
