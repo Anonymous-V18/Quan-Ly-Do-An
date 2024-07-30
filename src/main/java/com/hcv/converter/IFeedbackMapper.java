@@ -8,11 +8,9 @@ import org.mapstruct.Mapper;
 @Mapper
 public interface IFeedbackMapper {
 
-
     FeedbackDTO toDTO(FeedbackEntity feedbackEntity);
 
     FeedbackEntity toEntity(FeedbackForResearchInput newFeedbackDTOForResearch);
 
-    FeedbackEntity toEntity(FeedbackDTO feedbackDTO);
 
 }

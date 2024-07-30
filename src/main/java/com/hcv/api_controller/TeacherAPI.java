@@ -59,13 +59,8 @@ public class TeacherAPI {
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM') or hasRole('TEACHER') or hasRole('HEAD_OF_DEPARTMENT')")
     public ApiResponse<TeacherDTO> update(@PathVariable(value = "id") String id,
                                           @RequestBody @Valid TeacherInput teacherInput) {
-        TeacherDTO oldTeacherDTO = teacherService.findOneById(id);
-        TeacherDTO updatedDTO;
-        if (oldTeacherDTO == null) {
-            updatedDTO = teacherService.insert(teacherInput);
-        } else {
-            updatedDTO = teacherService.update(oldTeacherDTO, teacherInput);
-        }
+
+        TeacherDTO updatedDTO = teacherService.update(id, teacherInput);
         return ApiResponse.<TeacherDTO>builder()
                 .result(updatedDTO)
                 .build();

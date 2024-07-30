@@ -1,5 +1,6 @@
-package com.hcv.dto.request.User;
+package com.hcv.dto.request.user;
 
+import com.hcv.dto.request.user.BaseAuthInput;
 import lombok.Getter;
 import lombok.Setter;
 

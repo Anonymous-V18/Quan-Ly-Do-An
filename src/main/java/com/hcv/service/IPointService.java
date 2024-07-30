@@ -8,7 +8,7 @@ public interface IPointService {
 
     PointResponse insert(PointInsertInput pointInsertInput);
 
-    PointResponse update(String idOldPoint, PointUpdateInput newPointDTO);
+    PointResponse update(String oldPointId, PointUpdateInput newPointDTO);
 
     void checkTypePoint(String typePoint);
 

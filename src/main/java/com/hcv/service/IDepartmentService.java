@@ -10,7 +10,7 @@ public interface IDepartmentService {
 
     DepartmentDTO insert(DepartmentDTO departmentDTO);
 
-    DepartmentDTO update(String idOldDepartmentDTO, DepartmentDTO newDepartmentDTO);
+    DepartmentDTO update(String oldDepartmentId, DepartmentDTO newDepartmentDTO);
 
     void delete(String[] ids);
 
@@ -21,4 +21,5 @@ public interface IDepartmentService {
     ShowAllResponse<DepartmentDTO> showAll(ShowAllRequest showAllRequest);
 
     List<DepartmentDTO> findAll();
+
 }

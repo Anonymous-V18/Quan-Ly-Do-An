@@ -10,11 +10,11 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "department")
 @Getter
 @Setter
 @RequiredArgsConstructor
-@Entity
-@Table(name = "department")
 public class DepartmentEntity extends BaseEntity {
 
     private String name;

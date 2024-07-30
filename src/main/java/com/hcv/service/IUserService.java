@@ -14,7 +14,7 @@ public interface IUserService {
 
     UserDTO updateForAdmin(UserRequest updateUserInput);
 
-    UserDTO update(UserUpdateInput updateUserInput);
+    UserDTO update(String oldUserId, UserUpdateInput updateUserInput);
 
     void delete(String[] ids);
 
@@ -27,6 +27,5 @@ public interface IUserService {
     int countAll();
 
     ShowAllResponse<UserDTO> showAll(ShowAllRequest showAllRequest);
-
 
 }

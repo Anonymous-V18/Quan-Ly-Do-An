@@ -47,8 +47,8 @@ public class FeedbackService implements IFeedbackService {
     }
 
     @Override
-    public FeedbackDTO update(String idOldFeedbackDTO, FeedbackForResearchInput newFeedbackDTOForResearchInput) {
-        FeedbackEntity feedbackEntity = feedbackRepository.findOneById(idOldFeedbackDTO);
+    public FeedbackDTO update(String oldFeedbackId, FeedbackForResearchInput newFeedbackDTOForResearchInput) {
+        FeedbackEntity feedbackEntity = feedbackRepository.findOneById(oldFeedbackId);
         if (feedbackEntity == null) {
             throw new AppException(ErrorCode.FEEDBACK_NOT_EXISTED);
         }

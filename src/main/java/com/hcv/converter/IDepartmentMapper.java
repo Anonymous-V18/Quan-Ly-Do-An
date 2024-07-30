@@ -6,7 +6,9 @@ import org.mapstruct.Mapper;
 
 @Mapper
 public interface IDepartmentMapper {
+
     DepartmentDTO toDTO(DepartmentEntity departmentEntity);
 
     DepartmentEntity toEntity(DepartmentDTO departmentDTO);
+
 }

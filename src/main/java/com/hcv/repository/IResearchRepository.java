@@ -4,6 +4,7 @@ import com.hcv.entity.ResearchEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface IResearchRepository extends JpaRepository<ResearchEntity, String> {
+
     ResearchEntity findOneById(String id);
 
 }

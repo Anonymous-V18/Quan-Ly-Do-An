@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/points")
 public class PointAPI {
 
-    IPointRepository pointRepository;
     IPointService pointService;
 
     @PostMapping("/insert")

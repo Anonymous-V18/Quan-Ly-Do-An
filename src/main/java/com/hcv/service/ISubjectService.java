@@ -11,7 +11,7 @@ public interface ISubjectService {
 
     SubjectDTO insert(SubjectInput subjectInput);
 
-    SubjectDTO update(SubjectDTO oldSubjectDTO, SubjectInput subjectInput);
+    SubjectDTO update(String oldSubjectId, SubjectInput subjectInput);
 
     void delete(String[] ids);
 
@@ -24,4 +24,5 @@ public interface ISubjectService {
     ShowAllResponse<SubjectDTO> showAll(ShowAllRequest showAllRequest);
 
     List<SubjectDTO> findAll();
+    
 }

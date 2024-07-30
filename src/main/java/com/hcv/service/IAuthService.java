@@ -4,5 +4,4 @@ public interface IAuthService {
 
     String authentication(String username, String password);
 
-
 }

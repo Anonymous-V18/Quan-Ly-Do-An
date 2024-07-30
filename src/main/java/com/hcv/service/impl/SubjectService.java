@@ -49,20 +49,23 @@ public class SubjectService implements ISubjectService {
     }
 
     @Override
-    public SubjectDTO update(SubjectDTO oldSubjectDTO, SubjectInput subjectInput) {
-        oldSubjectDTO.setName(subjectInput.getName());
+    public SubjectDTO update(String oldSubjectId, SubjectInput subjectInput) {
+        SubjectEntity subjectEntity = subjectRepository.findOneById(oldSubjectId);
+        if (subjectEntity == null) {
+            throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
+        }
 
-        SubjectEntity subjectEntityUpdate = subjectMapper.toEntity(oldSubjectDTO);
+        subjectEntity.setName(subjectInput.getName());
 
         DepartmentEntity departmentEntity = departmentRepository.findOneByName(subjectInput.getNameDepartment());
         if (departmentEntity == null) {
             throw new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED);
         }
-        subjectEntityUpdate.setDepartments(departmentEntity);
+        subjectEntity.setDepartments(departmentEntity);
 
-        subjectRepository.save(subjectEntityUpdate);
+        subjectRepository.save(subjectEntity);
 
-        return subjectMapper.toDTO(subjectEntityUpdate);
+        return subjectMapper.toDTO(subjectEntity);
     }
 
     @Override

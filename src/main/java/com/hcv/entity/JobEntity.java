@@ -33,8 +33,6 @@ public class JobEntity extends BaseEntity {
             , inverseJoinColumns = @JoinColumn(name = "teacher_id"))
     private List<TeacherEntity> teachers = new ArrayList<>();
 
-    //    @ManyToMany(mappedBy = "jobs")
-//    private List<StudentEntity> students = new ArrayList<>();
     @ManyToOne
     @JoinColumn(name = "group_id")
     private GroupEntity groups;

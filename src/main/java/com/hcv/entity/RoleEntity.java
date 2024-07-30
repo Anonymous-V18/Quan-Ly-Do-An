@@ -9,11 +9,11 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "role")
 @Getter
 @Setter
 @RequiredArgsConstructor
-@Entity
-@Table(name = "role")
 public class RoleEntity extends BaseEntity {
 
     private String name;

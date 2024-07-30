@@ -15,5 +15,4 @@ public interface IJobService {
 
     List<JobDTO> findAll();
 
-
 }

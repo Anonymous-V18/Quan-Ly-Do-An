@@ -57,14 +57,7 @@ public class StudentAPI {
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM') or hasRole('STUDENT')")
     public ApiResponse<StudentDTO> update(@PathVariable(value = "id") String id,
                                           @RequestBody @Valid StudentInput studentInput) {
-        StudentDTO oldStudentDTO = studentService.findOneById(id);
-        if (oldStudentDTO == null) {
-            StudentDTO newStudentDTO = studentService.insert(studentInput);
-            return ApiResponse.<StudentDTO>builder()
-                    .result(newStudentDTO)
-                    .build();
-        }
-        StudentDTO updatedDTO = studentService.update(oldStudentDTO, studentInput);
+        StudentDTO updatedDTO = studentService.update(id, studentInput);
         return ApiResponse.<StudentDTO>builder()
                 .result(updatedDTO)
                 .build();

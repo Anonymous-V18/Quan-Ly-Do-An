@@ -8,13 +8,13 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "user")
 @Getter
 @Setter
 @RequiredArgsConstructor
-@Entity
-@Table(name = "user")
 public class UserEntity extends BaseEntity {
-    
+
     private String username;
     private String password;
     private Integer isGraduate;

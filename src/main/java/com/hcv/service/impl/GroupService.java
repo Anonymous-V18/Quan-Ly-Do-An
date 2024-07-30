@@ -63,8 +63,8 @@ public class GroupService implements IGroupService {
     }
 
     @Override
-    public GroupDTO update(String oldGroupID, GroupInput newGroupInput) {
-        GroupEntity oldGroupEntity = groupRepository.findOneById(oldGroupID);
+    public GroupDTO update(String oldGroupId, GroupInput newGroupInput) {
+        GroupEntity oldGroupEntity = groupRepository.findOneById(oldGroupId);
         if (oldGroupEntity.getResearches() != null) {
             throw new AppException(ErrorCode.GROUP_NOT_CHANGE_MEMBER);
         }

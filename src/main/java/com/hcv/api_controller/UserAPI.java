@@ -33,9 +33,10 @@ public class UserAPI {
                 .build();
     }
 
-    @PutMapping("/update-user")
-    public ApiResponse<UserDTO> updateUser(@RequestBody @Valid UserUpdateInput updateUserInput) {
-        UserDTO response = userService.update(updateUserInput);
+    @PutMapping("/update-user/{id}")
+    public ApiResponse<UserDTO> updateUser(@PathVariable("id") String id,
+                                           @RequestBody @Valid UserUpdateInput updateUserInput) {
+        UserDTO response = userService.update(id, updateUserInput);
         return ApiResponse.<UserDTO>builder()
                 .result(response)
                 .build();

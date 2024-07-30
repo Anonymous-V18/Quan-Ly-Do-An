@@ -40,8 +40,8 @@ public class DepartmentService implements IDepartmentService {
     }
 
     @Override
-    public DepartmentDTO update(String idOldDepartmentDTO, DepartmentDTO newDepartmentDTO) {
-        DepartmentEntity departmentEntityUpdate = departmentRepository.findOneById(idOldDepartmentDTO);
+    public DepartmentDTO update(String oldDepartmentId, DepartmentDTO newDepartmentDTO) {
+        DepartmentEntity departmentEntityUpdate = departmentRepository.findOneById(oldDepartmentId);
         if (departmentEntityUpdate == null) {
             throw new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED);
         }

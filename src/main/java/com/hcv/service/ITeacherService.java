@@ -14,7 +14,7 @@ public interface ITeacherService {
 
     TeacherDTO insert(TeacherInput teacherInput);
 
-    TeacherDTO update(TeacherDTO oldTeacherDTO, TeacherInput teacherInput);
+    TeacherDTO update(String oldTeacherId, TeacherInput teacherInput);
 
     void delete(String[] ids);
 
@@ -27,6 +27,5 @@ public interface ITeacherService {
     TeacherDTO findOneById(String id);
 
     List<TeacherDTO> findAll();
-
 
 }

@@ -58,8 +58,8 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public UserDTO update(UserUpdateInput updateUserInput) {
-        UserEntity userEntity = userRepository.findOneByUsername(updateUserInput.getUsername());
+    public UserDTO update(String oldUserId, UserUpdateInput updateUserInput) {
+        UserEntity userEntity = userRepository.findOneById(oldUserId);
         if (userEntity == null) {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
@@ -85,6 +85,7 @@ public class UserService implements IUserService {
         userEntityOld.setPassword(passwordEncoder.encode(updateUserInput.getPassword()));
         userEntityOld.setIsGraduate(updateUserInput.getIsGraduate());
         userRepository.save(userEntityOld);
+        
         return userMapper.toDTO(userEntityOld);
     }
 

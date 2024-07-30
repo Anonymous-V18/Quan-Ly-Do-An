@@ -10,8 +10,8 @@ public interface IGroupService {
 
     GroupDTO insert(GroupInput groupInput);
 
-    GroupDTO update(String oldGroupID, GroupInput newGroupInput);
-    
+    GroupDTO update(String oldGroupId, GroupInput newGroupInput);
+
     void delete(String[] ids);
 
     int countAll();
@@ -19,4 +19,5 @@ public interface IGroupService {
     GroupDTO findOneById(String id);
 
     ShowAllResponse<GroupResponse> showAll(ShowAllRequest showAllRequest);
+
 }

@@ -38,13 +38,7 @@ public class ResearchAPI {
     @PreAuthorize("hasRole('TEACHER')")
     public ApiResponse<ResearchDTO> update(@PathVariable(value = "id") String id,
                                            @RequestBody ResearchInput researchInput) {
-        ResearchDTO oldResearchDTO = researchService.findOneById(id);
-        ResearchDTO updateDTO;
-        if (oldResearchDTO == null) {
-            updateDTO = researchService.insert(researchInput);
-        } else {
-            updateDTO = researchService.update(oldResearchDTO, researchInput);
-        }
+        ResearchDTO updateDTO = researchService.update(id, researchInput);
         return ApiResponse.<ResearchDTO>builder()
                 .result(updateDTO)
                 .build();

@@ -4,7 +4,7 @@ target/
 !**/src/test/**/target/
 
 ### IntelliJ IDEA ###
-TTTidea/
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -33,4 +33,4 @@ build/
 
 ### Mac OS ###
 .DS_Store
-/TTTidea/
+/.idea/

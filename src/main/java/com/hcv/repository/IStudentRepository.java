@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface IStudentRepository extends JpaRepository<StudentEntity, String> {
+
     StudentEntity findOneByMaSo(String maSo);
 
     StudentEntity findOneById(String id);
@@ -13,6 +14,5 @@ public interface IStudentRepository extends JpaRepository<StudentEntity, String>
     boolean existsByMaSo(String maSo);
 
     List<StudentEntity> findByGroups_IdIn(List<String> ids);
-
 
 }

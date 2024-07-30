@@ -12,10 +12,14 @@ import com.hcv.dto.response.ResearchResponse;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.entity.ResearchEntity;
 import com.hcv.entity.StudentEntity;
+import com.hcv.entity.SubjectEntity;
+import com.hcv.entity.TeacherEntity;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IResearchRepository;
 import com.hcv.repository.IStudentRepository;
+import com.hcv.repository.ISubjectRepository;
+import com.hcv.repository.ITeacherRepository;
 import com.hcv.service.IResearchService;
 import com.hcv.service.ISubjectService;
 import com.hcv.service.ITeacherService;
@@ -38,8 +42,8 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ResearchService implements IResearchService {
 
-    ITeacherService teacherService;
-    ISubjectService subjectService;
+    ITeacherRepository teacherRepository;
+    ISubjectRepository subjectRepository;
     IResearchRepository researchRepository;
     IResearchMapper mapper;
     IStudentRepository studentRepository;
@@ -51,59 +55,57 @@ public class ResearchService implements IResearchService {
             researchInput.setMaDeTai(UUID.randomUUID().toString());
         }
 
-        ResearchDTO researchDTO = mapper.toDTO(researchInput);
+        ResearchEntity researchEntity = mapper.toEntity(researchInput);
 
         List<String> teachersID = List.of(researchInput.getGvhd(), researchInput.getGvpb());
         if (teachersID.getFirst().compareTo(teachersID.getLast()) == 0) {
             throw new AppException(ErrorCode.TEACHER_DUPLICATED);
         }
-        List<TeacherDTO> teachers = teachersID.stream()
-                .map(teacherService::findOneById)
+        List<TeacherEntity> teachers = teachersID.stream()
+                .map(teacherRepository::findOneById)
                 .toList();
         if (teachers.contains(null)) {
             throw new AppException(ErrorCode.TEACHER_NOT_EXISTED);
         }
-        researchDTO.setTeachers(teachers);
+        researchEntity.setTeachers(teachers);
 
-        List<SubjectDTO> subjects = researchInput.getSubjectsID().stream()
-                .map(subjectService::findOneById)
+        List<SubjectEntity> subjects = researchInput.getSubjectsID().stream()
+                .map(subjectRepository::findOneById)
                 .toList();
         if (subjects.contains(null)) {
             throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
         }
-        researchDTO.setSubjects(subjects);
+        researchEntity.setSubjects(subjects);
 
-        ResearchEntity newResearchEntity = mapper.toEntity(researchDTO);
-        researchRepository.save(newResearchEntity);
+        researchEntity = researchRepository.save(researchEntity);
 
-        return mapper.toDTO(newResearchEntity);
+        return mapper.toDTO(researchEntity);
     }
 
     @Override
-    public ResearchDTO update(ResearchDTO oldResearchDTO, ResearchInput newResearchDTO) {
-        oldResearchDTO = mapper.toDTO(oldResearchDTO, newResearchDTO);
+    public ResearchDTO update(String oldResearchId, ResearchInput newResearchDTO) {
+        ResearchEntity researchEntity = researchRepository.findOneById(oldResearchId);
 
         List<String> teachersID = List.of(newResearchDTO.getGvhd(), newResearchDTO.getGvpb());
         if (teachersID.getFirst().compareTo(teachersID.getLast()) == 0) {
             throw new AppException(ErrorCode.TEACHER_DUPLICATED);
         }
-        List<TeacherDTO> teachers = teachersID.stream()
-                .map(teacherService::findOneById)
+        List<TeacherEntity> teachers = teachersID.stream()
+                .map(teacherRepository::findOneById)
                 .toList();
         if (teachers.contains(null)) {
             throw new AppException(ErrorCode.TEACHER_NOT_EXISTED);
         }
-        oldResearchDTO.setTeachers(teachers);
+        researchEntity.setTeachers(teachers);
 
-        List<SubjectDTO> subjects = newResearchDTO.getSubjectsID().stream()
-                .map(subjectService::findOneById)
+        List<SubjectEntity> subjects = newResearchDTO.getSubjectsID().stream()
+                .map(subjectRepository::findOneById)
                 .toList();
         if (subjects.contains(null)) {
             throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
         }
-        oldResearchDTO.setSubjects(subjects);
+        researchEntity.setSubjects(subjects);
 
-        ResearchEntity researchEntity = mapper.toEntity(oldResearchDTO);
         researchEntity = researchRepository.save(researchEntity);
 
         return mapper.toDTO(researchEntity);

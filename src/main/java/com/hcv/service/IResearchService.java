@@ -12,7 +12,7 @@ public interface IResearchService {
 
     ResearchDTO insert(ResearchInput researchInput);
 
-    ResearchDTO update(ResearchDTO oldResearchDTO, ResearchInput newResearchDTO);
+    ResearchDTO update(String oldResearchId, ResearchInput newResearchDTO);
 
     void delete(String[] ids);
 
@@ -25,4 +25,5 @@ public interface IResearchService {
     void registerResearch(RegisterResearchInput registerResearchInput);
 
     void cancelRegistrationResearch(CancelRegistrationResearchInput cancelRegistrationResearchInput);
+    
 }

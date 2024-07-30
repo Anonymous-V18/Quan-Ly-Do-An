@@ -7,11 +7,9 @@ import org.mapstruct.Mapper;
 
 @Mapper
 public interface IJobMapper {
-    JobDTO toDTO(JobEntity jobEntity);
 
-    JobEntity toEntity(JobDTO jobDTO);
+    JobDTO toDTO(JobEntity jobEntity);
 
     JobEntity toEntity(JobInput jobInput);
 
-    JobDTO toDTO(JobInput jobInput);
 }

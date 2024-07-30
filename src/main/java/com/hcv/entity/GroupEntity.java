@@ -11,11 +11,11 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "group")
 @Getter
 @Setter
 @RequiredArgsConstructor
-@Entity
-@Table(name = "group")
 public class GroupEntity extends BaseEntity {
 
     @OneToOne(mappedBy = "groups")
@@ -26,5 +26,5 @@ public class GroupEntity extends BaseEntity {
 
     @OneToMany(mappedBy = "groups")
     private List<JobEntity> jobs = new ArrayList<>();
-    
+
 }

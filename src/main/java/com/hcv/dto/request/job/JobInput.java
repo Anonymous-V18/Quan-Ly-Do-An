@@ -1,4 +1,4 @@
-package com.hcv.dto.request.Job;
+package com.hcv.dto.request.job;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;

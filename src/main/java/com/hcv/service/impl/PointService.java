@@ -65,8 +65,8 @@ public class PointService implements IPointService {
     }
 
     @Override
-    public PointResponse update(String idOldPoint, PointUpdateInput newPointDTO) {
-        PointEntity oldPointEntity = pointRepository.findOneById(idOldPoint);
+    public PointResponse update(String oldPointId, PointUpdateInput newPointDTO) {
+        PointEntity oldPointEntity = pointRepository.findOneById(oldPointId);
         if (oldPointEntity == null) {
             throw new AppException(ErrorCode.POINT_NOT_EXIST);
         }

@@ -7,7 +7,7 @@ public interface IFeedbackService {
 
     FeedbackDTO insert(FeedbackForResearchInput feedbackForResearchInput);
 
-    FeedbackDTO update(String idOldFeedbackDTO, FeedbackForResearchInput newFeedbackDTOForResearchInput);
+    FeedbackDTO update(String oldFeedbackId, FeedbackForResearchInput newFeedbackDTOForResearchInput);
 
     void delete(String[] ids);
 

@@ -37,13 +37,8 @@ public class SubjectAPI {
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
     public ApiResponse<SubjectDTO> update(@PathVariable(name = "id") String id,
                                           @RequestBody @Valid SubjectInput subjectInput) {
-        SubjectDTO oldSubjectDTO = subjectService.findOneById(id);
-        SubjectDTO updatedDTO;
-        if (oldSubjectDTO == null) {
-            updatedDTO = subjectService.insert(subjectInput);
-        } else {
-            updatedDTO = subjectService.update(oldSubjectDTO, subjectInput);
-        }
+
+        SubjectDTO updatedDTO = subjectService.update(id, subjectInput);
         return ApiResponse.<SubjectDTO>builder()
                 .result(updatedDTO)
                 .build();

@@ -4,6 +4,7 @@ import com.hcv.entity.TeacherEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ITeacherRepository extends JpaRepository<TeacherEntity, String> {
+
     TeacherEntity findOneByMaSo(String maSo);
 
     TeacherEntity findOneById(String id);
@@ -11,4 +12,5 @@ public interface ITeacherRepository extends JpaRepository<TeacherEntity, String>
     boolean existsByMaSo(String maSo);
 
     boolean existsById(String id);
+    
 }

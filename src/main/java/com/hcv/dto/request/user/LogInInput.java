@@ -1,4 +1,4 @@
-package com.hcv.dto.request.User;
+package com.hcv.dto.request.user;
 
 import lombok.Getter;
 

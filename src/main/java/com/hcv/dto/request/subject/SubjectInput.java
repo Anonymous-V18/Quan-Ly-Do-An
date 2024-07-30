@@ -1,4 +1,4 @@
-package com.hcv.dto.request.Subject;
+package com.hcv.dto.request.subject;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

@@ -8,11 +8,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+@Entity
+@Table(name = "feedback")
 @Getter
 @Setter
 @RequiredArgsConstructor
-@Entity
-@Table(name = "feedback")
 public class FeedbackEntity extends BaseEntity {
 
     private String message;

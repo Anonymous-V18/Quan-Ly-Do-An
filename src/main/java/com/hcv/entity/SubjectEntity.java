@@ -8,11 +8,11 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "subject")
 @Getter
 @Setter
 @RequiredArgsConstructor
-@Entity
-@Table(name = "subject")
 public class SubjectEntity extends BaseEntity {
 
     private String name;
