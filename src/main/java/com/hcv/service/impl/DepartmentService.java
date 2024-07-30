@@ -40,10 +40,15 @@ public class DepartmentService implements IDepartmentService {
     }
 
     @Override
-    public DepartmentDTO update(DepartmentDTO newDepartmentDTO, DepartmentDTO oldDepartmentDTO) {
-        oldDepartmentDTO.setName(newDepartmentDTO.getName());
-        DepartmentEntity departmentEntityUpdate = departmentMapper.toEntity(oldDepartmentDTO);
+    public DepartmentDTO update(String idOldDepartmentDTO, DepartmentDTO newDepartmentDTO) {
+        DepartmentEntity departmentEntityUpdate = departmentRepository.findOneById(idOldDepartmentDTO);
+        if (departmentEntityUpdate == null) {
+            throw new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED);
+        }
+        departmentEntityUpdate.setName(newDepartmentDTO.getName());
+
         departmentRepository.save(departmentEntityUpdate);
+
         return departmentMapper.toDTO(departmentEntityUpdate);
     }
 
@@ -52,12 +57,6 @@ public class DepartmentService implements IDepartmentService {
         for (String id : ids) {
             departmentRepository.deleteById(id);
         }
-    }
-
-    @Override
-    public DepartmentDTO findOneById(String id) {
-        DepartmentEntity departmentEntity = departmentRepository.findOneById(id);
-        return departmentMapper.toDTO(departmentEntity);
     }
 
     @Override

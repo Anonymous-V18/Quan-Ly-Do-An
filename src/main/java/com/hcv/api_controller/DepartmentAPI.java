@@ -36,13 +36,7 @@ public class DepartmentAPI {
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
     public ApiResponse<DepartmentDTO> update(@PathVariable(value = "id") String id,
                                              @RequestBody @Valid DepartmentDTO newDepartmentDTO) {
-        DepartmentDTO oldDepartmentDTO = departmentService.findOneById(id);
-        DepartmentDTO updatedDTO;
-        if (oldDepartmentDTO == null) {
-            updatedDTO = departmentService.insert(newDepartmentDTO);
-        } else {
-            updatedDTO = departmentService.update(newDepartmentDTO, oldDepartmentDTO);
-        }
+        DepartmentDTO updatedDTO = departmentService.update(id, newDepartmentDTO);
         return ApiResponse.<DepartmentDTO>builder()
                 .result(updatedDTO)
                 .build();

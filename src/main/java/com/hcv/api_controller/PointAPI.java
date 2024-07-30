@@ -1,7 +1,7 @@
 package com.hcv.api_controller;
 
-import com.hcv.dto.request.Point.PointInsertInput;
-import com.hcv.dto.request.Point.PointUpdateInput;
+import com.hcv.dto.request.point.PointInsertInput;
+import com.hcv.dto.request.point.PointUpdateInput;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.PointResponse;
 import com.hcv.repository.IPointRepository;

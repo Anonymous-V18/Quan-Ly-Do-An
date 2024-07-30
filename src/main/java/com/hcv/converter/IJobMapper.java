@@ -1,7 +1,7 @@
 package com.hcv.converter;
 
 import com.hcv.dto.JobDTO;
-import com.hcv.dto.request.JobInput;
+import com.hcv.dto.request.job.JobInput;
 import com.hcv.entity.JobEntity;
 import org.mapstruct.Mapper;
 

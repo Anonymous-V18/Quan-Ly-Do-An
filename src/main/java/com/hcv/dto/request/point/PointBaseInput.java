@@ -1,4 +1,4 @@
-package com.hcv.dto.request.Point;
+package com.hcv.dto.request.point;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

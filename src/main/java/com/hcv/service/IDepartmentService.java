@@ -10,11 +10,9 @@ public interface IDepartmentService {
 
     DepartmentDTO insert(DepartmentDTO departmentDTO);
 
-    DepartmentDTO update(DepartmentDTO newDepartmentDTO, DepartmentDTO oldDepartmentDTO);
+    DepartmentDTO update(String idOldDepartmentDTO, DepartmentDTO newDepartmentDTO);
 
     void delete(String[] ids);
-
-    DepartmentDTO findOneById(String id);
 
     DepartmentDTO findOneByName(String name);
 

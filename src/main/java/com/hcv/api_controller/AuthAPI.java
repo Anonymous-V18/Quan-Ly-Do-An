@@ -1,6 +1,6 @@
 package com.hcv.api_controller;
 
-import com.hcv.dto.request.LogInInput;
+import com.hcv.dto.request.user.LogInInput;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.IntrospectTokenResponse;
 import com.hcv.dto.response.LoginOutput;

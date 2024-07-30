@@ -1,4 +1,4 @@
-package com.hcv.dto.request;
+package com.hcv.dto.request.Teacher;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;

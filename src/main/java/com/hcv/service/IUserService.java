@@ -2,8 +2,8 @@ package com.hcv.service;
 
 import com.hcv.dto.UserDTO;
 import com.hcv.dto.request.ShowAllRequest;
-import com.hcv.dto.request.UserRequest;
-import com.hcv.dto.request.UserUpdateInput;
+import com.hcv.dto.request.user.UserRequest;
+import com.hcv.dto.request.user.UserUpdateInput;
 import com.hcv.dto.response.ShowAllResponse;
 
 import java.util.List;

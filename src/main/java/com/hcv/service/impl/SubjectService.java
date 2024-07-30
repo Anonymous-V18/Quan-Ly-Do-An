@@ -3,7 +3,7 @@ package com.hcv.service.impl;
 import com.hcv.converter.ISubjectMapper;
 import com.hcv.dto.SubjectDTO;
 import com.hcv.dto.request.ShowAllRequest;
-import com.hcv.dto.request.SubjectInput;
+import com.hcv.dto.request.subject.SubjectInput;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.entity.DepartmentEntity;
 import com.hcv.entity.SubjectEntity;

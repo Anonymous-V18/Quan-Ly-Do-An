@@ -1,7 +1,7 @@
 package com.hcv.api_controller;
 
 import com.hcv.dto.JobDTO;
-import com.hcv.dto.request.JobInput;
+import com.hcv.dto.request.job.JobInput;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.service.IJobService;
 import jakarta.validation.Valid;

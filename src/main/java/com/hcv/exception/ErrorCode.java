@@ -64,6 +64,7 @@ public enum ErrorCode {
     POINT_INVALID(1047, "Point parameter is invalid !", HttpStatus.BAD_REQUEST),
     POINT_NOT_EXIST(1048, "Point isn't exist !", HttpStatus.NOT_FOUND),
     POINT_EXIST(1049, "Point existed !", HttpStatus.CONFLICT),
+    FEEDBACK_NOT_EXISTED(1049, "Feedback isn't exist !", HttpStatus.NOT_FOUND),
     EXPIRATION_TOKEN(9990, "Token expired !", HttpStatus.REQUEST_TIMEOUT),
     UNAUTHORIZED(9991, "User is not permitted !", HttpStatus.UNAUTHORIZED),
     UNAUTHENTICATED(9992, "Unauthenticated error !", HttpStatus.UNAUTHORIZED),

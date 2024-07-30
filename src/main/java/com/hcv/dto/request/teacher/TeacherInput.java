@@ -1,4 +1,4 @@
-package com.hcv.dto.request;
+package com.hcv.dto.request.Teacher;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -7,10 +7,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter
-public class StudentInput {
+public class TeacherInput {
 
     @Setter
-    private String user_id;
+    private String userId;
 
     @NotNull(message = "MASO_INVALID")
     @Size(min = 8, message = "MASO_INVALID")
@@ -20,9 +20,9 @@ public class StudentInput {
     @Size(min = 4, message = "NAME_INVALID")
     private String name;
 
-    @NotNull(message = "MY_CLASS_INVALID")
-    @Size(min = 4, message = "MY_CLASS_INVALID")
-    private String myClass;
+    @NotNull(message = "HOCVI_INVALID")
+    @Size(min = 4, message = "HOCVI_INVALID")
+    private String hocVi;
 
     @NotNull(message = "EMAIL_INVALID")
     @Email(message = "EMAIL_INVALID")
@@ -31,6 +31,10 @@ public class StudentInput {
     @NotNull(message = "PHONE_NUMBER_INVALID")
     @Size(min = 9, message = "PHONE_NUMBER_INVALID")
     private String phoneNumber;
+
+    @NotNull(message = "POSITION_INVALID")
+    @Size(min = 4, message = "POSITION_INVALID")
+    private String chucVu;
 
     private String departmentName;
 

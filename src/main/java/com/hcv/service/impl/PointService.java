@@ -2,8 +2,8 @@ package com.hcv.service.impl;
 
 import com.hcv.constant.PointType;
 import com.hcv.converter.IPointMapper;
-import com.hcv.dto.request.Point.PointInsertInput;
-import com.hcv.dto.request.Point.PointUpdateInput;
+import com.hcv.dto.request.point.PointInsertInput;
+import com.hcv.dto.request.point.PointUpdateInput;
 import com.hcv.dto.response.PointResponse;
 import com.hcv.entity.BaseEntity;
 import com.hcv.entity.PointEntity;

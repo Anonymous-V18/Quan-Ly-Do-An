@@ -1,8 +1,8 @@
 package com.hcv.api_controller;
 
 import com.hcv.dto.GroupDTO;
-import com.hcv.dto.request.GroupInput;
 import com.hcv.dto.request.ShowAllRequest;
+import com.hcv.dto.request.group.GroupInput;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.GroupResponse;
 import com.hcv.dto.response.ShowAllResponse;
@@ -35,13 +35,7 @@ public class GroupAPI {
     @PreAuthorize("hasRole('STUDENT')")
     public ApiResponse<GroupDTO> update(@PathVariable(value = "id") String id,
                                         @RequestBody GroupInput groupInput) {
-        GroupDTO oldGroupDTO = groupService.findOneById(id);
-        GroupDTO updateDTO;
-        if (oldGroupDTO == null) {
-            updateDTO = groupService.insert(groupInput);
-        } else {
-            updateDTO = groupService.update(id, groupInput);
-        }
+        GroupDTO updateDTO = groupService.update(id, groupInput);
         return ApiResponse.<GroupDTO>builder()
                 .result(updateDTO)
                 .build();

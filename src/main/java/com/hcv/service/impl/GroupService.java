@@ -2,8 +2,8 @@ package com.hcv.service.impl;
 
 import com.hcv.converter.IGroupMapper;
 import com.hcv.dto.GroupDTO;
-import com.hcv.dto.request.GroupInput;
 import com.hcv.dto.request.ShowAllRequest;
+import com.hcv.dto.request.group.GroupInput;
 import com.hcv.dto.response.GroupResponse;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.entity.GroupEntity;
@@ -13,6 +13,7 @@ import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IGroupRepository;
 import com.hcv.repository.IStudentRepository;
 import com.hcv.service.IGroupService;
+import com.hcv.service.IUserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -33,29 +34,28 @@ public class GroupService implements IGroupService {
     IGroupRepository groupRepository;
     IGroupMapper mapper;
     IStudentRepository studentRepository;
+    IUserService userService;
 
     @Override
     public GroupDTO insert(GroupInput groupInput) {
-        GroupDTO groupDTO = new GroupDTO();
-
+        String currentUser = userService.getSubToken();
         List<String> studentID = groupInput.getStudentId();
-        List<StudentEntity> studentDTOList = studentRepository.findAllById(studentID);
-        if (studentDTOList.contains(null)) {
+        if (!studentID.contains(currentUser)) {
+            studentID.add(currentUser);
+        }
+
+        List<StudentEntity> studentEntityList = studentRepository.findAllById(studentID);
+        if (studentEntityList.contains(null)) {
             throw new AppException(ErrorCode.STUDENT_NOT_EXIST);
         }
 
-        List<StudentEntity> studentEntityListExistedInOtherGroup = studentDTOList.stream()
-                .filter(studentEntity -> studentEntity.getGroups() == null)
-                .toList();
-        if (studentEntityListExistedInOtherGroup.isEmpty()) {
-            throw new AppException(ErrorCode.STUDENT_EXISTED_IN_OTHER_GROUP);
-        }
+        this.checkStudentExistedInOtherGroup(studentEntityList);
 
-        GroupEntity groupEntity = mapper.toEntity(groupDTO);
+        GroupEntity groupEntity = new GroupEntity();
 
         GroupEntity finalGroupEntity = groupEntity;
-        studentDTOList.forEach(s -> s.setGroups(finalGroupEntity));
-        groupEntity.setStudents(studentDTOList);
+        studentEntityList.forEach(s -> s.setGroups(finalGroupEntity));
+        groupEntity.setStudents(studentEntityList);
 
         groupEntity = groupRepository.save(groupEntity);
 
@@ -63,25 +63,18 @@ public class GroupService implements IGroupService {
     }
 
     @Override
-    public GroupDTO update(String oldGroupID, GroupInput newGroupDTO) {
-
+    public GroupDTO update(String oldGroupID, GroupInput newGroupInput) {
         GroupEntity oldGroupEntity = groupRepository.findOneById(oldGroupID);
         if (oldGroupEntity.getResearches() != null) {
             throw new AppException(ErrorCode.GROUP_NOT_CHANGE_MEMBER);
         }
 
-        List<StudentEntity> studentEntityListExistedInOtherGroup = oldGroupEntity.getStudents().stream()
-                .filter(studentEntity -> studentEntity.getGroups() == null)
-                .toList();
-        if (studentEntityListExistedInOtherGroup.isEmpty()) {
-            throw new AppException(ErrorCode.STUDENT_EXISTED_IN_OTHER_GROUP);
-        }
+        List<StudentEntity> oldStudentEntityList = oldGroupEntity.getStudents();
+        this.checkStudentExistedInOtherGroup(oldStudentEntityList);
+        oldStudentEntityList.forEach(studentEntity -> studentEntity.setGroups(null));
+        studentRepository.saveAll(oldStudentEntityList);
 
-        List<StudentEntity> oldGroupEntityList = oldGroupEntity.getStudents();
-        oldGroupEntityList.forEach(studentEntity -> studentEntity.setGroups(null));
-        studentRepository.saveAll(oldGroupEntityList);
-
-        List<String> newStudentIDList = newGroupDTO.getStudentId();
+        List<String> newStudentIDList = newGroupInput.getStudentId();
         List<StudentEntity> newStudentEntityList = studentRepository.findAllById(newStudentIDList);
         oldGroupEntity.setStudents(newStudentEntityList);
 
@@ -131,5 +124,14 @@ public class GroupService implements IGroupService {
                 .totalPages(totalPages)
                 .responses(resultDTO)
                 .build();
+    }
+
+    private void checkStudentExistedInOtherGroup(List<StudentEntity> studentEntityList) {
+        List<StudentEntity> studentEntityListExistedInOtherGroup = studentEntityList.stream()
+                .filter(studentEntity -> studentEntity.getGroups() != null)
+                .toList();
+        if (!studentEntityListExistedInOtherGroup.isEmpty()) {
+            throw new AppException(ErrorCode.STUDENT_EXISTED_IN_OTHER_GROUP);
+        }
     }
 }

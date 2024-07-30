@@ -1,13 +1,13 @@
 package com.hcv.service;
 
 import com.hcv.dto.FeedbackDTO;
-import com.hcv.dto.request.FeedbackForResearchInput;
+import com.hcv.dto.request.feedback.FeedbackForResearchInput;
 
 public interface IFeedbackService {
 
     FeedbackDTO insert(FeedbackForResearchInput feedbackForResearchInput);
 
-    FeedbackDTO update(FeedbackDTO oldFeedbackDTO, FeedbackForResearchInput newFeedbackDTOForResearchInput);
+    FeedbackDTO update(String idOldFeedbackDTO, FeedbackForResearchInput newFeedbackDTOForResearchInput);
 
     void delete(String[] ids);
 

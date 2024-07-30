@@ -1,4 +1,4 @@
-package com.hcv.dto.request;
+package com.hcv.dto.request.feedback;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -10,11 +10,7 @@ public class FeedbackForResearchInput {
     @NotNull(message = "MESSAGE_PARAM_FEEDBACK_INVALID")
     @Size(min = 2, message = "MESSAGE_PARAM_FEEDBACK_INVALID")
     private String message;
-    @NotNull(message = "SENDTO_PARAM_FEEDBACK_INVALID")
-    @Size(min = 8, message = "SENDTO_PARAM_FEEDBACK_INVALID")
     private String sendTo;
-    @NotNull(message = "SENDFROM_PARAM_FEEDBACK_INVALID")
-    @Size(min = 8, message = "SENDFROM_PARAM_FEEDBACK_INVALID")
     private String sendFrom;
     @NotNull(message = "RESEARCHES_PARAM_FEEDBACK_INVALID")
     @Size(min = 8, message = "RESEARCHES_PARAM_FEEDBACK_INVALID")

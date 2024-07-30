@@ -1,4 +1,4 @@
-package com.hcv.dto.request.Point;
+package com.hcv.dto.request.point;
 
 public class PointUpdateInput extends PointBaseInput {
 }

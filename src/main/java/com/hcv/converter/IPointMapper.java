@@ -1,8 +1,8 @@
 package com.hcv.converter;
 
 import com.hcv.dto.PointDTO;
-import com.hcv.dto.request.Point.PointInsertInput;
-import com.hcv.dto.request.Point.PointUpdateInput;
+import com.hcv.dto.request.point.PointInsertInput;
+import com.hcv.dto.request.point.PointUpdateInput;
 import com.hcv.dto.response.PointResponse;
 import com.hcv.entity.PointEntity;
 import org.mapstruct.Mapper;

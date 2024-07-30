@@ -2,7 +2,7 @@ package com.hcv.api_controller;
 
 import com.hcv.dto.SubjectDTO;
 import com.hcv.dto.request.ShowAllRequest;
-import com.hcv.dto.request.SubjectInput;
+import com.hcv.dto.request.subject.SubjectInput;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.service.ISubjectService;

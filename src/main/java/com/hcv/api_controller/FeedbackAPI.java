@@ -1,7 +1,7 @@
 package com.hcv.api_controller;
 
 import com.hcv.dto.FeedbackDTO;
-import com.hcv.dto.request.FeedbackForResearchInput;
+import com.hcv.dto.request.feedback.FeedbackForResearchInput;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.service.IFeedbackService;
 import lombok.AccessLevel;
@@ -32,13 +32,8 @@ public class FeedbackAPI {
     @PreAuthorize("hasRole('TEACHER')")
     public ApiResponse<FeedbackDTO> update(@PathVariable(value = "id") String id,
                                            @RequestBody FeedbackForResearchInput feedbackForResearchInput) {
-        FeedbackDTO oldFeedbackDTO = feedbackService.findOneById(id);
-        FeedbackDTO updateDTO;
-        if (oldFeedbackDTO == null) {
-            updateDTO = feedbackService.insert(feedbackForResearchInput);
-        } else {
-            updateDTO = feedbackService.update(oldFeedbackDTO, feedbackForResearchInput);
-        }
+
+        FeedbackDTO updateDTO = feedbackService.update(id, feedbackForResearchInput);
         return ApiResponse.<FeedbackDTO>builder()
                 .result(updateDTO)
                 .build();

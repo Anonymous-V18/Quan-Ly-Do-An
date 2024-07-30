@@ -1,4 +1,4 @@
-package com.hcv.dto.request;
+package com.hcv.dto.request.research;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

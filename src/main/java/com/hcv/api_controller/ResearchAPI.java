@@ -1,10 +1,10 @@
 package com.hcv.api_controller;
 
 import com.hcv.dto.ResearchDTO;
-import com.hcv.dto.request.CancelRegistrationResearchInput;
-import com.hcv.dto.request.RegisterResearchInput;
-import com.hcv.dto.request.ResearchInput;
 import com.hcv.dto.request.ShowAllRequest;
+import com.hcv.dto.request.research.CancelRegistrationResearchInput;
+import com.hcv.dto.request.research.RegisterResearchInput;
+import com.hcv.dto.request.research.ResearchInput;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.ResearchResponse;
 import com.hcv.dto.response.ShowAllResponse;
@@ -93,5 +93,5 @@ public class ResearchAPI {
                 .message("Hủy dăng ký đề tài thành công !")
                 .build();
     }
-    
+
 }
