@@ -1,7 +1,6 @@
 package com.hcv.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.hcv.dto.BaseDTO;
 import lombok.Getter;
 import lombok.Setter;
 

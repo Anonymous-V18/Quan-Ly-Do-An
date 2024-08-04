@@ -1,6 +1,5 @@
 package com.hcv.dto.response;
 
-import com.hcv.dto.BaseDTO;
 import lombok.Getter;
 import lombok.Setter;
 

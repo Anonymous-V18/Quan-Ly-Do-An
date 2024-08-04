@@ -1,10 +1,10 @@
 package com.hcv.service;
 
-import com.hcv.dto.StudentDTO;
 import com.hcv.dto.request.ShowAllRequest;
-import com.hcv.dto.request.student.StudentFromExcelInput;
-import com.hcv.dto.request.student.StudentInput;
+import com.hcv.dto.request.StudentFromExcelInput;
+import com.hcv.dto.request.StudentInput;
 import com.hcv.dto.response.ShowAllResponse;
+import com.hcv.dto.response.StudentDTO;
 
 import java.util.List;
 

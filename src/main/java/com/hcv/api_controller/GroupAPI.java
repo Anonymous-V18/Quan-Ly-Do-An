@@ -1,9 +1,9 @@
 package com.hcv.api_controller;
 
-import com.hcv.dto.GroupDTO;
+import com.hcv.dto.request.GroupInput;
 import com.hcv.dto.request.ShowAllRequest;
-import com.hcv.dto.request.group.GroupInput;
 import com.hcv.dto.response.ApiResponse;
+import com.hcv.dto.response.GroupDTO;
 import com.hcv.dto.response.GroupResponse;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.service.IGroupService;
@@ -13,7 +13,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

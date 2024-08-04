@@ -4,9 +4,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,15 +18,16 @@ import java.util.List;
 @Getter
 @Setter
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class GroupEntity extends BaseEntity {
 
     @OneToOne(mappedBy = "groups")
-    private ResearchEntity researches;
+    ResearchEntity researches;
 
     @OneToMany(mappedBy = "groups")
-    private List<StudentEntity> students = new ArrayList<>();
+    List<StudentEntity> students = new ArrayList<>();
 
     @OneToMany(mappedBy = "groups")
-    private List<JobEntity> jobs = new ArrayList<>();
+    List<JobEntity> jobs = new ArrayList<>();
 
 }

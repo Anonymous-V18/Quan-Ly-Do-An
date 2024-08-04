@@ -1,10 +1,10 @@
 package com.hcv.api_controller;
 
-import com.hcv.dto.SubjectDTO;
 import com.hcv.dto.request.ShowAllRequest;
-import com.hcv.dto.request.subject.SubjectInput;
+import com.hcv.dto.request.SubjectInput;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.ShowAllResponse;
+import com.hcv.dto.response.SubjectDTO;
 import com.hcv.service.ISubjectService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

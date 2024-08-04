@@ -2,8 +2,8 @@ package com.hcv.service.impl;
 
 import com.hcv.constant.JobNameConst;
 import com.hcv.converter.IJobMapper;
-import com.hcv.dto.JobDTO;
-import com.hcv.dto.request.job.JobInput;
+import com.hcv.dto.request.JobInput;
+import com.hcv.dto.response.JobDTO;
 import com.hcv.entity.GroupEntity;
 import com.hcv.entity.JobEntity;
 import com.hcv.entity.TeacherEntity;

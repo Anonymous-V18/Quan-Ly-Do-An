@@ -1,11 +1,11 @@
 package com.hcv.service.impl;
 
 import com.hcv.converter.IUserMapper;
-import com.hcv.dto.UserDTO;
 import com.hcv.dto.request.ShowAllRequest;
-import com.hcv.dto.request.user.UserRequest;
-import com.hcv.dto.request.user.UserUpdateInput;
+import com.hcv.dto.request.UserRequest;
+import com.hcv.dto.request.UserUpdateInput;
 import com.hcv.dto.response.ShowAllResponse;
+import com.hcv.dto.response.UserDTO;
 import com.hcv.entity.RoleEntity;
 import com.hcv.entity.UserEntity;
 import com.hcv.exception.AppException;
@@ -85,7 +85,7 @@ public class UserService implements IUserService {
         userEntityOld.setPassword(passwordEncoder.encode(updateUserInput.getPassword()));
         userEntityOld.setIsGraduate(updateUserInput.getIsGraduate());
         userRepository.save(userEntityOld);
-        
+
         return userMapper.toDTO(userEntityOld);
     }
 

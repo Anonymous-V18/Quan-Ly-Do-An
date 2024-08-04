@@ -1,11 +1,11 @@
 package com.hcv.service.impl;
 
 import com.hcv.converter.IStudentMapper;
-import com.hcv.dto.StudentDTO;
 import com.hcv.dto.request.ShowAllRequest;
-import com.hcv.dto.request.student.StudentFromExcelInput;
-import com.hcv.dto.request.student.StudentInput;
+import com.hcv.dto.request.StudentFromExcelInput;
+import com.hcv.dto.request.StudentInput;
 import com.hcv.dto.response.ShowAllResponse;
+import com.hcv.dto.response.StudentDTO;
 import com.hcv.entity.DepartmentEntity;
 import com.hcv.entity.StudentEntity;
 import com.hcv.entity.SubjectEntity;
@@ -160,5 +160,5 @@ public class StudentService implements IStudentService {
         List<StudentEntity> resultEntity = studentRepository.findAll();
         return resultEntity.stream().map(studentMapper::toDTO).toList();
     }
-    
+
 }

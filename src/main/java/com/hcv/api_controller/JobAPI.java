@@ -1,8 +1,8 @@
 package com.hcv.api_controller;
 
-import com.hcv.dto.JobDTO;
-import com.hcv.dto.request.job.JobInput;
+import com.hcv.dto.request.JobInput;
 import com.hcv.dto.response.ApiResponse;
+import com.hcv.dto.response.JobDTO;
 import com.hcv.service.IJobService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

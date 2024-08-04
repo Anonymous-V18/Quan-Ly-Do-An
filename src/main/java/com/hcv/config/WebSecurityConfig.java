@@ -1,6 +1,6 @@
 package com.hcv.config;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,27 +11,27 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
-
-import javax.crypto.spec.SecretKeySpec;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class WebSecurityConfig {
+
+    @Autowired
+    private CustomJwtDecoder customJwtDecoder;
 
     @Value("${com.hcv.jwt.secret-key}")
     private String secretKey;
 
     private final String[] PUBLIC_ENDPOINTS = {
-            "/log-in", "/introspectToken", "/register", "/log-out",
-            "/subjects/**", "/departments/**", "/teachers/**", "/students/**", "/jobs/**", "/users/**",
+            "/log-in", "/introspectToken", "/register", "/log-out", "/refresh",
+            "/auth/**", "/subjects/**", "/departments/**", "/teachers/**", "/students/**", "/jobs/**", "/users/**",
             "/researches/**", "/feedbacks/**", "/groups/**"
     };
 
@@ -50,7 +50,7 @@ public class WebSecurityConfig {
         );
         http.oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwtConfigurer -> jwtConfigurer
-                        .decoder(jwtDecoder())
+                        .decoder(customJwtDecoder)
                         .jwtAuthenticationConverter(jwtAuthenticationConverter())
                 )
                 .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
@@ -72,11 +72,17 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public JwtDecoder jwtDecoder() {
-        SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey.getBytes(), "HS512");
-        return NimbusJwtDecoder
-                .withSecretKey(secretKeySpec)
-                .macAlgorithm(MacAlgorithm.HS512)
-                .build();
+    public CorsFilter corsFilter() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        configuration.addAllowedOrigin("*");
+        configuration.addAllowedMethod("*");
+        configuration.addAllowedHeader("*");
+
+        UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
+        urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", configuration);
+
+        return new CorsFilter(urlBasedCorsConfigurationSource);
     }
+
 }

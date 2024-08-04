@@ -1,9 +1,11 @@
 package com.hcv.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,34 +15,35 @@ import java.util.List;
 @Getter
 @Setter
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class TeacherEntity extends BaseEntity {
 
-    private String maSo;
-    private String name;
-    private String hocVi;
-    private String email;
-    private String phoneNumber;
-    private String chucVu;
+    String maSo;
+    String name;
+    String hocVi;
+    String email;
+    String phoneNumber;
+    String chucVu;
 
     @OneToOne
     @JoinColumn(name = "user_id")
-    private UserEntity users;
+    UserEntity users;
 
     @OneToMany(mappedBy = "teachers")
-    private List<FeedbackEntity> feedbacks = new ArrayList<>();
+    List<FeedbackEntity> feedbacks = new ArrayList<>();
 
     @ManyToMany(mappedBy = "teachers")
-    private List<ResearchEntity> researches = new ArrayList<>();
+    List<ResearchEntity> researches = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "department_id")
-    private DepartmentEntity departments;
+    DepartmentEntity departments;
 
     @ManyToOne
     @JoinColumn(name = "subject_id")
-    private SubjectEntity subjects;
+    SubjectEntity subjects;
 
     @ManyToMany(mappedBy = "teachers")
-    private List<JobEntity> jobs = new ArrayList<>();
+    List<JobEntity> jobs = new ArrayList<>();
 
 }

@@ -1,11 +1,19 @@
 package com.hcv.util;
 
 import com.hcv.entity.UserEntity;
+import com.hcv.exception.AppException;
+import com.hcv.exception.ErrorCode;
+import com.hcv.repository.IInvalidatedTokenRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -19,20 +27,33 @@ import java.util.StringJoiner;
 import java.util.UUID;
 
 @Component
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class JwtUtil {
 
+    IInvalidatedTokenRepository invalidatedTokenRepository;
+
+    @NonFinal
     @Value("${com.hcv.jwt.secret-key}")
-    private String secretKey;
+    String secretKey;
+
+    @NonFinal
+    @Value("${com.hcv.jwt.valid-duration}")
+    long validDuration;
+
+    @NonFinal
+    @Value("${com.hcv.jwt.refreshable-duration}")
+    long refreshableDuration;
 
     public String generateToken(UserEntity userEntity) {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 
-        // Gửi id
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(getTeacherOrStudentID(userEntity))
-                .issuer("qlda-hcv.com")
+                .issuer("qlklks-hcv.com")
                 .issueTime(new Date())
-                .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
+                .expirationTime(new Date(Instant.now().plus(validDuration, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(userEntity))
                 .claim("username", userEntity.getUsername())
@@ -54,7 +75,7 @@ public class JwtUtil {
         List<String> roleName = userEntity.getRoles().stream()
                 .map(roleEntity -> roleEntity.getCode().name())
                 .toList();
-        String id = "";
+        String id;
         if (roleName.contains("STUDENT")) {
             id = userEntity.getStudents().getId();
         } else {
@@ -73,19 +94,30 @@ public class JwtUtil {
         return stringJoiner.toString();
     }
 
-    public boolean introspectToken(String token) throws ParseException, JOSEException {
+    public SignedJWT verifyToken(String token, boolean isRefresh) throws ParseException, JOSEException {
         SignedJWT signedJWT = SignedJWT.parse(token);
-        return isTokenValid(signedJWT) && !isTokenExpired(signedJWT);
-    }
 
-    public boolean isTokenValid(SignedJWT signedJWT) throws JOSEException {
         JWSVerifier jwsVerifier = new MACVerifier(secretKey.getBytes());
-        return signedJWT.verify(jwsVerifier);
+        boolean isTokenValid = signedJWT.verify(jwsVerifier);
+
+        Date expirationTimeToken = isRefresh
+                ? new Date(
+                signedJWT.getJWTClaimsSet().getIssueTime().toInstant()
+                        .plus(refreshableDuration, ChronoUnit.SECONDS).toEpochMilli())
+                : signedJWT.getJWTClaimsSet().getExpirationTime();
+        boolean isTokenExpired = expirationTimeToken.before(new Date());
+
+        if (!(isTokenValid && !isTokenExpired)) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        boolean isTokenExistedInBlackList = invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID());
+        if (isTokenExistedInBlackList) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        return signedJWT;
     }
 
-    public boolean isTokenExpired(SignedJWT signedJWT) throws ParseException {
-        Date expirationTimeToken = signedJWT.getJWTClaimsSet().getExpirationTime();
-        return expirationTimeToken.before(new Date());
-    }
 
 }

@@ -1,10 +1,9 @@
 package com.hcv.api_controller;
 
-import com.hcv.dto.request.point.PointInsertInput;
-import com.hcv.dto.request.point.PointUpdateInput;
+import com.hcv.dto.request.PointInsertInput;
+import com.hcv.dto.request.PointUpdateInput;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.PointResponse;
-import com.hcv.repository.IPointRepository;
 import com.hcv.service.IPointService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +11,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

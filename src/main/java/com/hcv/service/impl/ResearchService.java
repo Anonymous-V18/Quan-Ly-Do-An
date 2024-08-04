@@ -1,13 +1,11 @@
 package com.hcv.service.impl;
 
 import com.hcv.converter.IResearchMapper;
-import com.hcv.dto.ResearchDTO;
-import com.hcv.dto.SubjectDTO;
-import com.hcv.dto.TeacherDTO;
+import com.hcv.dto.request.ResearchCancelRegistrationInput;
+import com.hcv.dto.request.ResearchInput;
+import com.hcv.dto.request.ResearchRegisterInput;
 import com.hcv.dto.request.ShowAllRequest;
-import com.hcv.dto.request.research.CancelRegistrationResearchInput;
-import com.hcv.dto.request.research.RegisterResearchInput;
-import com.hcv.dto.request.research.ResearchInput;
+import com.hcv.dto.response.ResearchDTO;
 import com.hcv.dto.response.ResearchResponse;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.entity.ResearchEntity;
@@ -21,8 +19,6 @@ import com.hcv.repository.IStudentRepository;
 import com.hcv.repository.ISubjectRepository;
 import com.hcv.repository.ITeacherRepository;
 import com.hcv.service.IResearchService;
-import com.hcv.service.ISubjectService;
-import com.hcv.service.ITeacherService;
 import com.hcv.service.IUserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -150,16 +146,16 @@ public class ResearchService implements IResearchService {
     }
 
     @Override
-    public void registerResearch(RegisterResearchInput registerResearchInput) {
-        registerResearchInput.setStudentID(userService.getSubToken());
+    public void registerResearch(ResearchRegisterInput researchRegisterInput) {
+        researchRegisterInput.setStudentID(userService.getSubToken());
 
-        String researchID = registerResearchInput.getResearchID();
+        String researchID = researchRegisterInput.getResearchID();
         ResearchEntity researchEntity = researchRepository.findOneById(researchID);
         if (researchEntity == null) {
             throw new AppException(ErrorCode.RESEARCH_NOT_EXISTED);
         }
 
-        String studentID = registerResearchInput.getStudentID();
+        String studentID = researchRegisterInput.getStudentID();
         StudentEntity studentEntity = studentRepository.findOneById(studentID);
         if (studentEntity == null) {
             throw new AppException(ErrorCode.STUDENT_NOT_EXIST);
@@ -169,8 +165,8 @@ public class ResearchService implements IResearchService {
     }
 
     @Override
-    public void cancelRegistrationResearch(CancelRegistrationResearchInput cancelRegistrationResearchInput) {
-        String researchID = cancelRegistrationResearchInput.getResearchID();
+    public void cancelRegistrationResearch(ResearchCancelRegistrationInput researchCancelRegistrationInput) {
+        String researchID = researchCancelRegistrationInput.getResearchID();
         ResearchEntity researchEntity = researchRepository.findOneById(researchID);
         if (researchEntity == null) {
             throw new AppException(ErrorCode.RESEARCH_NOT_EXISTED);

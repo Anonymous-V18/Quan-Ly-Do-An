@@ -1,8 +1,8 @@
 package com.hcv.service.impl;
 
 import com.hcv.converter.IFeedbackMapper;
-import com.hcv.dto.FeedbackDTO;
-import com.hcv.dto.request.feedback.FeedbackForResearchInput;
+import com.hcv.dto.request.FeedbackForResearchInput;
+import com.hcv.dto.response.FeedbackDTO;
 import com.hcv.entity.FeedbackEntity;
 import com.hcv.entity.ResearchEntity;
 import com.hcv.exception.AppException;
@@ -71,7 +71,7 @@ public class FeedbackService implements IFeedbackService {
         if (researchEntity == null) {
             throw new AppException(ErrorCode.RESEARCH_NOT_EXISTED);
         }
-        
+
         feedbackRepository.save(feedbackEntity);
 
         return feedbackMapper.toDTO(feedbackEntity);

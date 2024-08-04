@@ -1,7 +1,7 @@
 package com.hcv.service;
 
-import com.hcv.dto.FeedbackDTO;
-import com.hcv.dto.request.feedback.FeedbackForResearchInput;
+import com.hcv.dto.request.FeedbackForResearchInput;
+import com.hcv.dto.response.FeedbackDTO;
 
 public interface IFeedbackService {
 

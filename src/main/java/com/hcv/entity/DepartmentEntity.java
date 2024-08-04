@@ -3,9 +3,11 @@ package com.hcv.entity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,17 +17,18 @@ import java.util.List;
 @Getter
 @Setter
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class DepartmentEntity extends BaseEntity {
 
-    private String name;
+    String name;
 
     @OneToMany(mappedBy = "departments")
-    private List<SubjectEntity> subjects = new ArrayList<>();
+    List<SubjectEntity> subjects = new ArrayList<>();
 
     @OneToMany(mappedBy = "departments")
-    private List<TeacherEntity> teachers = new ArrayList<>();
+    List<TeacherEntity> teachers = new ArrayList<>();
 
     @OneToMany(mappedBy = "departments")
-    private List<StudentEntity> students = new ArrayList<>();
+    List<StudentEntity> students = new ArrayList<>();
 
 }

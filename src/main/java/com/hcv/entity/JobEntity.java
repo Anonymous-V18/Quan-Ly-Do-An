@@ -1,9 +1,11 @@
 package com.hcv.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.ArrayList;
@@ -15,26 +17,27 @@ import java.util.List;
 @Getter
 @Setter
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class JobEntity extends BaseEntity {
 
     @Temporal(TemporalType.DATE)
     @DateTimeFormat(pattern = "dd/MM/yyyy")
-    private Date from;
-    private Date due;
-    private String sendTo;
-    private String sendFrom;
-    private String name;
-    private String details;
-    private Integer isCompleted;
+    Date from;
+    Date due;
+    String sendTo;
+    String sendFrom;
+    String name;
+    String details;
+    Integer isCompleted;
 
     @ManyToMany
     @JoinTable(name = "job_teacher"
             , joinColumns = @JoinColumn(name = "job_id")
             , inverseJoinColumns = @JoinColumn(name = "teacher_id"))
-    private List<TeacherEntity> teachers = new ArrayList<>();
+    List<TeacherEntity> teachers = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "group_id")
-    private GroupEntity groups;
+    GroupEntity groups;
 
 }

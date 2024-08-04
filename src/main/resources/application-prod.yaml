@@ -1,0 +1,7 @@
+#file: noinspection undefined
+com:
+  hcv:
+    jwt:
+      secret-key: ${JWT_SECRETKEY}
+      valid-duration: 3600 # in seconds
+      refreshable-duration: 86400 # in seconds

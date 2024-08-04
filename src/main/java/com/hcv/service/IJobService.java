@@ -1,7 +1,7 @@
 package com.hcv.service;
 
-import com.hcv.dto.JobDTO;
-import com.hcv.dto.request.job.JobInput;
+import com.hcv.dto.request.JobInput;
+import com.hcv.dto.response.JobDTO;
 
 import java.util.List;
 

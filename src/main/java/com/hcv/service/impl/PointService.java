@@ -1,9 +1,9 @@
 package com.hcv.service.impl;
 
-import com.hcv.constant.PointType;
+import com.hcv.constant.PointTypeConst;
 import com.hcv.converter.IPointMapper;
-import com.hcv.dto.request.point.PointInsertInput;
-import com.hcv.dto.request.point.PointUpdateInput;
+import com.hcv.dto.request.PointInsertInput;
+import com.hcv.dto.request.PointUpdateInput;
 import com.hcv.dto.response.PointResponse;
 import com.hcv.entity.BaseEntity;
 import com.hcv.entity.PointEntity;
@@ -89,7 +89,7 @@ public class PointService implements IPointService {
 
     @Override
     public void checkTypePoint(String typePoint) {
-        List<String> listOfTypePoint = List.of(PointType.POINT_INSTRUCTORS, PointType.POINT_THESIS_ADVISOR, PointType.POINT_COUNCIL);
+        List<String> listOfTypePoint = List.of(PointTypeConst.POINT_INSTRUCTORS, PointTypeConst.POINT_THESIS_ADVISOR, PointTypeConst.POINT_COUNCIL);
         boolean isTypePointValid = listOfTypePoint.contains(typePoint);
         if (!isTypePointValid) {
             throw new AppException(ErrorCode.POINT_TYPE_INVALID);
@@ -109,9 +109,9 @@ public class PointService implements IPointService {
 
         boolean isValid = false;
         switch (typePoint) {
-            case PointType.POINT_INSTRUCTORS -> isValid = instructorsId.equals(teacherId);
-            case PointType.POINT_THESIS_ADVISOR -> isValid = thesisAdvisorsId.equals(teacherId);
-            case PointType.POINT_COUNCIL -> {
+            case PointTypeConst.POINT_INSTRUCTORS -> isValid = instructorsId.equals(teacherId);
+            case PointTypeConst.POINT_THESIS_ADVISOR -> isValid = thesisAdvisorsId.equals(teacherId);
+            case PointTypeConst.POINT_COUNCIL -> {
                 List<String> councilIdList = researchEntity.getTeachers().stream()
                         .filter(teacherEntity -> teacherEntity.getId().equals(instructorsId)
                                 || teacherEntity.getId().equals(thesisAdvisorsId)

@@ -3,6 +3,7 @@ package com.hcv.exception;
 import com.hcv.dto.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -28,8 +29,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(errorCode.getHttpStatusCode())
                 .body(ApiResponse.<ErrorCode>builder()
-                        .code(ErrorCode.UNAUTHORIZED.getCode())
-                        .message(ErrorCode.UNAUTHORIZED.getMessage())
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build()
+                );
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ApiResponse<ErrorCode>> accessDeniedExceptionHandler(JwtException e) {
+        ErrorCode errorCode = ErrorCode.EXPIRATION_TOKEN;
+        return ResponseEntity
+                .status(errorCode.getHttpStatusCode())
+                .body(ApiResponse.<ErrorCode>builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
                         .build()
                 );
     }
@@ -57,7 +70,7 @@ public class GlobalExceptionHandler {
         } catch (IllegalArgumentException ignored) {
 
         }
-        
+
         return ResponseEntity
                 .status(errorCode.getHttpStatusCode())
                 .body(ApiResponse.<ErrorCode>builder()

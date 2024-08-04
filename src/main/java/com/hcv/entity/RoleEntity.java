@@ -2,9 +2,11 @@ package com.hcv.entity;
 
 import com.hcv.dto.CodeRole;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,15 +16,16 @@ import java.util.List;
 @Getter
 @Setter
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoleEntity extends BaseEntity {
 
-    private String name;
+    String name;
 
     @Enumerated(EnumType.STRING)
-    private CodeRole code;
+    CodeRole code;
 
     @ManyToMany(mappedBy = "roles")
-    private List<UserEntity> users = new ArrayList<>();
+    List<UserEntity> users = new ArrayList<>();
 
 }
 

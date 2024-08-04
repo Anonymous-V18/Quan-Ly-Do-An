@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatusCode;
 
 @Getter
 public enum ErrorCode {
+    
     INVALID_KEY(1000, "Invalid key in message validation !", HttpStatus.BAD_REQUEST),
     INVALID_USERNAME(1001, "Username must be at least 8 characters !", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1002, "Password must be at least 8 characters !", HttpStatus.BAD_REQUEST),

@@ -1,8 +1,5 @@
 package com.hcv.dto.response;
 
-import com.hcv.dto.BaseDTO;
-import com.hcv.dto.SubjectDTO;
-import com.hcv.dto.UserDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,5 +16,4 @@ public class StudentResponse extends BaseDTO {
     private String phoneNumber;
     private SubjectDTO subjects;
     private List<PointResponse> points = new ArrayList<>();
-    private UserDTO users;
 }
