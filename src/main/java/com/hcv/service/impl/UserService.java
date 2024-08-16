@@ -44,8 +44,8 @@ public class UserService implements IUserService {
 
     @Override
     public UserDTO create(UserRequest userRequest) {
-        UserDTO checkUserNameExist = this.findOneByUsername(userRequest.getUsername());
-        if (checkUserNameExist != null) {
+        boolean isUserExisted = userRepository.existsByUsername(userRequest.getUsername());
+        if (isUserExisted) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
         UserEntity userEntity = userMapper.toEntity(userRequest, passwordEncoder);
