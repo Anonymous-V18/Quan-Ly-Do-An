@@ -31,10 +31,8 @@ public class AuthService implements IAuthService {
 
     @Override
     public String authentication(String username, String password) {
-        UserEntity userEntity = userRepository.findOneByUsername(username);
-        if (userEntity == null) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
-        }
+        UserEntity userEntity = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         boolean isPasswordValid = passwordEncoder.matches(password, userEntity.getPassword());
@@ -74,13 +72,13 @@ public class AuthService implements IAuthService {
         invalidatedTokenService.insert(signedToken);
 
         String username = signedToken.getJWTClaimsSet().getStringClaim("username");
-        UserEntity userEntity = userRepository.findOneByUsername(username);
-        if (userEntity == null) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
-        }
+        UserEntity userEntity = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
         String accessToken = jwtUtil.generateToken(userEntity);
 
-        return new RefreshOutput(accessToken);
+        return RefreshOutput.builder()
+                .accessToken(accessToken)
+                .build();
     }
 }

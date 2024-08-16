@@ -1,15 +1,22 @@
 package com.hcv.dto.response;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
-public class PointDTO extends BaseDTO {
 
-    private Double point;
-    private String type;
-    private String teacherId;
-    private StudentDTO students;
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class PointDTO {
+
+    String id;
+    Double point;
+    String type;
+    String teacherId;
+    StudentDTO students;
 
 }

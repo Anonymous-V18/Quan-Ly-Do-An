@@ -57,6 +57,7 @@ public class JwtUtil {
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(userEntity))
                 .claim("username", userEntity.getUsername())
+                .claim("expirationTime-Refresh", new Date(Instant.now().plus(refreshableDuration, ChronoUnit.SECONDS).toEpochMilli()))
                 .build();
 
         Payload payload = jwtClaimsSet.toPayload();
@@ -100,15 +101,17 @@ public class JwtUtil {
         JWSVerifier jwsVerifier = new MACVerifier(secretKey.getBytes());
         boolean isTokenValid = signedJWT.verify(jwsVerifier);
 
+        if (!isTokenValid) {
+            throw new AppException(ErrorCode.TOKEN_INVALID);
+        }
+
         Date expirationTimeToken = isRefresh
-                ? new Date(
-                signedJWT.getJWTClaimsSet().getIssueTime().toInstant()
-                        .plus(refreshableDuration, ChronoUnit.SECONDS).toEpochMilli())
+                ? new Date(Instant.now().plus(validDuration, ChronoUnit.SECONDS).toEpochMilli())
                 : signedJWT.getJWTClaimsSet().getExpirationTime();
         boolean isTokenExpired = expirationTimeToken.before(new Date());
 
-        if (!(isTokenValid && !isTokenExpired)) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        if (isTokenExpired) {
+            throw new AppException(ErrorCode.EXPIRATION_TOKEN);
         }
 
         boolean isTokenExistedInBlackList = invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID());

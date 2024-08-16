@@ -4,15 +4,16 @@ import com.hcv.entity.StudentEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IStudentRepository extends JpaRepository<StudentEntity, String> {
 
-    StudentEntity findOneByMaSo(String maSo);
+    Optional<StudentEntity> findByCode(String code);
 
-    StudentEntity findOneById(String id);
-
-    boolean existsByMaSo(String maSo);
+    boolean existsByCode(String code);
 
     List<StudentEntity> findByGroups_IdIn(List<String> ids);
+
+    List<StudentEntity> findByUsers_IsGraduate(Integer isGraduate);
 
 }

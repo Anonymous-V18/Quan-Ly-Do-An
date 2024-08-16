@@ -7,6 +7,4 @@ public interface IPointRepository extends JpaRepository<PointEntity, String> {
 
     boolean existsById(String id);
 
-    PointEntity findOneById(String id);
-    
 }

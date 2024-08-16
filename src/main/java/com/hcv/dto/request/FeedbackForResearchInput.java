@@ -2,18 +2,19 @@ package com.hcv.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
-@Getter
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class FeedbackForResearchInput {
 
     @NotNull(message = "MESSAGE_PARAM_FEEDBACK_INVALID")
     @Size(min = 2, message = "MESSAGE_PARAM_FEEDBACK_INVALID")
-    private String message;
-    private String sendTo;
-    private String sendFrom;
-    @NotNull(message = "RESEARCHES_PARAM_FEEDBACK_INVALID")
-    @Size(min = 8, message = "RESEARCHES_PARAM_FEEDBACK_INVALID")
-    private String researchID;
+    String message;
+    @NotNull(message = "RESEARCHES_PARAM_INVALID")
+    @Size(min = 8, message = "RESEARCHES_PARAM_INVALID")
+    String researchID;
 
 }

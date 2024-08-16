@@ -1,15 +1,20 @@
 package com.hcv.dto.response;
 
-import lombok.Builder;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
 
-@Getter
+@Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ShowAllResponse<T> {
-    private int page;
-    private int totalPages;
-    private List<T> responses;
+    int page;
+    int totalPages;
+    List<T> responses;
 }

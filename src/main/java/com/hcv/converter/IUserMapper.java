@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Mapper
 public interface IUserMapper {
-
+    
     UserDTO toDTO(UserEntity userEntity);
 
     @Mapping(target = "password", ignore = true)

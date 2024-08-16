@@ -28,7 +28,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PointService implements IPointService {
 
-    IUserService currentUser;
+    IUserService userService;
     IStudentRepository studentRepository;
     IPointRepository pointRepository;
     IPointMapper pointMapper;
@@ -36,21 +36,19 @@ public class PointService implements IPointService {
     @Override
     public PointResponse insert(PointInsertInput pointInsertInput) {
         this.checkTypePoint(pointInsertInput.getType());
-        this.checkPointTeacherValid(currentUser.getSubToken()
-                , pointInsertInput.getStudentId(),
-                pointInsertInput.getType());
-
+        this.checkPointTeacherValid(userService.getClaimsToken().get("sub").toString()
+                , pointInsertInput.getStudentId()
+                , pointInsertInput.getType());
 
         PointEntity pointEntity = pointMapper.toEntity(pointInsertInput);
 
-        String teacherId = currentUser.getSubToken();
+        String teacherId = userService.getClaimsToken().get("sub").toString();
         pointEntity.setTeacherId(teacherId);
 
         String studentId = pointInsertInput.getStudentId();
-        StudentEntity studentEntity = studentRepository.findOneById(studentId);
-        if (studentEntity == null) {
-            throw new AppException(ErrorCode.STUDENT_NOT_EXIST);
-        }
+        StudentEntity studentEntity = studentRepository.findById(studentId)
+                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
+
         List<PointEntity> pointEntityListOfStudent = studentEntity.getPoints();
         pointEntityListOfStudent.forEach(pointEntity1 -> {
             if (pointEntity1.getTeacherId().equals(teacherId)) {
@@ -66,13 +64,11 @@ public class PointService implements IPointService {
 
     @Override
     public PointResponse update(String oldPointId, PointUpdateInput newPointDTO) {
-        PointEntity oldPointEntity = pointRepository.findOneById(oldPointId);
-        if (oldPointEntity == null) {
-            throw new AppException(ErrorCode.POINT_NOT_EXIST);
-        }
+        PointEntity oldPointEntity = pointRepository.findById(oldPointId)
+                .orElseThrow(() -> new AppException(ErrorCode.POINT_NOT_EXIST));
 
-        this.checkPointTeacherValid(currentUser.getSubToken()
-                , oldPointEntity.getStudents().getId(),
+        this.checkPointTeacherValid(userService.getClaimsToken().get("sub").toString(),
+                oldPointEntity.getStudents().getId(),
                 oldPointEntity.getType());
 
         oldPointEntity.setPoint(newPointDTO.getPoint());
@@ -98,22 +94,21 @@ public class PointService implements IPointService {
 
     @Override
     public void checkPointTeacherValid(String teacherId, String studentId, String typePoint) {
-        StudentEntity studentEntity = studentRepository.findOneById(studentId);
-        if (studentEntity == null) {
-            throw new AppException(ErrorCode.STUDENT_NOT_EXIST);
-        }
+        StudentEntity studentEntity = studentRepository.findById(studentId)
+                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
+        
         ResearchEntity researchEntity = studentEntity.getGroups().getResearches();
 
-        String instructorsId = researchEntity.getGvhd();
-        String thesisAdvisorsId = researchEntity.getGvpb();
+        List<String> instructorsIds = researchEntity.getInstructorsIds();
+        String thesisAdvisorsId = researchEntity.getThesisAdvisorId();
 
         boolean isValid = false;
         switch (typePoint) {
-            case PointTypeConst.POINT_INSTRUCTORS -> isValid = instructorsId.equals(teacherId);
+            case PointTypeConst.POINT_INSTRUCTORS -> isValid = instructorsIds.contains(teacherId);
             case PointTypeConst.POINT_THESIS_ADVISOR -> isValid = thesisAdvisorsId.equals(teacherId);
             case PointTypeConst.POINT_COUNCIL -> {
                 List<String> councilIdList = researchEntity.getTeachers().stream()
-                        .filter(teacherEntity -> teacherEntity.getId().equals(instructorsId)
+                        .filter(teacherEntity -> instructorsIds.contains(teacherEntity.getId())
                                 || teacherEntity.getId().equals(thesisAdvisorsId)
                         )
                         .map(BaseEntity::getId)

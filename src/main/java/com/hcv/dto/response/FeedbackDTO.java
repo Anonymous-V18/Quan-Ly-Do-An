@@ -1,20 +1,24 @@
 package com.hcv.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class FeedbackDTO extends BaseDTO {
+public class FeedbackDTO {
 
-    private String message;
-    private String sendTo;
-    private String sendFrom;
+    String id;
+    String message;
+    String sendTo;
+    String sendFrom;
 
-    private TeacherDTO teachers;
-    private StudentDTO students;
-    private ResearchDTO researches;
+    TeacherDTO teachers;
+    StudentDTO students;
+    ResearchDTO researches;
 
 }

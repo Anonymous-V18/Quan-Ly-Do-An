@@ -5,5 +5,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface IFeedbackRepository extends JpaRepository<FeedbackEntity, String> {
 
-    FeedbackEntity findOneById(String id);
 }

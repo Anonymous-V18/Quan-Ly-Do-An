@@ -4,7 +4,6 @@ import com.hcv.dto.request.LogInInput;
 import com.hcv.dto.request.LogoutInput;
 import com.hcv.dto.request.RefreshInput;
 import com.hcv.dto.response.ApiResponse;
-import com.hcv.dto.response.IntrospectTokenResponse;
 import com.hcv.dto.response.LoginOutput;
 import com.hcv.dto.response.RefreshOutput;
 import com.hcv.service.IAuthService;
@@ -13,7 +12,10 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
 
@@ -21,16 +23,17 @@ import java.text.ParseException;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/auth")
-public class AuthAPI {
+public class AuthController {
 
     IAuthService authService;
 
     @PostMapping("/log-in")
     public ApiResponse<LoginOutput> createAuthenticationToken(@RequestBody @Valid LogInInput request) {
         String accessToken = authService.authentication(request.getUsername(), request.getPassword());
-        LoginOutput response = new LoginOutput(accessToken);
         return ApiResponse.<LoginOutput>builder()
-                .result(response)
+                .result(LoginOutput.builder()
+                        .accessToken(accessToken)
+                        .build())
                 .build();
     }
 
@@ -46,15 +49,6 @@ public class AuthAPI {
     public ApiResponse<RefreshOutput> refresh(@RequestBody RefreshInput request) throws ParseException, JOSEException {
         RefreshOutput response = authService.refreshToken(request.getToken());
         return ApiResponse.<RefreshOutput>builder()
-                .result(response)
-                .build();
-    }
-
-    @PostMapping("/introspectToken")
-    public ApiResponse<IntrospectTokenResponse> authentication(@RequestParam("Token") String token) throws ParseException, JOSEException {
-        boolean isAuthenticated = authService.introspectToken(token);
-        IntrospectTokenResponse response = new IntrospectTokenResponse(isAuthenticated);
-        return ApiResponse.<IntrospectTokenResponse>builder()
                 .result(response)
                 .build();
     }

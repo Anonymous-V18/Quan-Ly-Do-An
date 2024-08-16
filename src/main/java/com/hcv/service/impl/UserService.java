@@ -24,9 +24,12 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -47,22 +50,20 @@ public class UserService implements IUserService {
         }
         UserEntity userEntity = userMapper.toEntity(userRequest, passwordEncoder);
         List<RoleEntity> listRolesEntity = userRequest.getNameRoles().stream()
-                .map(roleRepository::findOneByName)
+                .map(roleName -> roleRepository.findByName(roleName)
+                        .orElseThrow(() -> new AppException(ErrorCode.INVALID_NAME_ROLE)))
                 .toList();
-        if (listRolesEntity.contains(null)) {
-            throw new AppException(ErrorCode.INVALID_NAME_ROLE);
-        }
+
         userEntity.setRoles(listRolesEntity);
-        userRepository.save(userEntity);
+        userEntity = userRepository.save(userEntity);
         return userMapper.toDTO(userEntity);
     }
 
     @Override
-    public UserDTO update(String oldUserId, UserUpdateInput updateUserInput) {
-        UserEntity userEntity = userRepository.findOneById(oldUserId);
-        if (userEntity == null) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
-        }
+    public UserDTO update(String oldUsername, UserUpdateInput updateUserInput) {
+        UserEntity userEntity = userRepository.findByUsername(oldUsername)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
         String newPassword = passwordEncoder.encode(updateUserInput.getPassword());
         userEntity.setPassword(newPassword);
         userRepository.save(userEntity);
@@ -72,15 +73,13 @@ public class UserService implements IUserService {
     @Override
     public UserDTO updateForAdmin(UserRequest updateUserInput) {
         List<RoleEntity> listRolesEntity = updateUserInput.getNameRoles().stream()
-                .map(roleRepository::findOneByName)
+                .map(roleName -> roleRepository.findByName(roleName)
+                        .orElseThrow(() -> new AppException(ErrorCode.INVALID_NAME_ROLE)))
                 .toList();
-        if (listRolesEntity.getFirst() == null) {
-            throw new AppException(ErrorCode.INVALID_NAME_ROLE);
-        }
-        UserEntity userEntityOld = userRepository.findOneByUsername(updateUserInput.getUsername());
-        if (userEntityOld == null) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
-        }
+
+        UserEntity userEntityOld = userRepository.findByUsername(updateUserInput.getUsername())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
         userEntityOld.setRoles(listRolesEntity);
         userEntityOld.setPassword(passwordEncoder.encode(updateUserInput.getPassword()));
         userEntityOld.setIsGraduate(updateUserInput.getIsGraduate());
@@ -98,21 +97,19 @@ public class UserService implements IUserService {
 
     @Override
     public UserDTO findOneByUsername(String username) {
-        UserEntity userEntity = userRepository.findOneByUsername(username);
-        if (userEntity == null) {
-            return null;
-        }
+        UserEntity userEntity = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return userMapper.toDTO(userEntity);
     }
 
     @Override
-    public String getSubToken() {
+    public Map<String, Object> getClaimsToken() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserName = " ";
+        Map<String, Object> currentClaimsToken = new HashMap<>();
         if (!(authentication instanceof AnonymousAuthenticationToken)) {
-            currentUserName = authentication.getName();
+            currentClaimsToken = ((JwtAuthenticationToken) authentication).getToken().getClaims();
         }
-        return currentUserName;
+        return currentClaimsToken;
     }
 
     @Override

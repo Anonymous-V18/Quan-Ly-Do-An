@@ -5,6 +5,7 @@ import com.hcv.dto.request.ShowAllRequest;
 import com.hcv.dto.request.SubjectInput;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.dto.response.SubjectDTO;
+import com.hcv.dto.response.SubjectResponse;
 import com.hcv.entity.DepartmentEntity;
 import com.hcv.entity.SubjectEntity;
 import com.hcv.exception.AppException;
@@ -34,33 +35,30 @@ public class SubjectService implements ISubjectService {
 
     @Override
     public SubjectDTO insert(SubjectInput subjectInput) {
-        SubjectEntity subjectEntity = subjectRepository.findOneByName(subjectInput.getName());
-        if (subjectEntity != null) {
-            throw new AppException(ErrorCode.SUBJECT_EXISTED);
-        }
-        subjectEntity = subjectMapper.toEntity(subjectInput);
-        DepartmentEntity departmentEntity = departmentRepository.findOneByName(subjectInput.getNameDepartment());
-        if (departmentEntity == null) {
-            throw new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED);
-        }
+        subjectRepository.findByName(subjectInput.getName())
+                .ifPresent(item -> {
+                    throw new AppException(ErrorCode.SUBJECT_EXISTED);
+                });
+
+        SubjectEntity subjectEntity = subjectMapper.toEntity(subjectInput);
+        DepartmentEntity departmentEntity = departmentRepository.findByName(subjectInput.getNameDepartment())
+                .orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED));
+
         subjectEntity.setDepartments(departmentEntity);
-        subjectRepository.save(subjectEntity);
+        subjectEntity = subjectRepository.save(subjectEntity);
         return subjectMapper.toDTO(subjectEntity);
     }
 
     @Override
     public SubjectDTO update(String oldSubjectId, SubjectInput subjectInput) {
-        SubjectEntity subjectEntity = subjectRepository.findOneById(oldSubjectId);
-        if (subjectEntity == null) {
-            throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
-        }
+        SubjectEntity subjectEntity = subjectRepository.findById(oldSubjectId)
+                .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
 
         subjectEntity.setName(subjectInput.getName());
 
-        DepartmentEntity departmentEntity = departmentRepository.findOneByName(subjectInput.getNameDepartment());
-        if (departmentEntity == null) {
-            throw new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED);
-        }
+        DepartmentEntity departmentEntity = departmentRepository.findByName(subjectInput.getNameDepartment())
+                .orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED));
+
         subjectEntity.setDepartments(departmentEntity);
 
         subjectRepository.save(subjectEntity);
@@ -77,14 +75,16 @@ public class SubjectService implements ISubjectService {
 
     @Override
     public SubjectDTO findOneById(String id) {
-        SubjectEntity subjectEntity = subjectRepository.findOneById(id);
-        return subjectEntity == null ? null : subjectMapper.toDTO(subjectEntity);
+        SubjectEntity subjectEntity = subjectRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
+        return subjectMapper.toDTO(subjectEntity);
     }
 
     @Override
     public SubjectDTO findOneByName(String name) {
-        SubjectEntity subjectEntity = subjectRepository.findOneByName(name);
-        return subjectEntity == null ? null : subjectMapper.toDTO(subjectEntity);
+        SubjectEntity subjectEntity = subjectRepository.findByName(name)
+                .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
+        return subjectMapper.toDTO(subjectEntity);
     }
 
     @Override
@@ -118,5 +118,10 @@ public class SubjectService implements ISubjectService {
     public List<SubjectDTO> findAll() {
         List<SubjectEntity> resultEntity = subjectRepository.findAll();
         return resultEntity.stream().map(subjectMapper::toDTO).toList();
+    }
+
+    @Override
+    public List<SubjectResponse> showAllByDepartment(String departmentId) {
+        return subjectRepository.findByDepartments_Id(departmentId).stream().map(subjectMapper::toShowDTO).toList();
     }
 }

@@ -3,39 +3,38 @@ package com.hcv.dto.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
-@Getter
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class StudentInput {
 
-    @Setter
-    private String user_id;
+    String userId;
 
-    @NotNull(message = "MASO_INVALID")
-    @Size(min = 8, message = "MASO_INVALID")
-    private String maSo;
+    @NotNull(message = "CODE_INVALID")
+    @Size(min = 8, message = "CODE_INVALID")
+    String code;
 
     @NotNull(message = "NAME_INVALID")
     @Size(min = 4, message = "NAME_INVALID")
-    private String name;
+    String name;
 
     @NotNull(message = "MY_CLASS_INVALID")
     @Size(min = 4, message = "MY_CLASS_INVALID")
-    private String myClass;
+    String myClass;
 
     @NotNull(message = "EMAIL_INVALID")
     @Email(message = "EMAIL_INVALID")
-    private String email;
+    String email;
 
     @NotNull(message = "PHONE_NUMBER_INVALID")
     @Size(min = 9, message = "PHONE_NUMBER_INVALID")
-    private String phoneNumber;
-
-    private String departmentName;
+    String phoneNumber;
 
     @NotNull(message = "SUBJECT_NAME_INVALID")
     @Size(min = 4, message = "SUBJECT_NAME_INVALID")
-    private String subjectName;
+    String subjectName;
 
 }

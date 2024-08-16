@@ -25,4 +25,6 @@ com:
       secret-key: 5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437
       valid-duration: 3600 # in seconds
       refreshable-duration: 864000 # in seconds
+    origin-client-1: http://localhost:3000/
+    origin-client-2: http://localhost:4000/
 

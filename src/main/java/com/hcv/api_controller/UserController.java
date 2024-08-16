@@ -20,22 +20,22 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/users")
-public class UserAPI {
+public class UserController {
 
     IUserService userService;
 
     @PostMapping("/register")
     public ApiResponse<UserDTO> createdUser(@RequestBody @Valid UserRequest userRequest) {
-        UserDTO userDTO = userService.create(userRequest);
+        UserDTO response = userService.create(userRequest);
         return ApiResponse.<UserDTO>builder()
-                .result(userDTO)
+                .result(response)
                 .build();
     }
 
-    @PutMapping("/update-user/{id}")
-    public ApiResponse<UserDTO> updateUser(@PathVariable("id") String id,
-                                           @RequestBody @Valid UserUpdateInput updateUserInput) {
-        UserDTO response = userService.update(id, updateUserInput);
+    @PutMapping("/update-user")
+    public ApiResponse<UserDTO> updateUser(@RequestBody @Valid UserUpdateInput updateUserInput) {
+        String username = userService.getClaimsToken().get("username").toString();
+        UserDTO response = userService.update(username, updateUserInput);
         return ApiResponse.<UserDTO>builder()
                 .result(response)
                 .build();
@@ -77,16 +77,17 @@ public class UserAPI {
     }
 
     @GetMapping("/showAll-no-params")
-    public ApiResponse<List<UserDTO>> showAll() {
+    public ApiResponse<List<UserDTO>> getAll() {
         List<UserDTO> response = userService.findAll();
         return ApiResponse.<List<UserDTO>>builder()
                 .result(response)
                 .build();
     }
 
-    @GetMapping("/showOne")
-    public ApiResponse<UserDTO> showOne(@RequestParam(name = "userName") String userName) {
-        UserDTO response = userService.findOneByUsername(userName);
+    @GetMapping("/getMyInfo")
+    public ApiResponse<UserDTO> getMyInfo() {
+        String username = userService.getClaimsToken().get("username").toString();
+        UserDTO response = userService.findOneByUsername(username);
         return ApiResponse.<UserDTO>builder()
                 .result(response)
                 .build();

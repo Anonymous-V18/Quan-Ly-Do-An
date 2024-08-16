@@ -1,16 +1,19 @@
 package com.hcv.dto.request;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserRequest extends BaseAuthInput {
 
-    private List<String> nameRoles = new ArrayList<>();
-    private Integer isGraduate = 0;
+    List<String> nameRoles = new ArrayList<>();
+    Integer isGraduate = 0;
 
 }

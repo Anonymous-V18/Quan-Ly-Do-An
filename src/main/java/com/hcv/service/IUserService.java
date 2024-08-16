@@ -7,6 +7,7 @@ import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.dto.response.UserDTO;
 
 import java.util.List;
+import java.util.Map;
 
 public interface IUserService {
 
@@ -14,13 +15,13 @@ public interface IUserService {
 
     UserDTO updateForAdmin(UserRequest updateUserInput);
 
-    UserDTO update(String oldUserId, UserUpdateInput updateUserInput);
+    UserDTO update(String oldUsername, UserUpdateInput updateUserInput);
 
     void delete(String[] ids);
 
     UserDTO findOneByUsername(String username);
 
-    String getSubToken();
+    Map<String, Object> getClaimsToken();
 
     List<UserDTO> findAll();
 

@@ -1,15 +1,25 @@
 package com.hcv.dto.response;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
-public class TeacherResponse extends BaseDTO {
-    private String maSo;
-    private String name;
-    private String hocVi;
-    private String email;
-    private String phoneNumber;
-    private String chucVu;
+import java.util.ArrayList;
+import java.util.List;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class TeacherResponse {
+
+    String id;
+    String code;
+    String name;
+    String degree;
+    String email;
+    String phoneNumber;
+    List<String> position = new ArrayList<>();
 }

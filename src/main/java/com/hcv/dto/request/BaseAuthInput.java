@@ -2,19 +2,20 @@ package com.hcv.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
+@Data
+@FieldDefaults(level = AccessLevel.PROTECTED)
 public class BaseAuthInput {
 
     @NotNull(message = "INVALID_USERNAME")
     @Size(min = 8, message = "INVALID_USERNAME")
-    protected String username;
+    String username;
 
     @NotNull(message = "INVALID_USERNAME")
     @Size(min = 8, message = "INVALID_PASSWORD")
-    protected String password;
+    String password;
 
 }

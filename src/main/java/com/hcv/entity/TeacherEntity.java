@@ -1,5 +1,6 @@
 package com.hcv.entity;
 
+import com.hcv.config.StringListConverterConfig;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -18,12 +19,14 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TeacherEntity extends BaseEntity {
 
-    String maSo;
+    String code;
     String name;
-    String hocVi;
+    String degree;
     String email;
     String phoneNumber;
-    String chucVu;
+    @Convert(converter = StringListConverterConfig.class)
+    @Column(name = "position", nullable = false)
+    List<String> position = new ArrayList<>();
 
     @OneToOne
     @JoinColumn(name = "user_id")

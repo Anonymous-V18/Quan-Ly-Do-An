@@ -1,31 +1,35 @@
 package com.hcv.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ResearchDTO extends BaseDTO {
+public class ResearchDTO {
 
-    private String name;
-    private String maDeTai;
-    private String detail;
-    private String oldDetail;
-    private String notes;
-    private Integer maxMembers;
-    private Integer minMembers;
-    private String gvhd;
-    private String gvpb;
-    private String dotDangKy;
-    private String namHoc;
-    private Integer isApproved;
+    String id;
+    String name;
+    String code;
+    String detail;
+    String notes;
+    Integer maxMembers;
+    Integer minMembers;
+    List<String> instructorsIds = new ArrayList<>();
+    String thesisAdvisorId;
+    String stage;
+    String schoolYear;
+    Integer isApproved;
 
-    private List<TeacherDTO> teachers = new ArrayList<>();
-    private List<SubjectDTO> subjects = new ArrayList<>();
-    private GroupDTO groups;
+    List<TeacherResponse> teachers = new ArrayList<>();
+    List<SubjectResponse> subjects = new ArrayList<>();
+    GroupDTO groups;
 }

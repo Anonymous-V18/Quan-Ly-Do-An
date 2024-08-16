@@ -30,21 +30,22 @@ public class DepartmentService implements IDepartmentService {
 
     @Override
     public DepartmentDTO insert(DepartmentDTO departmentDTO) {
-        DepartmentEntity departmentEntity = departmentRepository.findOneByName(departmentDTO.getName());
-        if (departmentEntity != null) {
-            throw new AppException(ErrorCode.DEPARTMENT_EXISTED);
-        }
-        departmentEntity = departmentMapper.toEntity(departmentDTO);
-        departmentRepository.save(departmentEntity);
-        return departmentDTO;
+        departmentRepository.findByName(departmentDTO.getName())
+                .ifPresent(item -> {
+                    throw new AppException(ErrorCode.DEPARTMENT_EXISTED);
+                });
+
+        DepartmentEntity departmentEntity = departmentMapper.toEntity(departmentDTO);
+        departmentEntity = departmentRepository.save(departmentEntity);
+        return departmentMapper.toDTO(departmentEntity);
     }
 
     @Override
     public DepartmentDTO update(String oldDepartmentId, DepartmentDTO newDepartmentDTO) {
-        DepartmentEntity departmentEntityUpdate = departmentRepository.findOneById(oldDepartmentId);
-        if (departmentEntityUpdate == null) {
-            throw new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED);
-        }
+        DepartmentEntity departmentEntityUpdate =
+                departmentRepository.findById(oldDepartmentId)
+                        .orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED));
+
         departmentEntityUpdate.setName(newDepartmentDTO.getName());
 
         departmentRepository.save(departmentEntityUpdate);
@@ -61,8 +62,9 @@ public class DepartmentService implements IDepartmentService {
 
     @Override
     public DepartmentDTO findOneByName(String name) {
-        DepartmentEntity departmentEntity = departmentRepository.findOneByName(name);
-        return departmentEntity == null ? null : departmentMapper.toDTO(departmentEntity);
+        DepartmentEntity departmentEntity = departmentRepository.findByName(name)
+                .orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED));
+        return departmentMapper.toDTO(departmentEntity);
     }
 
     @Override

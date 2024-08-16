@@ -1,5 +1,7 @@
 package com.hcv.entity;
 
+import com.hcv.config.StringListConverterConfig;
+import com.hcv.dto.StatusResearch;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -18,18 +20,22 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ResearchEntity extends BaseEntity {
 
+    @Column(name = "name", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     String name;
-    String maDeTai;
+    @Column(name = "code", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
+    String code;
     String detail;
-    String oldDetail;
     String notes;
     Integer maxMembers;
     Integer minMembers;
-    String gvhd;
-    String gvpb;
-    String dotDangKy;
-    String namHoc;
-    Integer isApproved;
+    @Convert(converter = StringListConverterConfig.class)
+    @Column(name = "instructors_ids", nullable = false)
+    List<String> instructorsIds = new ArrayList<>();
+    String thesisAdvisorId;
+    String stage;
+    String schoolYear;
+    @Enumerated(EnumType.STRING)
+    StatusResearch status;
 
 
     @ManyToMany

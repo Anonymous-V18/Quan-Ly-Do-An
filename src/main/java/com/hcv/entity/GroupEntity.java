@@ -21,6 +21,9 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GroupEntity extends BaseEntity {
 
+    Integer maxMember;
+    String leaderId;
+
     @OneToOne(mappedBy = "groups")
     ResearchEntity researches;
 

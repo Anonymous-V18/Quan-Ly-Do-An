@@ -2,29 +2,31 @@ package com.hcv.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class UserDTO extends BaseDTO {
+public class UserDTO {
 
-    private String username;
-
+    String id;
+    String username;
     @JsonIgnore
-    private String password;
+    String password;
+    Integer isGraduate;
 
-    private Integer isGraduate;
+    List<RoleDTO> roles = new ArrayList<>();
 
-    private List<RoleDTO> roles = new ArrayList<>();
+    TeacherResponse teachers;
 
-    private TeacherResponse teachers;
-
-    private StudentResponse students;
+    StudentResponse students;
 
 
 }

@@ -15,16 +15,16 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/points")
-public class PointAPI {
+public class PointController {
 
     IPointService pointService;
 
     @PostMapping("/insert")
     @PreAuthorize("hasRole('TEACHER')")
     public ApiResponse<PointResponse> insert(@RequestBody PointInsertInput pointInsertInput) {
-        PointResponse pointDTO = pointService.insert(pointInsertInput);
+        PointResponse response = pointService.insert(pointInsertInput);
         return ApiResponse.<PointResponse>builder()
-                .result(pointDTO)
+                .result(response)
                 .build();
     }
 
@@ -32,9 +32,9 @@ public class PointAPI {
     @PreAuthorize("hasRole('TEACHER')")
     public ApiResponse<PointResponse> update(@PathVariable(value = "id") String id,
                                              @RequestBody PointUpdateInput pointUpdateInput) {
-        PointResponse updateDTO = pointService.update(id, pointUpdateInput);
+        PointResponse response = pointService.update(id, pointUpdateInput);
         return ApiResponse.<PointResponse>builder()
-                .result(updateDTO)
+                .result(response)
                 .build();
     }
 

@@ -1,14 +1,20 @@
 package com.hcv.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
-public class DepartmentDTO extends BaseDTO {
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class DepartmentDTO {
 
+    String id;
     @Size(min = 3, message = "INVALID_NAME_PARAM")
-    private String name;
+    String name;
 
 }

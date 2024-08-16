@@ -1,21 +1,23 @@
 package com.hcv.dto.response;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
-import java.util.ArrayList;
-import java.util.List;
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class StudentDTO {
 
-@Getter
-@Setter
-public class StudentDTO extends BaseDTO {
-
-    private String maSo;
-    private String name;
-    private String myClass;
-    private String email;
-    private String phoneNumber;
-    private SubjectDTO subjects;
-    private List<PointResponse> points = new ArrayList<>();
+    String id;
+    String code;
+    String name;
+    String myClass;
+    String email;
+    String phoneNumber;
+    SubjectDTO subjects;
 
 }

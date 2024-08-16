@@ -1,9 +1,7 @@
 package com.hcv.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import com.hcv.dto.StatusNotification;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +19,8 @@ public class FeedbackEntity extends BaseEntity {
     String message;
     String sendTo;
     String sendFrom;
+    @Enumerated(EnumType.STRING)
+    StatusNotification status;
 
     @ManyToOne
     @JoinColumn(name = "teacher_id")

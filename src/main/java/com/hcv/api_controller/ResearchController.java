@@ -1,13 +1,7 @@
 package com.hcv.api_controller;
 
-import com.hcv.dto.request.ResearchCancelRegistrationInput;
-import com.hcv.dto.request.ResearchInput;
-import com.hcv.dto.request.ResearchRegisterInput;
-import com.hcv.dto.request.ShowAllRequest;
-import com.hcv.dto.response.ApiResponse;
-import com.hcv.dto.response.ResearchDTO;
-import com.hcv.dto.response.ResearchResponse;
-import com.hcv.dto.response.ShowAllResponse;
+import com.hcv.dto.request.*;
+import com.hcv.dto.response.*;
 import com.hcv.service.IResearchService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -16,30 +10,41 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/researches")
-public class ResearchAPI {
+public class ResearchController {
 
     IResearchService researchService;
 
-    @PostMapping("/insert")
+    @PostMapping("/insert-from-file")
     @PreAuthorize("hasRole('TEACHER')")
-    public ApiResponse<ResearchDTO> insert(@RequestBody @Valid ResearchInput researchInput) {
-        ResearchDTO newResearch = researchService.insert(researchInput);
-        return ApiResponse.<ResearchDTO>builder()
-                .result(newResearch)
+    public ApiResponse<List<ResearchDTO>> insert(@RequestBody @Valid ResearchInsertFromFileInput researchInsertFromFileInput) {
+        List<ResearchDTO> response = researchService.insertFromFile(researchInsertFromFileInput);
+        return ApiResponse.<List<ResearchDTO>>builder()
+                .result(response)
                 .build();
     }
 
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('TEACHER')")
     public ApiResponse<ResearchDTO> update(@PathVariable(value = "id") String id,
-                                           @RequestBody ResearchInput researchInput) {
-        ResearchDTO updateDTO = researchService.update(id, researchInput);
+                                           @RequestBody ResearchUpdateInput researchUpdateInput) {
+        ResearchDTO response = researchService.update(id, researchUpdateInput);
         return ApiResponse.<ResearchDTO>builder()
-                .result(updateDTO)
+                .result(response)
+                .build();
+    }
+
+    @PutMapping("/mark-approved/{id}")
+    @PreAuthorize("hasRole('HEAD_OF_DEPARTMENT')")
+    public ApiResponse<ResearchDTO> markApproved(@PathVariable(value = "id") String id) {
+        ResearchDTO response = researchService.markApproved(id);
+        return ApiResponse.<ResearchDTO>builder()
+                .result(response)
                 .build();
     }
 
@@ -53,21 +58,35 @@ public class ResearchAPI {
     }
 
     @GetMapping("/showAll")
-    public ApiResponse<ShowAllResponse<ResearchResponse>> showAll(@RequestParam(name = "page") Integer page,
-                                                                  @RequestParam(name = "limit") Integer limit,
-                                                                  @RequestParam(name = "orderBy") String orderBy,
-                                                                  @RequestParam(name = "orderDirection") String orderDirection) {
+    public ApiResponse<ShowAllResponse<ResearchShowToRegistrationResponse>> showAllToRegistration
+            (
+                    @RequestParam(name = "page") Integer page,
+                    @RequestParam(name = "limit") Integer limit,
+                    @RequestParam(name = "orderBy") String orderBy,
+                    @RequestParam(name = "orderDirection") String orderDirection
+            ) {
+
         ShowAllRequest showAllRequest = ShowAllRequest.builder()
                 .page(page)
                 .limit(limit)
                 .orderBy(orderBy)
                 .orderDirection(orderDirection)
                 .build();
-        ShowAllResponse<ResearchResponse> response = researchService.showAll(showAllRequest);
-        return ApiResponse.<ShowAllResponse<ResearchResponse>>builder()
+
+        ShowAllResponse<ResearchShowToRegistrationResponse> response = researchService.showAllToRegistration(showAllRequest);
+        return ApiResponse.<ShowAllResponse<ResearchShowToRegistrationResponse>>builder()
                 .result(response)
                 .build();
     }
+
+    @GetMapping("/showOne")
+    public ApiResponse<ResearchResponse> showOne(@RequestParam("researchId") String id) {
+        ResearchResponse response = researchService.showDetail(id);
+        return ApiResponse.<ResearchResponse>builder()
+                .result(response)
+                .build();
+    }
+
 
     @PostMapping("/register")
     @PreAuthorize("hasRole('STUDENT')")

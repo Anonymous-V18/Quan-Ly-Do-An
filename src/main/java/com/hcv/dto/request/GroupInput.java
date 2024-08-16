@@ -1,16 +1,20 @@
 package com.hcv.dto.request;
 
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class GroupInput {
 
-    private String researchId;
-    private List<String> studentId = new ArrayList<>();
+    @NotNull(message = "INVALID_LIST_STUDENT")
+    @Size(min = 1, message = "INVALID_LIST_STUDENT")
+    List<String> studentIds = new ArrayList<>();
 
 }

@@ -1,15 +1,18 @@
 package com.hcv.dto.request;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShowAllRequest {
 
-    private Integer page;
-    private Integer limit;
-    private String orderBy;
-    private String orderDirection;
+    Integer page;
+    Integer limit;
+    String orderBy;
+    String orderDirection;
 
 }

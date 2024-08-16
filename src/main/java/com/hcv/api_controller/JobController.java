@@ -17,25 +17,33 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/jobs")
-public class JobAPI {
+public class JobController {
 
     IJobService jobService;
 
     @PostMapping("/teacher-job/insert")
     @PreAuthorize("hasAnyRole('DEAN','HEAD_OF_DEPARTMENT')")
     public ApiResponse<JobDTO> insert(@RequestBody @Valid JobInput jobInput) {
-        JobDTO jobDTO = jobService.insert(jobInput);
+        JobDTO response = jobService.insert(jobInput);
         return ApiResponse.<JobDTO>builder()
-                .result(jobDTO)
+                .result(response)
                 .build();
     }
 
     @PostMapping("/researchers-job/insert")
     @PreAuthorize("hasRole('TEACHER')")
     public ApiResponse<JobDTO> insertJobForResearchers(@RequestBody @Valid JobInput jobInput) {
-        JobDTO jobDTO = jobService.insert(jobInput);
+        JobDTO response = jobService.insert(jobInput);
         return ApiResponse.<JobDTO>builder()
-                .result(jobDTO)
+                .result(response)
+                .build();
+    }
+
+    @PutMapping("/mark-completed/{id}")
+    public ApiResponse<JobDTO> markCompleted(@PathVariable("id") String id) {
+        JobDTO response = jobService.markCompleted(id);
+        return ApiResponse.<JobDTO>builder()
+                .result(response)
                 .build();
     }
 
@@ -48,19 +56,10 @@ public class JobAPI {
     }
 
     @GetMapping("/showAll-no-params")
-    public ApiResponse<List<JobDTO>> showAll() {
+    public ApiResponse<List<JobDTO>> getAll() {
         List<JobDTO> response = jobService.findAll();
         return ApiResponse.<List<JobDTO>>builder()
                 .result(response)
-                .build();
-    }
-
-
-    @GetMapping("/teacher-job/show-job-not-complete")
-    public ApiResponse<List<JobDTO>> showJobNotComplete(@RequestParam(name = "maSo") String maSoGV) {
-        List<JobDTO> results = jobService.showAllJobNotComplete(maSoGV);
-        return ApiResponse.<List<JobDTO>>builder()
-                .result(results)
                 .build();
     }
 

@@ -1,16 +1,19 @@
 package com.hcv.dto.request;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PointInsertInput extends PointBaseInput {
 
     @NotNull(message = "POINT_TYPE_INVALID")
-    private String type;
+    String type;
 
     @NotNull(message = "STUDENT_NOT_EXIST")
-    private String studentId;
+    String studentId;
 }

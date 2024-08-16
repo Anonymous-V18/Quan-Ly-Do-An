@@ -3,10 +3,13 @@ package com.hcv.service.impl;
 import com.hcv.constant.TeacherPositionConst;
 import com.hcv.converter.ITeacherMapper;
 import com.hcv.dto.request.ShowAllRequest;
-import com.hcv.dto.request.TeacherFromExcelInput;
 import com.hcv.dto.request.TeacherInput;
+import com.hcv.dto.request.TeacherInsertFromFileInput;
+import com.hcv.dto.request.UserRequest;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.dto.response.TeacherDTO;
+import com.hcv.dto.response.TeacherShowToSelectionResponse;
+import com.hcv.dto.response.UserDTO;
 import com.hcv.entity.DepartmentEntity;
 import com.hcv.entity.SubjectEntity;
 import com.hcv.entity.TeacherEntity;
@@ -17,6 +20,7 @@ import com.hcv.repository.ISubjectRepository;
 import com.hcv.repository.ITeacherRepository;
 import com.hcv.repository.IUserRepository;
 import com.hcv.service.ITeacherService;
+import com.hcv.service.IUserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -39,12 +43,13 @@ public class TeacherService implements ITeacherService {
     ITeacherRepository teacherRepository;
     ITeacherMapper teacherMapper;
     IUserRepository userRepository;
+    IUserService userService;
     ISubjectRepository subjectRepository;
 
     @Override
-    public void checkDataBeforeInsert(TeacherFromExcelInput teacherFromExcelInput) {
-        for (TeacherInput teacherInput : teacherFromExcelInput.getTeachers()) {
-            boolean isTeacherExisted = teacherRepository.existsByMaSo(teacherInput.getMaSo().trim());
+    public void checkDataBeforeInsert(TeacherInsertFromFileInput teacherInsertFromFileInput) {
+        for (TeacherInput teacherInput : teacherInsertFromFileInput.getTeachers()) {
+            boolean isTeacherExisted = teacherRepository.existsByCode(teacherInput.getCode().trim());
             if (isTeacherExisted) {
                 throw new AppException(ErrorCode.TEACHER_EXISTED);
             }
@@ -53,7 +58,7 @@ public class TeacherService implements ITeacherService {
                 throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
             }
 
-            List<String> listNameRole = List.of(teacherInput.getChucVu().split(","));
+            List<String> listNameRole = teacherInput.getPosition();
             boolean checkNameRoleContain = List.of(TeacherPositionConst.TEACHER, TeacherPositionConst.DEAN,
                             TeacherPositionConst.CATECHISM, TeacherPositionConst.STUDENT,
                             TeacherPositionConst.HEAD_OF_DEPARTMENT)
@@ -65,52 +70,69 @@ public class TeacherService implements ITeacherService {
     }
 
     @Override
+    public List<TeacherDTO> insertFromFile(TeacherInsertFromFileInput teacherInsertFromFileInput) {
+        this.checkDataBeforeInsert(teacherInsertFromFileInput);
+        List<TeacherDTO> teacherDTOList = new ArrayList<>();
+        for (TeacherInput teacherInput : teacherInsertFromFileInput.getTeachers()) {
+
+            String usernameAndPasswordDefault = teacherInput.getCode().trim();
+            UserRequest userRequest = new UserRequest();
+            userRequest.setUsername(usernameAndPasswordDefault);
+            userRequest.setPassword(usernameAndPasswordDefault);
+            userRequest.setNameRoles(teacherInput.getPosition());
+            userRequest.setIsGraduate(1);
+
+            UserDTO userDTO = userService.create(userRequest);
+
+            teacherInput.setUserId(userDTO.getId());
+
+            teacherDTOList.add(this.insert(teacherInput));
+        }
+        return teacherDTOList;
+    }
+
+    @Override
     public TeacherDTO insert(TeacherInput teacherInput) {
-        TeacherEntity teacherEntity = teacherRepository.findOneByMaSo(teacherInput.getMaSo());
-        if (teacherEntity != null) {
-            throw new AppException(ErrorCode.TEACHER_EXISTED);
-        }
+        teacherRepository.findByCode(teacherInput.getCode())
+                .ifPresent(item -> {
+                    throw new AppException(ErrorCode.TEACHER_EXISTED);
+                });
 
-        teacherEntity = teacherMapper.toEntity(teacherInput);
+        TeacherEntity teacherEntity = teacherMapper.toEntity(teacherInput);
 
-        UserEntity userEntity = userRepository.findOneById(teacherInput.getUserId());
-        if (userEntity == null) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
-        }
+        UserEntity userEntity = userRepository.findById(teacherInput.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
         teacherEntity.setUsers(userEntity);
 
-        SubjectEntity subjectEntity = subjectRepository.findOneByName(teacherInput.getSubjectName());
-        if (subjectEntity == null) {
-            throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
-        }
+        SubjectEntity subjectEntity = subjectRepository.findByName(teacherInput.getSubjectName())
+                .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
+
         teacherEntity.setSubjects(subjectEntity);
 
         DepartmentEntity departmentEntity = subjectEntity.getDepartments();
         teacherEntity.setDepartments(departmentEntity);
 
-        teacherRepository.save(teacherEntity);
+        teacherEntity = teacherRepository.save(teacherEntity);
 
         return teacherMapper.toDTO(teacherEntity);
     }
 
     @Override
     public TeacherDTO update(String oldTeacherId, TeacherInput teacherInput) {
-        TeacherEntity teacherEntity = teacherRepository.findOneById(oldTeacherId);
-        if (teacherEntity == null) {
-            throw new AppException(ErrorCode.TEACHER_NOT_EXISTED);
-        }
+        TeacherEntity teacherEntity = teacherRepository.findById(oldTeacherId)
+                .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
 
-        teacherEntity.setMaSo(teacherInput.getMaSo());
+        teacherEntity.setCode(teacherInput.getCode());
         teacherEntity.setName(teacherInput.getName());
-        teacherEntity.setHocVi(teacherInput.getHocVi());
-        teacherEntity.setChucVu(teacherInput.getChucVu());
+        teacherEntity.setDegree(teacherInput.getDegree());
+        teacherEntity.setPosition(teacherInput.getPosition());
         teacherEntity.setEmail(teacherInput.getEmail());
         teacherEntity.setPhoneNumber(teacherInput.getPhoneNumber());
 
-        SubjectEntity subjectEntity = subjectRepository.findOneByName(teacherInput.getSubjectName());
-        if (subjectEntity == null) {
-            throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
-        }
+        SubjectEntity subjectEntity = subjectRepository.findByName(teacherInput.getSubjectName())
+                .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
+
         teacherEntity.setSubjects(subjectEntity);
 
         teacherEntity.setDepartments(teacherEntity.getSubjects().getDepartments());
@@ -161,15 +183,15 @@ public class TeacherService implements ITeacherService {
     }
 
     @Override
-    public TeacherDTO findOneByMaSo(String maSo) {
-        TeacherEntity teacher = teacherRepository.findOneByMaSo(maSo);
-        return teacher == null ? null : teacherMapper.toDTO(teacher);
+    public List<TeacherShowToSelectionResponse> showAllToSelection() {
+        return teacherRepository.findAll().stream().map(teacherMapper::toShowDTOToSelection).toList();
     }
 
     @Override
     public TeacherDTO findOneById(String id) {
-        TeacherEntity teacher = teacherRepository.findOneById(id);
-        return teacher == null ? null : teacherMapper.toDTO(teacher);
+        TeacherEntity teacher = teacherRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
+        return teacherMapper.toDTO(teacher);
     }
 
     @Override

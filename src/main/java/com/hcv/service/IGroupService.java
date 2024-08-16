@@ -1,6 +1,7 @@
 package com.hcv.service;
 
 import com.hcv.dto.request.GroupInput;
+import com.hcv.dto.request.GroupInsertInput;
 import com.hcv.dto.request.ShowAllRequest;
 import com.hcv.dto.response.GroupDTO;
 import com.hcv.dto.response.GroupResponse;
@@ -8,16 +9,18 @@ import com.hcv.dto.response.ShowAllResponse;
 
 public interface IGroupService {
 
-    GroupDTO insert(GroupInput groupInput);
+    GroupDTO insert(GroupInsertInput groupInsertInput);
 
-    GroupDTO update(String oldGroupId, GroupInput newGroupInput);
+    void addMember(String leaderGroupId);
+
+    void removeMember(String idOldGroup, GroupInput groupUpdateInput);
 
     void delete(String[] ids);
 
     int countAll();
 
-    GroupDTO findOneById(String id);
+    GroupResponse showInfoMyGroup();
 
-    ShowAllResponse<GroupResponse> showAll(ShowAllRequest showAllRequest);
+    ShowAllResponse<GroupResponse> showAllMyGroup(ShowAllRequest showAllRequest);
 
 }

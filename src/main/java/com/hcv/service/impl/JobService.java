@@ -36,33 +36,32 @@ public class JobService implements IJobService {
     public JobDTO insert(JobInput jobInput) {
         JobEntity jobEntity = jobMapper.toEntity(jobInput);
 
-        String teacherId = userService.getSubToken();
-        TeacherEntity sender = teacherRepository.findOneById(teacherId);
+        jobEntity.setIsCompleted(0);
+
+        String teacherId = userService.getClaimsToken().get("sub").toString();
+        TeacherEntity sender = teacherRepository.findById(teacherId)
+                .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
         jobEntity.setSendFrom(teacherId);
 
         String receiverId = jobInput.getSendTo();
-        Object receiver = null;
         switch (jobInput.getName().trim()) {
 
             case JobNameConst.NAME_PROCESS_1,
                  JobNameConst.NAME_PROCESS_2 -> {
-                TeacherEntity teacherEntity = teacherRepository.findOneById(receiverId);
-                receiver = teacherEntity;
+                TeacherEntity teacherEntity = teacherRepository.findById(receiverId)
+                        .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
                 jobEntity.setTeachers(List.of(teacherEntity, sender));
             }
             case JobNameConst.NAME_PROCESS_3 -> {
-                GroupEntity groupEntity = groupRepository.findOneById(receiverId);
-                receiver = groupEntity;
+                GroupEntity groupEntity = groupRepository.findById(receiverId)
+                        .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
                 jobEntity.setTeachers(List.of(sender));
                 jobEntity.setGroups(groupEntity);
             }
         }
 
-        if (receiver == null) {
-            throw new AppException(ErrorCode.TEACHER_NOT_EXISTED);
-        }
-
-        jobRepository.save(jobEntity);
+        jobEntity.setIsCompleted(0);
+        jobEntity = jobRepository.save(jobEntity);
 
         return jobMapper.toDTO(jobEntity);
     }
@@ -74,16 +73,13 @@ public class JobService implements IJobService {
         }
     }
 
-
     @Override
-    public List<JobDTO> showAllJobNotComplete(String maSoGV) {
-        TeacherEntity teacherEntity = teacherRepository.findOneByMaSo(maSoGV);
-        if (teacherEntity.getJobs() == null) {
-            return null;
-        }
-        List<JobEntity> resultEntity = teacherEntity.getJobs();
-
-        return resultEntity.stream().map(jobMapper::toDTO).toList();
+    public JobDTO markCompleted(String id) {
+        JobEntity jobEntity = jobRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.JOB_NOT_EXIST));
+        jobEntity.setIsCompleted(1);
+        jobEntity = jobRepository.save(jobEntity);
+        return jobMapper.toDTO(jobEntity);
     }
 
     @Override

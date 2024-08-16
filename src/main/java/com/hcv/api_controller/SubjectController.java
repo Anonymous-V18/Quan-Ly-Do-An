@@ -5,6 +5,7 @@ import com.hcv.dto.request.SubjectInput;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.dto.response.SubjectDTO;
+import com.hcv.dto.response.SubjectResponse;
 import com.hcv.service.ISubjectService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -19,16 +20,16 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/subjects")
-public class SubjectAPI {
+public class SubjectController {
 
     ISubjectService subjectService;
 
     @PostMapping("/insert")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
     public ApiResponse<SubjectDTO> insert(@RequestBody @Valid SubjectInput subjectInput) {
-        SubjectDTO newSubjectDTO = subjectService.insert(subjectInput);
+        SubjectDTO response = subjectService.insert(subjectInput);
         return ApiResponse.<SubjectDTO>builder()
-                .result(newSubjectDTO)
+                .result(response)
                 .build();
     }
 
@@ -37,9 +38,9 @@ public class SubjectAPI {
     public ApiResponse<SubjectDTO> update(@PathVariable(name = "id") String id,
                                           @RequestBody @Valid SubjectInput subjectInput) {
 
-        SubjectDTO updatedDTO = subjectService.update(id, subjectInput);
+        SubjectDTO response = subjectService.update(id, subjectInput);
         return ApiResponse.<SubjectDTO>builder()
-                .result(updatedDTO)
+                .result(response)
                 .build();
     }
 
@@ -70,7 +71,7 @@ public class SubjectAPI {
     }
 
     @GetMapping("/showAll-no-params")
-    public ApiResponse<List<SubjectDTO>> showAll() {
+    public ApiResponse<List<SubjectDTO>> getAll() {
         List<SubjectDTO> response = subjectService.findAll();
         return ApiResponse.<List<SubjectDTO>>builder()
                 .result(response)
@@ -80,10 +81,17 @@ public class SubjectAPI {
 
     @GetMapping("/showOne")
     public ApiResponse<SubjectDTO> showOne(@RequestParam(name = "name") String name) {
-        SubjectDTO subjectDTO = subjectService.findOneByName(name);
+        SubjectDTO response = subjectService.findOneByName(name);
         return ApiResponse.<SubjectDTO>builder()
-                .result(subjectDTO)
+                .result(response)
                 .build();
     }
 
+    @GetMapping("/showAll-by-department")
+    public ApiResponse<List<SubjectResponse>> showAllByDepartment(@RequestParam(name = "departmentId") String departmentId) {
+        List<SubjectResponse> response = subjectService.showAllByDepartment(departmentId);
+        return ApiResponse.<List<SubjectResponse>>builder()
+                .result(response)
+                .build();
+    }
 }

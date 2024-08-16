@@ -1,26 +1,33 @@
 package com.hcv.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@Getter
-@Setter
-public class JobDTO extends BaseDTO {
 
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class JobDTO {
+
+    String id;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    private Date from;
+    Date from;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    private Date due;
-    private String sendTo;
-    private String sendFrom;
-    private String name;
-    private String details;
-    private Integer isCompleted = 0;
-    private List<TeacherDTO> teachers = new ArrayList<>();
+    Date due;
+    String sendTo;
+    String sendFrom;
+    String name;
+    String details;
+    Integer isCompleted;
+    List<TeacherDTO> teachers = new ArrayList<>();
 
 }

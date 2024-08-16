@@ -1,14 +1,15 @@
 package com.hcv.dto.request;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PointBaseInput {
 
     @NotNull(message = "POINT_INVALID")
-    private Double point;
+    Double point;
 
 }

@@ -1,13 +1,12 @@
 package com.hcv.api_controller;
 
 import com.hcv.dto.request.ShowAllRequest;
-import com.hcv.dto.request.TeacherFromExcelInput;
 import com.hcv.dto.request.TeacherInput;
-import com.hcv.dto.request.UserRequest;
+import com.hcv.dto.request.TeacherInsertFromFileInput;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.dto.response.TeacherDTO;
-import com.hcv.dto.response.UserDTO;
+import com.hcv.dto.response.TeacherShowToSelectionResponse;
 import com.hcv.service.ITeacherService;
 import com.hcv.service.IUserService;
 import jakarta.validation.Valid;
@@ -17,51 +16,34 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/teachers")
-public class TeacherAPI {
+public class TeacherController {
 
     IUserService userService;
     ITeacherService teacherService;
 
 
-    @PostMapping("/insert-from-excel")
+    @PostMapping("/insert-from-file")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
-    public ApiResponse<String> insertFromExcel(@RequestBody @Valid TeacherFromExcelInput teacherFromExcelInput) {
-        teacherService.checkDataBeforeInsert(teacherFromExcelInput);
-        for (TeacherInput teacherInput : teacherFromExcelInput.getTeachers()) {
-
-            String usernameAndPasswordDefault = teacherInput.getMaSo().trim();
-            UserRequest userRequest = new UserRequest();
-            userRequest.setUsername(usernameAndPasswordDefault);
-            userRequest.setPassword(usernameAndPasswordDefault);
-            userRequest.setNameRoles(Arrays.stream(teacherInput.getChucVu().split(",")).toList());
-
-            UserDTO userDTO = userService.create(userRequest);
-
-            teacherInput.setUserId(userDTO.getId());
-
-            teacherService.insert(teacherInput);
-        }
-        return ApiResponse.<String>builder()
-                .message("Thêm danh sách giảng viên thành công !")
+    public ApiResponse<List<TeacherDTO>> insertFromFile(@RequestBody @Valid TeacherInsertFromFileInput teacherInsertFromFileInput) {
+        List<TeacherDTO> response = teacherService.insertFromFile(teacherInsertFromFileInput);
+        return ApiResponse.<List<TeacherDTO>>builder()
+                .result(response)
                 .build();
-
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/update")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM') or hasRole('TEACHER') or hasRole('HEAD_OF_DEPARTMENT')")
-    public ApiResponse<TeacherDTO> update(@PathVariable(value = "id") String id,
-                                          @RequestBody @Valid TeacherInput teacherInput) {
-
-        TeacherDTO updatedDTO = teacherService.update(id, teacherInput);
+    public ApiResponse<TeacherDTO> update(@RequestBody @Valid TeacherInput teacherInput) {
+        String teacherId = userService.getClaimsToken().get("sub").toString();
+        TeacherDTO response = teacherService.update(teacherId, teacherInput);
         return ApiResponse.<TeacherDTO>builder()
-                .result(updatedDTO)
+                .result(response)
                 .build();
     }
 
@@ -91,19 +73,29 @@ public class TeacherAPI {
                 .build();
     }
 
-    @GetMapping("/showAll-no-params")
-    public ApiResponse<List<TeacherDTO>> showAll() {
-        List<TeacherDTO> response = teacherService.findAll();
-        return ApiResponse.<List<TeacherDTO>>builder()
+    @GetMapping("/showAll-to-selection")
+    public ApiResponse<List<TeacherShowToSelectionResponse>> showAllToSelection() {
+        List<TeacherShowToSelectionResponse> response = teacherService.showAllToSelection();
+        return ApiResponse.<List<TeacherShowToSelectionResponse>>builder()
                 .result(response)
                 .build();
     }
 
+
     @GetMapping("/showOne")
-    public ApiResponse<TeacherDTO> showOne(@RequestParam(name = "maSo") String maSo) {
-        TeacherDTO teacherDTO = teacherService.findOneByMaSo(maSo);
+    public ApiResponse<TeacherDTO> showOne(@RequestParam(name = "id") String id) {
+        TeacherDTO response = teacherService.findOneById(id);
         return ApiResponse.<TeacherDTO>builder()
-                .result(teacherDTO)
+                .result(response)
+                .build();
+    }
+
+    @GetMapping("/getMyInfo")
+    public ApiResponse<TeacherDTO> getMyInfo() {
+        String teacherId = userService.getClaimsToken().get("sub").toString();
+        TeacherDTO response = teacherService.findOneById(teacherId);
+        return ApiResponse.<TeacherDTO>builder()
+                .result(response)
                 .build();
     }
 

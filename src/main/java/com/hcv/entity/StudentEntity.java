@@ -18,7 +18,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class StudentEntity extends BaseEntity {
 
-    String maSo;
+    String code;
     String name;
     String myClass;
     String email;

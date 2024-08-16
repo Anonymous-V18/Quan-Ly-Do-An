@@ -1,10 +1,15 @@
 package com.hcv.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
+@Data
+@Builder
 @AllArgsConstructor
-@Getter
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class IntrospectTokenResponse {
-    private Boolean isAuthenticated;
+    boolean isAuthenticated;
 }

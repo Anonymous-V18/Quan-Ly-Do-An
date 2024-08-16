@@ -11,8 +11,7 @@ public interface IJobService {
 
     void deleteJobOfTeacherCompleted(String[] ids);
 
-    List<JobDTO> showAllJobNotComplete(String maSoGV);
-
     List<JobDTO> findAll();
 
+    JobDTO markCompleted(String id);
 }

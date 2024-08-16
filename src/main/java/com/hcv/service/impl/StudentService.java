@@ -2,10 +2,13 @@ package com.hcv.service.impl;
 
 import com.hcv.converter.IStudentMapper;
 import com.hcv.dto.request.ShowAllRequest;
-import com.hcv.dto.request.StudentFromExcelInput;
 import com.hcv.dto.request.StudentInput;
+import com.hcv.dto.request.StudentInsertFromFileInput;
+import com.hcv.dto.request.UserRequest;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.dto.response.StudentDTO;
+import com.hcv.dto.response.StudentShowToSelectionResponse;
+import com.hcv.dto.response.UserDTO;
 import com.hcv.entity.DepartmentEntity;
 import com.hcv.entity.StudentEntity;
 import com.hcv.entity.SubjectEntity;
@@ -16,6 +19,7 @@ import com.hcv.repository.IStudentRepository;
 import com.hcv.repository.ISubjectRepository;
 import com.hcv.repository.IUserRepository;
 import com.hcv.service.IStudentService;
+import com.hcv.service.IUserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -25,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -36,11 +41,12 @@ public class StudentService implements IStudentService {
     IStudentMapper studentMapper;
     ISubjectRepository subjectRepository;
     IUserRepository userRepository;
+    IUserService userService;
 
     @Override
-    public void checkDataBeforeInsert(StudentFromExcelInput studentFromExcelInput) {
-        for (StudentInput studentInput : studentFromExcelInput.getStudents()) {
-            boolean isStudentExisted = studentRepository.existsByMaSo(studentInput.getMaSo().trim());
+    public void checkDataBeforeInsert(StudentInsertFromFileInput studentInsertFromFileInput) {
+        for (StudentInput studentInput : studentInsertFromFileInput.getStudents()) {
+            boolean isStudentExisted = studentRepository.existsByCode(studentInput.getCode().trim());
             if (isStudentExisted) {
                 throw new AppException(ErrorCode.STUDENT_EXISTED);
             }
@@ -53,51 +59,68 @@ public class StudentService implements IStudentService {
     }
 
     @Override
+    public List<StudentDTO> insertFromFile(StudentInsertFromFileInput studentInsertFromFileInput) {
+        this.checkDataBeforeInsert(studentInsertFromFileInput);
+        List<StudentDTO> studentDTOList = new ArrayList<>();
+        for (StudentInput studentInput : studentInsertFromFileInput.getStudents()) {
+
+            String usernameAndPasswordDefault = studentInput.getCode().trim();
+            UserRequest userRequest = new UserRequest();
+            userRequest.setUsername(usernameAndPasswordDefault);
+            userRequest.setPassword(usernameAndPasswordDefault);
+            userRequest.setNameRoles(List.of("SINH VIÊN"));
+            userRequest.setIsGraduate(1);
+
+            UserDTO userDTO = userService.create(userRequest);
+
+            studentInput.setUserId(userDTO.getId());
+
+            studentDTOList.add(this.insert(studentInput));
+        }
+        return studentDTOList;
+    }
+
+    @Override
     public StudentDTO insert(StudentInput studentInput) {
-        StudentEntity studentEntity = studentRepository.findOneByMaSo(studentInput.getMaSo().trim());
-        if (studentEntity != null) {
-            throw new AppException(ErrorCode.STUDENT_EXISTED);
-        }
+        studentRepository.findByCode(studentInput.getCode().trim())
+                .ifPresent(item -> {
+                    throw new AppException(ErrorCode.STUDENT_EXISTED);
+                });
 
-        studentEntity = studentMapper.toEntity(studentInput);
+        StudentEntity studentEntity = studentMapper.toEntity(studentInput);
 
-        UserEntity userEntity = userRepository.findOneById(studentInput.getUser_id().trim());
-        if (userEntity == null) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
-        }
+        UserEntity userEntity = userRepository.findById(studentInput.getUserId().trim())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
         studentEntity.setUsers(userEntity);
 
-        SubjectEntity subjectEntity = subjectRepository.findOneByName(studentInput.getSubjectName().trim());
-        if (subjectEntity == null) {
-            throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
-        }
+        SubjectEntity subjectEntity = subjectRepository.findByName(studentInput.getSubjectName().trim())
+                .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
+
         studentEntity.setSubjects(subjectEntity);
 
         DepartmentEntity departmentEntity = subjectEntity.getDepartments();
         studentEntity.setDepartments(departmentEntity);
 
-        studentRepository.save(studentEntity);
+        studentEntity = studentRepository.save(studentEntity);
 
         return studentMapper.toDTO(studentEntity);
     }
 
     @Override
     public StudentDTO update(String oldStudentId, StudentInput studentInput) {
-        StudentEntity studentEntity = studentRepository.findOneById(oldStudentId);
-        if (studentEntity == null) {
-            throw new AppException(ErrorCode.STUDENT_NOT_EXIST);
-        }
+        StudentEntity studentEntity = studentRepository.findById(oldStudentId)
+                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
 
-        studentEntity.setMaSo(studentInput.getMaSo());
+        studentEntity.setCode(studentInput.getCode());
         studentEntity.setName(studentInput.getName());
         studentEntity.setMyClass(studentInput.getMyClass());
         studentEntity.setEmail(studentInput.getEmail());
         studentEntity.setPhoneNumber(studentInput.getPhoneNumber());
 
-        SubjectEntity subjectEntity = subjectRepository.findOneByName(studentInput.getSubjectName());
-        if (subjectEntity == null) {
-            throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
-        }
+        SubjectEntity subjectEntity = subjectRepository.findByName(studentInput.getSubjectName())
+                .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
+
         studentEntity.setSubjects(subjectEntity);
 
         studentEntity.setDepartments(studentEntity.getSubjects().getDepartments());
@@ -116,15 +139,9 @@ public class StudentService implements IStudentService {
 
     @Override
     public StudentDTO findOneById(String id) {
-        StudentEntity student = studentRepository.findOneById(id);
-        return student == null ? null : studentMapper.toDTO(student);
-    }
-
-
-    @Override
-    public StudentDTO findOneByMaSo(String maSo) {
-        StudentEntity student = studentRepository.findOneByMaSo(maSo);
-        return student == null ? null : studentMapper.toDTO(student);
+        StudentEntity student = studentRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
+        return studentMapper.toDTO(student);
     }
 
     @Override
@@ -153,6 +170,11 @@ public class StudentService implements IStudentService {
                 .responses(resultDTO)
                 .build();
 
+    }
+
+    @Override
+    public List<StudentShowToSelectionResponse> showAllToSelection() {
+        return studentRepository.findAll().stream().map(studentMapper::toShowToSelectionDTO).toList();
     }
 
     @Override

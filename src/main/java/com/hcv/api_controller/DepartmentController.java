@@ -18,16 +18,16 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/departments")
-public class DepartmentAPI {
+public class DepartmentController {
 
     IDepartmentService departmentService;
 
     @PostMapping("/insert")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
     public ApiResponse<DepartmentDTO> insert(@RequestBody @Valid DepartmentDTO departmentDTO) {
-        DepartmentDTO newDepartmentDTO = departmentService.insert(departmentDTO);
+        DepartmentDTO response = departmentService.insert(departmentDTO);
         return ApiResponse.<DepartmentDTO>builder()
-                .result(newDepartmentDTO)
+                .result(response)
                 .build();
     }
 
@@ -35,9 +35,9 @@ public class DepartmentAPI {
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
     public ApiResponse<DepartmentDTO> update(@PathVariable(value = "id") String id,
                                              @RequestBody @Valid DepartmentDTO newDepartmentDTO) {
-        DepartmentDTO updatedDTO = departmentService.update(id, newDepartmentDTO);
+        DepartmentDTO response = departmentService.update(id, newDepartmentDTO);
         return ApiResponse.<DepartmentDTO>builder()
-                .result(updatedDTO)
+                .result(response)
                 .build();
     }
 
@@ -61,28 +61,26 @@ public class DepartmentAPI {
                 .orderBy(orderBy)
                 .orderDirection(orderDirection)
                 .build();
-        ShowAllResponse<DepartmentDTO> resultList = departmentService.showAll(showAllRequest);
+        ShowAllResponse<DepartmentDTO> response = departmentService.showAll(showAllRequest);
         return ApiResponse.<ShowAllResponse<DepartmentDTO>>builder()
-                .result(resultList)
+                .result(response)
                 .build();
     }
 
     @GetMapping("/showAll-no-params")
-    public ApiResponse<List<DepartmentDTO>> showAll() {
+    public ApiResponse<List<DepartmentDTO>> getAll() {
         List<DepartmentDTO> response = departmentService.findAll();
         return ApiResponse.<List<DepartmentDTO>>builder()
                 .result(response)
                 .build();
     }
 
-
     @GetMapping("/showOne")
     public ApiResponse<DepartmentDTO> showOne(@RequestParam(name = "name") String name) {
-        DepartmentDTO dto = departmentService.findOneByName(name);
+        DepartmentDTO response = departmentService.findOneByName(name);
         return ApiResponse.<DepartmentDTO>builder()
-                .result(dto)
+                .result(response)
                 .build();
     }
-
 
 }

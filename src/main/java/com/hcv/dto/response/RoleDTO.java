@@ -1,14 +1,21 @@
 package com.hcv.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.hcv.dto.CodeRole;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
-public class RoleDTO extends BaseDTO {
 
-    private String name;
-    private CodeRole code;
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class RoleDTO {
+
+    String id;
+    String name;
+    CodeRole code;
 
 }

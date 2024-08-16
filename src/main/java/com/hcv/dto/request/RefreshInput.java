@@ -1,12 +1,13 @@
 package com.hcv.dto.request;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class RefreshInput {
 
-    private String token;
+    String token;
 
 }

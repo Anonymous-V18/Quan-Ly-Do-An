@@ -4,6 +4,7 @@ import com.hcv.dto.request.FeedbackForResearchInput;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.FeedbackDTO;
 import com.hcv.service.IFeedbackService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -14,27 +15,27 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequestMapping("/feedbacks")
-public class FeedbackAPI {
+public class FeedbackController {
 
     IFeedbackService feedbackService;
 
     @PostMapping("/insert")
     @PreAuthorize("hasRole('TEACHER')")
-    public ApiResponse<FeedbackDTO> insert(@RequestBody FeedbackForResearchInput feedbackForResearchInput) {
-        FeedbackDTO newResearch = feedbackService.insert(feedbackForResearchInput);
+    public ApiResponse<FeedbackDTO> insert(@RequestBody @Valid FeedbackForResearchInput feedbackForResearchInput) {
+        FeedbackDTO response = feedbackService.insert(feedbackForResearchInput);
         return ApiResponse.<FeedbackDTO>builder()
-                .result(newResearch)
+                .result(response)
                 .build();
     }
 
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('TEACHER')")
     public ApiResponse<FeedbackDTO> update(@PathVariable(value = "id") String id,
-                                           @RequestBody FeedbackForResearchInput feedbackForResearchInput) {
+                                           @RequestBody @Valid FeedbackForResearchInput feedbackForResearchInput) {
 
-        FeedbackDTO updateDTO = feedbackService.update(id, feedbackForResearchInput);
+        FeedbackDTO response = feedbackService.update(id, feedbackForResearchInput);
         return ApiResponse.<FeedbackDTO>builder()
-                .result(updateDTO)
+                .result(response)
                 .build();
     }
 
@@ -46,4 +47,6 @@ public class FeedbackAPI {
                 .message("Xóa phản hồi thành công !")
                 .build();
     }
+
+
 }
