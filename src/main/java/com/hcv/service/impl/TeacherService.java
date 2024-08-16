@@ -67,6 +67,16 @@ public class TeacherService implements ITeacherService {
                 throw new AppException(ErrorCode.INVALID_NAME_ROLE);
             }
         }
+
+        List<String> teacherCodeList = teacherInsertFromFileInput.getTeachers()
+                .stream()
+                .map(TeacherInput::getCode)
+                .distinct()
+                .toList();
+        if (teacherCodeList.size() != teacherInsertFromFileInput.getTeachers().size()) {
+            throw new AppException(ErrorCode.TEACHER_DUPLICATED);
+        }
+
     }
 
     @Override
@@ -80,7 +90,7 @@ public class TeacherService implements ITeacherService {
             userRequest.setUsername(usernameAndPasswordDefault);
             userRequest.setPassword(usernameAndPasswordDefault);
             userRequest.setNameRoles(teacherInput.getPosition());
-            userRequest.setIsGraduate(1);
+            userRequest.setIsGraduate(0);
 
             UserDTO userDTO = userService.create(userRequest);
 

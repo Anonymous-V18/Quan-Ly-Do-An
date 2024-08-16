@@ -56,6 +56,14 @@ public class StudentService implements IStudentService {
                 throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
             }
         }
+        List<String> studentCodeList = studentInsertFromFileInput.getStudents()
+                .stream()
+                .map(StudentInput::getCode)
+                .distinct()
+                .toList();
+        if (studentCodeList.size() != studentInsertFromFileInput.getStudents().size()) {
+            throw new AppException(ErrorCode.STUDENT_DUPLICATED);
+        }
     }
 
     @Override
@@ -69,7 +77,7 @@ public class StudentService implements IStudentService {
             userRequest.setUsername(usernameAndPasswordDefault);
             userRequest.setPassword(usernameAndPasswordDefault);
             userRequest.setNameRoles(List.of("SINH VIÊN"));
-            userRequest.setIsGraduate(1);
+            userRequest.setIsGraduate(0);
 
             UserDTO userDTO = userService.create(userRequest);
 
