@@ -3,6 +3,7 @@ package com.hcv.api_controller;
 import com.hcv.dto.request.ShowAllRequest;
 import com.hcv.dto.request.TeacherInput;
 import com.hcv.dto.request.TeacherInsertFromFileInput;
+import com.hcv.dto.request.TeacherNormalUpdateInput;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.dto.response.TeacherDTO;
@@ -39,9 +40,19 @@ public class TeacherController {
 
     @PutMapping("/update")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM') or hasRole('TEACHER') or hasRole('HEAD_OF_DEPARTMENT')")
-    public ApiResponse<TeacherDTO> update(@RequestBody @Valid TeacherInput teacherInput) {
+    public ApiResponse<TeacherDTO> update(@RequestBody @Valid TeacherNormalUpdateInput teacherInput) {
         String teacherId = userService.getClaimsToken().get("sub").toString();
         TeacherDTO response = teacherService.update(teacherId, teacherInput);
+        return ApiResponse.<TeacherDTO>builder()
+                .result(response)
+                .build();
+    }
+
+    @PutMapping("/update/{id}")
+    @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
+    public ApiResponse<TeacherDTO> updateAdvanced(@PathVariable(name = "id") String teacherId,
+                                                  @RequestBody @Valid TeacherInput teacherInput) {
+        TeacherDTO response = teacherService.updateAdvanced(teacherId, teacherInput);
         return ApiResponse.<TeacherDTO>builder()
                 .result(response)
                 .build();
@@ -57,12 +68,14 @@ public class TeacherController {
     }
 
     @GetMapping("/showAll")
-    public ApiResponse<ShowAllResponse<TeacherDTO>> showAll(@RequestParam(name = "page") Integer page,
-                                                            @RequestParam(name = "limit") Integer limit,
-                                                            @RequestParam(name = "orderBy") String orderBy,
-                                                            @RequestParam(name = "orderDirection") String orderDirection) {
+    public ApiResponse<ShowAllResponse<TeacherDTO>> showAll(
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
+            @RequestParam(value = "orderBy", required = false, defaultValue = "id") String orderBy,
+            @RequestParam(value = "orderDirection", required = false, defaultValue = "ASC") String orderDirection
+    ) {
         ShowAllRequest showAllRequest = ShowAllRequest.builder()
-                .page(page)
+                .currentPage(page)
                 .limit(limit)
                 .orderBy(orderBy)
                 .orderDirection(orderDirection)

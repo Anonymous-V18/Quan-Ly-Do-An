@@ -4,7 +4,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-@Data
+import java.util.Date;
+
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,12 +16,13 @@ import lombok.experimental.FieldDefaults;
 public class FeedbackDTO {
 
     String id;
+    Date createdDate;
+    Date modifiedDate;
+    String createdBy;
+    String modifiedBy;
     String message;
     String sendTo;
     String sendFrom;
-
-    TeacherDTO teachers;
-    StudentDTO students;
-    ResearchDTO researches;
+    String sendFromName;
 
 }

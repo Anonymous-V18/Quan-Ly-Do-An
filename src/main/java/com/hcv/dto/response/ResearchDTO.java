@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,6 +26,7 @@ public class ResearchDTO {
     Integer minMembers;
     List<String> instructorsIds = new ArrayList<>();
     String thesisAdvisorId;
+    String status;
     String stage;
     String schoolYear;
     Integer isApproved;

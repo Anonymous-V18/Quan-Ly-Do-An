@@ -3,6 +3,7 @@ package com.hcv.api_controller;
 import com.hcv.dto.request.ShowAllRequest;
 import com.hcv.dto.request.StudentInput;
 import com.hcv.dto.request.StudentInsertFromFileInput;
+import com.hcv.dto.request.StudentNormalUpdateInput;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.dto.response.StudentDTO;
@@ -38,10 +39,21 @@ public class StudentController {
     }
 
     @PutMapping("/update")
-    @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM') or hasRole('STUDENT')")
-    public ApiResponse<StudentDTO> update(@RequestBody @Valid StudentInput studentInput) {
+    @PreAuthorize("hasRole('STUDENT')")
+    public ApiResponse<StudentDTO> update(@RequestBody @Valid StudentNormalUpdateInput studentInput) {
         String studentId = userService.getClaimsToken().get("sub").toString();
         StudentDTO updatedDTO = studentService.update(studentId, studentInput);
+        return ApiResponse.<StudentDTO>builder()
+                .result(updatedDTO)
+                .build();
+    }
+
+    @PutMapping("/update/{id}")
+    @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
+    public ApiResponse<StudentDTO> updateAdvanced(@PathVariable(name = "id") String studentId,
+                                                  @RequestBody @Valid StudentInput studentInput
+    ) {
+        StudentDTO updatedDTO = studentService.updateAdvanced(studentId, studentInput);
         return ApiResponse.<StudentDTO>builder()
                 .result(updatedDTO)
                 .build();
@@ -57,12 +69,14 @@ public class StudentController {
     }
 
     @GetMapping("/showAll")
-    public ApiResponse<ShowAllResponse<StudentDTO>> showAll(@RequestParam(name = "page") Integer page,
-                                                            @RequestParam(name = "limit") Integer limit,
-                                                            @RequestParam(name = "orderBy") String orderBy,
-                                                            @RequestParam(name = "orderDirection") String orderDirection) {
+    public ApiResponse<ShowAllResponse<StudentDTO>> showAll(
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
+            @RequestParam(value = "orderBy", required = false, defaultValue = "id") String orderBy,
+            @RequestParam(value = "orderDirection", required = false, defaultValue = "ASC") String orderDirection
+    ) {
         ShowAllRequest showAllRequest = ShowAllRequest.builder()
-                .page(page)
+                .currentPage(page)
                 .limit(limit)
                 .orderBy(orderBy)
                 .orderDirection(orderDirection)
@@ -90,6 +104,7 @@ public class StudentController {
     }
 
     @GetMapping("/getMyInfo")
+    @PreAuthorize("hasRole('STUDENT')")
     public ApiResponse<StudentDTO> getMyInfo() {
         String studentId = userService.getClaimsToken().get("sub").toString();
         StudentDTO studentDTO = studentService.findOneById(studentId);

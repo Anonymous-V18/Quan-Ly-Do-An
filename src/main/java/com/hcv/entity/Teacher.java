@@ -17,36 +17,38 @@ import java.util.List;
 @Setter
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class TeacherEntity extends BaseEntity {
+public class Teacher extends BaseEntity {
 
+    @Column(name = "code", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     String code;
     String name;
     String degree;
     String email;
     String phoneNumber;
+
     @Convert(converter = StringListConverterConfig.class)
     @Column(name = "position", nullable = false)
     List<String> position = new ArrayList<>();
 
     @OneToOne
     @JoinColumn(name = "user_id")
-    UserEntity users;
+    User users;
 
     @OneToMany(mappedBy = "teachers")
-    List<FeedbackEntity> feedbacks = new ArrayList<>();
+    List<Feedback> feedbacks = new ArrayList<>();
 
     @ManyToMany(mappedBy = "teachers")
-    List<ResearchEntity> researches = new ArrayList<>();
+    List<Research> researches = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "department_id")
-    DepartmentEntity departments;
+    Department departments;
 
     @ManyToOne
     @JoinColumn(name = "subject_id")
-    SubjectEntity subjects;
+    Subject subjects;
 
     @ManyToMany(mappedBy = "teachers")
-    List<JobEntity> jobs = new ArrayList<>();
+    List<Job> jobs = new ArrayList<>();
 
 }

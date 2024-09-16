@@ -1,7 +1,7 @@
 package com.hcv.service.impl;
 
 import com.hcv.dto.response.RefreshOutput;
-import com.hcv.entity.UserEntity;
+import com.hcv.entity.User;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IUserRepository;
@@ -31,15 +31,15 @@ public class AuthService implements IAuthService {
 
     @Override
     public String authentication(String username, String password) {
-        UserEntity userEntity = userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        boolean isPasswordValid = passwordEncoder.matches(password, userEntity.getPassword());
+        boolean isPasswordValid = passwordEncoder.matches(password, user.getPassword());
         if (!isPasswordValid) {
             throw new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
         }
-        return jwtUtil.generateToken(userEntity);
+        return jwtUtil.generateToken(user);
     }
 
     @Override
@@ -72,10 +72,10 @@ public class AuthService implements IAuthService {
         invalidatedTokenService.insert(signedToken);
 
         String username = signedToken.getJWTClaimsSet().getStringClaim("username");
-        UserEntity userEntity = userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
-        String accessToken = jwtUtil.generateToken(userEntity);
+        String accessToken = jwtUtil.generateToken(user);
 
         return RefreshOutput.builder()
                 .accessToken(accessToken)

@@ -16,8 +16,6 @@ public interface IDepartmentService {
 
     DepartmentDTO findOneByName(String name);
 
-    int countAll();
-
     ShowAllResponse<DepartmentDTO> showAll(ShowAllRequest showAllRequest);
 
     List<DepartmentDTO> findAll();

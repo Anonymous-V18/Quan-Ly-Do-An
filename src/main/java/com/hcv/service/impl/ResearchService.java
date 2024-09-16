@@ -8,15 +8,13 @@ import com.hcv.dto.response.ResearchDTO;
 import com.hcv.dto.response.ResearchResponse;
 import com.hcv.dto.response.ResearchShowToRegistrationResponse;
 import com.hcv.dto.response.ShowAllResponse;
-import com.hcv.entity.ResearchEntity;
-import com.hcv.entity.StudentEntity;
-import com.hcv.entity.SubjectEntity;
-import com.hcv.entity.TeacherEntity;
+import com.hcv.entity.*;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IResearchRepository;
 import com.hcv.repository.IStudentRepository;
 import com.hcv.repository.ITeacherRepository;
+import com.hcv.repository.IUserRepository;
 import com.hcv.service.IResearchService;
 import com.hcv.service.IUserService;
 import lombok.AccessLevel;
@@ -27,7 +25,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -43,32 +43,11 @@ public class ResearchService implements IResearchService {
     IResearchMapper mapper;
     IStudentRepository studentRepository;
     IUserService userService;
+    IUserRepository userRepository;
 
     @Override
-    public void checkDataBeforeInsert(ResearchInsertFromFileInput researchInsertFromFileInput) {
-        List<ResearchInput> data = researchInsertFromFileInput.getResearches();
-
-        List<ResearchInput> researchInputList = data.stream()
-                .filter(researchInput -> !researchInput.getInstructorsIds().isEmpty())
-                .distinct()
-                .toList();
-
-        if (!researchInputList.isEmpty()) {
-            List<String> teacherIds = new ArrayList<>();
-            for (ResearchInput researchInput : researchInputList) {
-                teacherIds.addAll(researchInput.getInstructorsIds());
-            }
-
-            if (!teacherRepository.existsByIdIn(teacherIds)) {
-                throw new AppException(ErrorCode.TEACHER_NOT_EXISTED);
-            }
-        }
-
-    }
-
-    @Override
+    @Transactional
     public List<ResearchDTO> insertFromFile(ResearchInsertFromFileInput researchInsertFromFileInput) {
-        this.checkDataBeforeInsert(researchInsertFromFileInput);
         return researchInsertFromFileInput.getResearches().stream().map(this::insert).toList();
     }
 
@@ -76,21 +55,21 @@ public class ResearchService implements IResearchService {
     public ResearchDTO insert(ResearchInput researchInput) {
         researchInput.setCode(this.generateResearchCode(researchInput));
 
-        ResearchEntity researchEntity = mapper.toEntity(researchInput);
+        Research research = mapper.toEntity(researchInput);
 
         List<String> teacherIds = researchInput.getInstructorsIds();
         String creatorId = userService.getClaimsToken().get("sub").toString();
         teacherIds.add(creatorId);
-        List<TeacherEntity> teachers = teacherIds.stream()
+        List<Teacher> teachers = teacherIds.stream()
                 .map(teacherId -> teacherRepository.findById(teacherId)
                         .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED)))
                 .toList();
 
-        researchEntity.setInstructorsIds(teacherIds);
-        researchEntity.setTeachers(teachers);
+        research.setInstructorsIds(teacherIds);
+        research.setTeachers(teachers);
 
-        List<SubjectEntity> subjects = teachers.stream()
-                .map(TeacherEntity::getSubjects)
+        List<Subject> subjects = teachers.stream()
+                .map(Teacher::getSubjects)
                 .distinct()
                 .toList();
 
@@ -98,55 +77,60 @@ public class ResearchService implements IResearchService {
             throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
         }
 
-        researchEntity.setSubjects(subjects);
+        research.setSubjects(subjects);
 
-        researchEntity.setStatus(StatusResearch.valueOf(StatusResearchConst.PENDING_APPROVE));
+        research.setStatus(StatusResearch.valueOf(StatusResearchConst.PENDING_APPROVE));
 
-        researchEntity = researchRepository.save(researchEntity);
+        research = researchRepository.save(research);
 
-        return mapper.toDTO(researchEntity);
+        return mapper.toDTO(research);
     }
 
     @Override
     public ResearchDTO update(String oldResearchId, ResearchUpdateInput newResearchUpdateInput) {
-        ResearchEntity researchEntity = researchRepository.findById(oldResearchId)
+        Research research = researchRepository.findById(oldResearchId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESEARCH_NOT_EXISTED));
 
-        researchEntity = mapper.toEntity(researchEntity, newResearchUpdateInput);
+        String currentUserId = userService.getClaimsToken().get("sub").toString();
+        if (!research.getInstructorsIds().contains(currentUserId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        research = mapper.toEntity(research, newResearchUpdateInput);
 
         List<String> newTeacherIds = new ArrayList<>();
 
         List<String> newInstructorsIds = newResearchUpdateInput.getInstructorsIds();
-        if (!new HashSet<>(researchEntity.getInstructorsIds()).containsAll(newInstructorsIds)) {
+        if (!new HashSet<>(research.getInstructorsIds()).containsAll(newInstructorsIds)) {
             newTeacherIds.addAll(newInstructorsIds);
         }
 
         String newThesisAdvisor = newResearchUpdateInput.getThesisAdvisorId();
-        if (!newThesisAdvisor.isBlank() && !newThesisAdvisor.equals(researchEntity.getThesisAdvisorId())) {
+        if (newThesisAdvisor != null && !newThesisAdvisor.equals(research.getThesisAdvisorId().trim())) {
             newTeacherIds.add(newThesisAdvisor);
         }
 
         if (!newTeacherIds.isEmpty()) {
-            List<TeacherEntity> teachers = newTeacherIds.stream()
+            List<Teacher> teachers = newTeacherIds.stream()
                     .map(teacherId -> teacherRepository.findById(teacherId)
                             .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED)))
                     .toList();
 
-            researchEntity.setInstructorsIds(newResearchUpdateInput.getInstructorsIds());
-            researchEntity.setThesisAdvisorId(newThesisAdvisor);
-            researchEntity.setTeachers(teachers);
+            research.setInstructorsIds(newResearchUpdateInput.getInstructorsIds());
+            research.setThesisAdvisorId(newThesisAdvisor);
+            research.setTeachers(teachers);
 
-            List<SubjectEntity> subjects = teachers.stream()
-                    .map(TeacherEntity::getSubjects)
+            List<Subject> subjects = teachers.stream()
+                    .map(Teacher::getSubjects)
                     .distinct()
                     .toList();
             if (subjects.contains(null)) {
                 throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
             }
-            researchEntity.setSubjects(subjects);
+            research.setSubjects(subjects);
         }
 
-        researchEntity.setCode(this.generateResearchCode(
+        research.setCode(this.generateResearchCode(
                 ResearchInput.builder()
                         .name(newResearchUpdateInput.getName())
                         .stage(newResearchUpdateInput.getStage())
@@ -154,73 +138,71 @@ public class ResearchService implements IResearchService {
                         .build())
         );
 
-        researchEntity = researchRepository.save(researchEntity);
+        research = researchRepository.save(research);
 
-        return mapper.toDTO(researchEntity);
+        return mapper.toDTO(research);
     }
 
     @Override
     public ResearchDTO markApproved(String id) {
-        ResearchEntity researchEntity = researchRepository.findById(id)
+        Research research = researchRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESEARCH_NOT_EXISTED));
 
-        researchEntity.setStatus(StatusResearch.valueOf(StatusResearchConst.APPROVED));
-        researchRepository.save(researchEntity);
+        research.setStatus(StatusResearch.valueOf(StatusResearchConst.APPROVED));
+        researchRepository.save(research);
 
-        return mapper.toDTO(researchEntity);
+        return mapper.toDTO(research);
     }
+
 
     @Override
     public void delete(String[] ids) {
-        List<ResearchEntity> researchEntityList = researchRepository.findAllById(Arrays.asList(ids));
-        researchEntityList.forEach(researchEntity ->
+        List<Research> researchList = researchRepository.findAllById(Arrays.asList(ids));
+        researchList.forEach(researchEntity ->
                 researchEntity.setStatus(StatusResearch.valueOf(StatusResearchConst.DELETED)));
 
-        researchRepository.saveAll(researchEntityList);
+        researchRepository.saveAll(researchList);
     }
 
     @Override
     public ResearchDTO findOneById(String id) {
-        ResearchEntity researchEntity = researchRepository.findById(id)
+        Research research = researchRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESEARCH_NOT_EXISTED));
-        return mapper.toDTO(researchEntity);
+        return mapper.toDTO(research);
     }
 
     @Override
     public ResearchResponse showDetail(String id) {
-        ResearchEntity researchEntity = researchRepository.findById(id)
+        Research research = researchRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESEARCH_NOT_EXISTED));
 
-        if (researchEntity.getStatus().name().equals("AS")) {
-            return mapper.toShowDTOAfterApproved(researchEntity);
+        if (research.getStatus().equals(StatusResearch.valueOf(StatusResearchConst.ASSIGNED))) {
+            return mapper.toShowDTOAfterApproved(research);
         }
 
-        return mapper.toShowDTO(researchEntity);
+        return mapper.toShowDTO(research);
 
     }
 
     @Override
-    public int countAll() {
-        return (int) researchRepository.count();
-    }
-
-    @Override
-    public ShowAllResponse<ResearchResponse> showAll(ShowAllRequest showAllRequest) {
-        int page = showAllRequest.getPage();
-        int limit = showAllRequest.getLimit();
-        int totalPages = (int) Math.ceil((1.0 * countAll()) / limit);
-
-        Pageable paging = PageRequest.of(
-                page - 1,
-                limit,
-                Sort.by(Sort.Direction.fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
+    public ShowAllResponse<ResearchResponse> showAllToFeedback(ShowAllRequest showAllRequest) {
+        List<StatusResearch> statusList = List.of(
+                StatusResearch.valueOf(StatusResearchConst.PENDING_APPROVE)
         );
-        Page<ResearchEntity> researchEntityList = researchRepository.findAll(paging);
-        List<ResearchEntity> resultEntity = researchEntityList.getContent();
-        List<ResearchResponse> resultDTO = resultEntity.stream().map(mapper::toShowDTO).toList();
+
+        Page<Research> researchEntityList = showAllBase(showAllRequest, statusList);
+        List<ResearchResponse> resultDTO = researchEntityList.getContent().stream()
+                .map(mapper::toShowDTO)
+                .toList();
+
+        int page = showAllRequest.getCurrentPage();
+        int limit = showAllRequest.getLimit();
+        int totalElements = resultDTO.size();
+        int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
         return ShowAllResponse.<ResearchResponse>builder()
-                .page(page)
+                .currentPage(page)
+                .totalElements(totalElements)
                 .totalPages(totalPages)
                 .responses(resultDTO)
                 .build();
@@ -228,26 +210,67 @@ public class ResearchService implements IResearchService {
 
     @Override
     public ShowAllResponse<ResearchShowToRegistrationResponse> showAllToRegistration(ShowAllRequest showAllRequest) {
-        int page = showAllRequest.getPage();
-        int limit = showAllRequest.getLimit();
-        int totalPages = (int) Math.ceil((1.0 * countAll()) / limit);
-
-        Pageable paging = PageRequest.of(
-                page - 1,
-                limit,
-                Sort.by(Sort.Direction
-                        .fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
+        List<StatusResearch> statusList = List.of(
+                StatusResearch.valueOf(StatusResearchConst.APPROVED)
         );
-        Page<ResearchEntity> researchEntityList = researchRepository.findAll(paging);
-        List<ResearchEntity> resultEntity = researchEntityList.getContent();
+
+        Page<Research> researchEntityList = showAllBase(showAllRequest, statusList);
         List<ResearchShowToRegistrationResponse> resultDTO =
-                resultEntity.stream().map(mapper::toShowToRegistrationDTO).toList();
+                researchEntityList.getContent().stream()
+                        .map(mapper::toShowToRegistrationDTO)
+                        .toList();
+
+        int page = showAllRequest.getCurrentPage();
+        int limit = showAllRequest.getLimit();
+        int totalElements = resultDTO.size();
+        int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
         return ShowAllResponse.<ResearchShowToRegistrationResponse>builder()
-                .page(page)
+                .currentPage(page)
+                .totalElements(totalElements)
                 .totalPages(totalPages)
                 .responses(resultDTO)
                 .build();
+    }
+
+    @Override
+    public ShowAllResponse<ResearchShowToRegistrationResponse> showAllToApprovalProcessing(ShowAllRequest showAllRequest) {
+        List<StatusResearch> statusList = List.of(
+                StatusResearch.valueOf(StatusResearchConst.PENDING_APPROVE),
+                StatusResearch.valueOf(StatusResearchConst.APPROVED)
+        );
+
+        Page<Research> researchEntityList = showAllBase(showAllRequest, statusList);
+        List<ResearchShowToRegistrationResponse> resultDTO =
+                researchEntityList.getContent().stream()
+                        .map(mapper::toShowToRegistrationDTO)
+                        .toList();
+
+        int page = showAllRequest.getCurrentPage();
+        int limit = showAllRequest.getLimit();
+        int totalElements = resultDTO.size();
+        int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
+
+        return ShowAllResponse.<ResearchShowToRegistrationResponse>builder()
+                .currentPage(page)
+                .totalElements(totalElements)
+                .totalPages(totalPages)
+                .responses(resultDTO)
+                .build();
+    }
+
+    @Override
+    public ResearchDTO cancelApproval(String id) {
+        Research research = researchRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.RESEARCH_NOT_EXISTED));
+
+        if (research.getStatus().equals(StatusResearch.valueOf(StatusResearchConst.APPROVED))) {
+            research.setStatus(StatusResearch.valueOf(StatusResearchConst.PENDING_APPROVE));
+            research = researchRepository.save(research);
+            return mapper.toDTO(research);
+        }
+
+        return mapper.toDTO(research);
     }
 
     @Override
@@ -255,29 +278,39 @@ public class ResearchService implements IResearchService {
         researchRegisterInput.setStudentID(userService.getClaimsToken().get("sub").toString());
 
         String researchID = researchRegisterInput.getResearchID();
-        ResearchEntity researchEntity = researchRepository.findById(researchID)
+        Research research = researchRepository.findById(researchID)
                 .orElseThrow(() -> new AppException(ErrorCode.RESEARCH_NOT_EXISTED));
+        if (research.getStatus().name().equals("AS")) {
+            throw new AppException(ErrorCode.RESEARCH_HAS_BEEN_ASSIGNED);
+        }
 
         String studentID = researchRegisterInput.getStudentID();
-        StudentEntity studentEntity = studentRepository.findById(studentID)
+        Student student = studentRepository.findById(studentID)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
+        if (student.getGroups() == null) {
+            throw new AppException(ErrorCode.STUDENT_HAS_NOT_GROUP);
+        }
+        if (student.getGroups().getResearches() != null) {
+            throw new AppException(ErrorCode.STUDENT_EXISTED_IN_OTHER_RESEARCH);
+        }
 
-        researchEntity.setGroups(studentEntity.getGroups());
+        research.setGroups(student.getGroups());
 
-        researchEntity.setStatus(StatusResearch.valueOf(StatusResearchConst.ASSIGNED));
-        researchRepository.save(researchEntity);
+        research.setStatus(StatusResearch.valueOf(StatusResearchConst.ASSIGNED));
+        researchRepository.save(research);
     }
 
     @Override
     public void cancelRegistrationResearch(ResearchCancelRegistrationInput researchCancelRegistrationInput) {
         String researchID = researchCancelRegistrationInput.getResearchID();
-        ResearchEntity researchEntity = researchRepository.findById(researchID)
+        Research research = researchRepository.findById(researchID)
                 .orElseThrow(() -> new AppException(ErrorCode.RESEARCH_NOT_EXISTED));
 
-        researchEntity.setGroups(null);
+        research.getGroups().setResearches(null);
+        research.setGroups(null);
 
-        researchEntity.setStatus(StatusResearch.valueOf(StatusResearchConst.APPROVED));
-        researchRepository.save(researchEntity);
+        research.setStatus(StatusResearch.valueOf(StatusResearchConst.APPROVED));
+        researchRepository.save(research);
     }
 
     private String generateResearchCode(ResearchInput researchInput) {
@@ -294,6 +327,27 @@ public class ResearchService implements IResearchService {
         String[] allLetterName = researchInput.getName().toUpperCase().split(" ");
         Arrays.stream(allLetterName).toList().forEach(l -> code.append(l, 0, 1));
 
-        return code.toString();
+        return Normalizer.normalize(code.toString(), Normalizer.Form.NFKD).replaceAll("\\p{M}", "");
     }
+
+    private Page<Research> showAllBase(ShowAllRequest showAllRequest, List<StatusResearch> statusList) {
+        String currentUserName = userService.getClaimsToken().get("username").toString();
+        User user = userRepository.findByUsername(currentUserName)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        String subjectId = user.getStudents() != null
+                ? user.getStudents().getSubjects().getId()
+                : user.getTeachers().getSubjects().getId();
+
+
+        Pageable paging = PageRequest.of(
+                showAllRequest.getCurrentPage() - 1,
+                showAllRequest.getLimit(),
+                Sort.by(Sort.Direction
+                        .fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
+        );
+
+        return researchRepository.findByStatusInAndSubjects_Id(statusList, subjectId, paging);
+    }
+
 }

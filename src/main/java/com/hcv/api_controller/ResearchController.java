@@ -48,6 +48,15 @@ public class ResearchController {
                 .build();
     }
 
+    @PutMapping("/cancel-approval/{id}")
+    @PreAuthorize("hasRole('HEAD_OF_DEPARTMENT')")
+    public ApiResponse<ResearchDTO> cancelApproval(@PathVariable(value = "id") String id) {
+        ResearchDTO response = researchService.cancelApproval(id);
+        return ApiResponse.<ResearchDTO>builder()
+                .result(response)
+                .build();
+    }
+
     @DeleteMapping("/delete")
     @PreAuthorize("hasRole('TEACHER')")
     public ApiResponse<String> delete(@RequestBody String[] ids) {
@@ -57,17 +66,62 @@ public class ResearchController {
                 .build();
     }
 
-    @GetMapping("/showAll")
-    public ApiResponse<ShowAllResponse<ResearchShowToRegistrationResponse>> showAllToRegistration
+    @GetMapping("/showAll-to-feedback")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ApiResponse<ShowAllResponse<ResearchResponse>> showAllToFeedback
             (
-                    @RequestParam(name = "page") Integer page,
-                    @RequestParam(name = "limit") Integer limit,
-                    @RequestParam(name = "orderBy") String orderBy,
-                    @RequestParam(name = "orderDirection") String orderDirection
+                    @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+                    @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
+                    @RequestParam(value = "orderBy", required = false, defaultValue = "id") String orderBy,
+                    @RequestParam(value = "orderDirection", required = false, defaultValue = "ASC") String orderDirection
             ) {
 
         ShowAllRequest showAllRequest = ShowAllRequest.builder()
-                .page(page)
+                .currentPage(page)
+                .limit(limit)
+                .orderBy(orderBy)
+                .orderDirection(orderDirection)
+                .build();
+
+        ShowAllResponse<ResearchResponse> response = researchService.showAllToFeedback(showAllRequest);
+        return ApiResponse.<ShowAllResponse<ResearchResponse>>builder()
+                .result(response)
+                .build();
+    }
+
+    @GetMapping("/showAll-to-approval-processing")
+    @PreAuthorize("hasRole('HEAD_OF_DEPARTMENT')")
+    public ApiResponse<ShowAllResponse<ResearchShowToRegistrationResponse>> showAllToApprovalProcessing
+            (
+                    @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+                    @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
+                    @RequestParam(value = "orderBy", required = false, defaultValue = "id") String orderBy,
+                    @RequestParam(value = "orderDirection", required = false, defaultValue = "ASC") String orderDirection
+            ) {
+
+        ShowAllRequest showAllRequest = ShowAllRequest.builder()
+                .currentPage(page)
+                .limit(limit)
+                .orderBy(orderBy)
+                .orderDirection(orderDirection)
+                .build();
+
+        ShowAllResponse<ResearchShowToRegistrationResponse> response = researchService.showAllToApprovalProcessing(showAllRequest);
+        return ApiResponse.<ShowAllResponse<ResearchShowToRegistrationResponse>>builder()
+                .result(response)
+                .build();
+    }
+
+    @GetMapping("/showAll-to-registration")
+    public ApiResponse<ShowAllResponse<ResearchShowToRegistrationResponse>> showAllToRegistration
+            (
+                    @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+                    @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
+                    @RequestParam(value = "orderBy", required = false, defaultValue = "id") String orderBy,
+                    @RequestParam(value = "orderDirection", required = false, defaultValue = "ASC") String orderDirection
+            ) {
+        ShowAllRequest showAllRequest = ShowAllRequest.builder()
+                .currentPage(page)
                 .limit(limit)
                 .orderBy(orderBy)
                 .orderDirection(orderDirection)

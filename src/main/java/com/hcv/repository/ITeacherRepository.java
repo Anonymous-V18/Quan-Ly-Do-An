@@ -1,19 +1,16 @@
 package com.hcv.repository;
 
-import com.hcv.entity.TeacherEntity;
+import com.hcv.entity.Teacher;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Collection;
 import java.util.Optional;
 
-public interface ITeacherRepository extends JpaRepository<TeacherEntity, String> {
+public interface ITeacherRepository extends JpaRepository<Teacher, String> {
 
-    Optional<TeacherEntity> findByCode(String code);
+    Optional<Teacher> findByCode(String code);
 
-    boolean existsByCode(String maSo);
 
     boolean existsById(String id);
 
-    boolean existsByIdIn(Collection<String> ids);
-
+    Optional<Teacher> findByCodeAndIdNot(String code, String id);
 }

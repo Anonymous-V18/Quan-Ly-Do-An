@@ -13,9 +13,9 @@ public interface IUserService {
 
     UserDTO create(UserRequest userRequest);
 
-    UserDTO updateForAdmin(UserRequest updateUserInput);
+    UserDTO updateForAdmin(String oldUserId, UserRequest updateUserInput);
 
-    UserDTO update(String oldUsername, UserUpdateInput updateUserInput);
+    UserDTO update(UserUpdateInput updateUserInput);
 
     void delete(String[] ids);
 
@@ -24,8 +24,6 @@ public interface IUserService {
     Map<String, Object> getClaimsToken();
 
     List<UserDTO> findAll();
-
-    int countAll();
 
     ShowAllResponse<UserDTO> showAll(ShowAllRequest showAllRequest);
 

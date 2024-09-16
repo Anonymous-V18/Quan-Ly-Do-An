@@ -1,11 +1,13 @@
 package com.hcv.repository;
 
-import com.hcv.entity.DepartmentEntity;
+import com.hcv.entity.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-public interface IDepartmentRepository extends JpaRepository<DepartmentEntity, String> {
+@Repository
+public interface IDepartmentRepository extends JpaRepository<Department, String> {
 
-    Optional<DepartmentEntity> findByName(String name);
+    Optional<Department> findByName(String name);
 }

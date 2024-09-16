@@ -7,8 +7,8 @@ import com.hcv.dto.request.ShowAllRequest;
 import com.hcv.dto.response.GroupDTO;
 import com.hcv.dto.response.GroupResponse;
 import com.hcv.dto.response.ShowAllResponse;
-import com.hcv.entity.GroupEntity;
-import com.hcv.entity.StudentEntity;
+import com.hcv.entity.Group;
+import com.hcv.entity.Student;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IGroupRepository;
@@ -41,78 +41,82 @@ public class GroupService implements IGroupService {
     public GroupDTO insert(GroupInsertInput groupInsertInput) {
         String currentUserId = userService.getClaimsToken().get("sub").toString();
 
-        StudentEntity studentEntity = studentRepository.findById(currentUserId)
+        Student student = studentRepository.findById(currentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
 
-        if (studentEntity.getGroups() != null) {
+        if (student.getGroups() != null) {
             throw new AppException(ErrorCode.STUDENT_EXISTED_IN_OTHER_GROUP);
         }
 
-        GroupEntity groupEntity = new GroupEntity();
-        groupEntity.setLeaderId(currentUserId);
-        groupEntity.setMaxMember(groupInsertInput.getMaxMember());
-        GroupEntity finalGroupEntity = groupEntity;
-        studentEntity.setGroups(finalGroupEntity);
+        Group group = new Group();
+        group.setLeaderId(currentUserId);
+        group.setMaxMember(groupInsertInput.getMaxMember());
+        Group finalGroup = group;
+        student.setGroups(finalGroup);
 
-        groupEntity.setStudents(List.of(studentEntity));
+        group.setStudents(List.of(student));
 
-        groupEntity = groupRepository.save(groupEntity);
+        group = groupRepository.save(group);
 
-        return mapper.toDTO(groupEntity);
+        return mapper.toDTO(group);
     }
 
     @Override
     public void addMember(String leaderGroupId) {
         String currentUserId = userService.getClaimsToken().get("sub").toString();
 
-        StudentEntity studentEntity = studentRepository.findById(currentUserId)
+        Student student = studentRepository.findById(currentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
 
-        if (studentEntity.getGroups() != null) {
+        if (student.getGroups() != null) {
             throw new AppException(ErrorCode.STUDENT_EXISTED_IN_OTHER_GROUP);
         }
 
-        StudentEntity leaderGroup = studentRepository.findById(leaderGroupId)
+        Student leaderGroup = studentRepository.findById(leaderGroupId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
 
+        if (leaderGroup.getGroups() == null) {
+            throw new AppException(ErrorCode.LEADER_HAS_NOT_GROUP);
+        }
+
         String groupId = leaderGroup.getGroups().getId();
-        GroupEntity groupEntity = groupRepository.findById(groupId)
+        Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new AppException(ErrorCode.GROUP_NOT_EXIST));
-        if (groupEntity.getResearches() != null) {
+        if (group.getResearches() != null) {
             throw new AppException(ErrorCode.GROUP_NOT_CHANGE_MEMBER);
         }
 
-        List<StudentEntity> oldStudentEntityList = groupEntity.getStudents();
-        if (oldStudentEntityList.size() == groupEntity.getMaxMember()) {
+        List<Student> oldStudentList = group.getStudents();
+        if (oldStudentList.size() == group.getMaxMember()) {
             throw new AppException(ErrorCode.GROUP_ENOUGH_MEMBER);
         }
 
-        studentEntity.setGroups(groupEntity);
-        groupEntity.getStudents().add(studentEntity);
+        student.setGroups(group);
+        group.getStudents().add(student);
 
-        groupEntity = groupRepository.save(groupEntity);
+        group = groupRepository.save(group);
 
-        mapper.toDTO(groupEntity);
+        mapper.toDTO(group);
     }
 
     @Override
     public void removeMember(String idOldGroup, GroupInput groupUpdateInput) {
         String currentUserId = userService.getClaimsToken().get("sub").toString();
 
-        GroupEntity groupEntity = groupRepository.findById(idOldGroup)
+        Group group = groupRepository.findById(idOldGroup)
                 .orElseThrow(() -> new AppException(ErrorCode.GROUP_NOT_EXIST));
 
-        if (!groupEntity.getLeaderId().equals(currentUserId)) {
+        if (!group.getLeaderId().equals(currentUserId)) {
             throw new AppException(ErrorCode.YOU_NOT_DELEGATE_LEADER);
         }
 
-        List<StudentEntity> newMember = groupEntity.getStudents().stream()
+        List<Student> newMember = group.getStudents().stream()
                 .filter(member -> member.getId().equals(currentUserId)
                         && !groupUpdateInput.getStudentIds().contains(member.getId())
                 )
                 .toList();
 
-        List<StudentEntity> memberRemoveList = groupEntity.getStudents().stream()
+        List<Student> memberRemoveList = group.getStudents().stream()
                 .filter(member -> !member.getId().equals(currentUserId)
                         && groupUpdateInput.getStudentIds().contains(member.getId())
                 )
@@ -121,38 +125,31 @@ public class GroupService implements IGroupService {
         memberRemoveList.forEach(member -> member.setGroups(null));
         studentRepository.saveAll(memberRemoveList);
 
-        groupEntity.setStudents(newMember);
+        group.setStudents(newMember);
     }
 
     @Override
     public void delete(String[] ids) {
-        List<StudentEntity> studentEntityList = studentRepository.findByGroups_IdIn(Arrays.stream(ids).toList());
-        if (!studentEntityList.isEmpty()) {
-            studentEntityList.forEach(studentEntity -> studentEntity.setGroups(null));
-            studentRepository.saveAll(studentEntityList);
+        List<Student> studentList = studentRepository.findByGroups_IdIn(Arrays.stream(ids).toList());
+        if (!studentList.isEmpty()) {
+            studentList.forEach(studentEntity -> studentEntity.setGroups(null));
+            studentRepository.saveAll(studentList);
         }
         groupRepository.deleteAllById(Arrays.stream(ids).toList());
     }
 
     @Override
-    public int countAll() {
-        return (int) groupRepository.count();
-    }
-
-    @Override
     public GroupResponse showInfoMyGroup() {
         String currentUserId = userService.getClaimsToken().get("sub").toString();
-        StudentEntity studentEntity = studentRepository.findById(currentUserId)
+        Student student = studentRepository.findById(currentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
-        return mapper.toShowDTO(studentEntity.getGroups());
+        return mapper.toShowDTO(student.getGroups());
     }
 
     @Override
     public ShowAllResponse<GroupResponse> showAllMyGroup(ShowAllRequest showAllRequest) {
-        int page = showAllRequest.getPage();
+        int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
-        int totalPages = (int) Math.ceil((1.0 * countAll()) / limit);
-
         Pageable paging = PageRequest.of(
                 page - 1,
                 limit,
@@ -160,12 +157,15 @@ public class GroupService implements IGroupService {
         );
 
         String currentUserId = userService.getClaimsToken().get("sub").toString();
-        Page<GroupEntity> researchEntityList = groupRepository.findByResearches_Teachers_Id(currentUserId, paging);
-        List<GroupEntity> resultEntity = researchEntityList.getContent();
-        List<GroupResponse> resultDTO = resultEntity.stream().map(mapper::toShowDTO).toList();
+        Page<Group> researchEntityList = groupRepository.findByResearches_Teachers_Id(currentUserId, paging);
+        List<GroupResponse> resultDTO = researchEntityList.getContent().stream().map(mapper::toShowDTO).toList();
+
+        int totalElements = resultDTO.size();
+        int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
         return ShowAllResponse.<GroupResponse>builder()
-                .page(page)
+                .currentPage(page)
+                .totalElements(totalElements)
                 .totalPages(totalPages)
                 .responses(resultDTO)
                 .build();

@@ -16,7 +16,7 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PointEntity extends BaseEntity {
+public class Point extends BaseEntity {
 
     Double point;
     String type;
@@ -24,6 +24,6 @@ public class PointEntity extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "student_id")
-    StudentEntity students;
+    Student students;
 
 }

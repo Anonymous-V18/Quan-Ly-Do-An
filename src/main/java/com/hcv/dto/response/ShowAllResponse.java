@@ -7,14 +7,16 @@ import lombok.experimental.FieldDefaults;
 import java.util.List;
 
 
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ShowAllResponse<T> {
-    int page;
+    int currentPage;
     int totalPages;
+    int totalElements;
     List<T> responses;
 }

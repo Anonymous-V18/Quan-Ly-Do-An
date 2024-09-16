@@ -1,18 +1,18 @@
 package com.hcv.converter;
 
 import com.hcv.dto.response.DepartmentDTO;
-import com.hcv.entity.DepartmentEntity;
+import com.hcv.entity.Department;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper
 public interface IDepartmentMapper {
 
-    DepartmentDTO toDTO(DepartmentEntity departmentEntity);
+    DepartmentDTO toDTO(Department department);
 
     @Mapping(target = "teachers", ignore = true)
     @Mapping(target = "subjects", ignore = true)
     @Mapping(target = "students", ignore = true)
-    DepartmentEntity toEntity(DepartmentDTO departmentDTO);
+    Department toEntity(DepartmentDTO departmentDTO);
 
 }

@@ -37,14 +37,6 @@ public class PointController {
                 .result(response)
                 .build();
     }
-
-//    @DeleteMapping("/delete")
-//    @PreAuthorize("hasRole('TEACHER')")
-//    public ApiResponse<String> delete(@RequestBody String[] ids) {
-//        pointService.delete(ids);
-//        return ApiResponse.<String>builder()
-//                .message("Xóa thành công !")
-//                .build();
-//    }
+    
 
 }

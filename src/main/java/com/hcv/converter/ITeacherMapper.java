@@ -3,16 +3,17 @@ package com.hcv.converter;
 import com.hcv.dto.request.TeacherInput;
 import com.hcv.dto.response.TeacherDTO;
 import com.hcv.dto.response.TeacherShowToSelectionResponse;
-import com.hcv.entity.TeacherEntity;
+import com.hcv.entity.Teacher;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper
 public interface ITeacherMapper {
 
-    TeacherDTO toDTO(TeacherEntity teacherEntity);
+    TeacherDTO toDTO(Teacher teacher);
 
-    TeacherShowToSelectionResponse toShowDTOToSelection(TeacherEntity teacherEntity);
+    TeacherShowToSelectionResponse toShowDTOToSelection(Teacher teacher);
 
     @Mapping(target = "users", ignore = true)
     @Mapping(target = "subjects", ignore = true)
@@ -21,6 +22,9 @@ public interface ITeacherMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "feedbacks", ignore = true)
     @Mapping(target = "departments", ignore = true)
-    TeacherEntity toEntity(TeacherInput teacherInput);
+    Teacher toEntity(TeacherInput teacherInput);
+
+    @Mapping(target = "position", expression = "java(teacherInput.getPosition())")
+    Teacher toEntity(@MappingTarget Teacher oldTeacher, TeacherInput teacherInput);
 
 }

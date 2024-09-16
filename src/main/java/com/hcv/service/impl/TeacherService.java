@@ -1,21 +1,15 @@
 package com.hcv.service.impl;
 
-import com.hcv.constant.TeacherPositionConst;
 import com.hcv.converter.ITeacherMapper;
-import com.hcv.dto.request.ShowAllRequest;
-import com.hcv.dto.request.TeacherInput;
-import com.hcv.dto.request.TeacherInsertFromFileInput;
-import com.hcv.dto.request.UserRequest;
+import com.hcv.dto.request.*;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.dto.response.TeacherDTO;
 import com.hcv.dto.response.TeacherShowToSelectionResponse;
 import com.hcv.dto.response.UserDTO;
-import com.hcv.entity.DepartmentEntity;
-import com.hcv.entity.SubjectEntity;
-import com.hcv.entity.TeacherEntity;
-import com.hcv.entity.UserEntity;
+import com.hcv.entity.*;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
+import com.hcv.repository.IRoleRepository;
 import com.hcv.repository.ISubjectRepository;
 import com.hcv.repository.ITeacherRepository;
 import com.hcv.repository.IUserRepository;
@@ -29,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,43 +40,11 @@ public class TeacherService implements ITeacherService {
     IUserRepository userRepository;
     IUserService userService;
     ISubjectRepository subjectRepository;
+    IRoleRepository roleRepository;
 
     @Override
-    public void checkDataBeforeInsert(TeacherInsertFromFileInput teacherInsertFromFileInput) {
-        for (TeacherInput teacherInput : teacherInsertFromFileInput.getTeachers()) {
-            boolean isTeacherExisted = teacherRepository.existsByCode(teacherInput.getCode().trim());
-            if (isTeacherExisted) {
-                throw new AppException(ErrorCode.TEACHER_EXISTED);
-            }
-            boolean isSubjectExisted = subjectRepository.existsByName(teacherInput.getSubjectName().trim());
-            if (!isSubjectExisted) {
-                throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
-            }
-
-            List<String> listNameRole = teacherInput.getPosition();
-            boolean checkNameRoleContain = List.of(TeacherPositionConst.TEACHER, TeacherPositionConst.DEAN,
-                            TeacherPositionConst.CATECHISM, TeacherPositionConst.STUDENT,
-                            TeacherPositionConst.HEAD_OF_DEPARTMENT)
-                    .containsAll(listNameRole);
-            if (!checkNameRoleContain) {
-                throw new AppException(ErrorCode.INVALID_NAME_ROLE);
-            }
-        }
-
-        List<String> teacherCodeList = teacherInsertFromFileInput.getTeachers()
-                .stream()
-                .map(TeacherInput::getCode)
-                .distinct()
-                .toList();
-        if (teacherCodeList.size() != teacherInsertFromFileInput.getTeachers().size()) {
-            throw new AppException(ErrorCode.TEACHER_DUPLICATED);
-        }
-
-    }
-
-    @Override
+    @Transactional
     public List<TeacherDTO> insertFromFile(TeacherInsertFromFileInput teacherInsertFromFileInput) {
-        this.checkDataBeforeInsert(teacherInsertFromFileInput);
         List<TeacherDTO> teacherDTOList = new ArrayList<>();
         for (TeacherInput teacherInput : teacherInsertFromFileInput.getTeachers()) {
 
@@ -89,6 +52,11 @@ public class TeacherService implements ITeacherService {
             UserRequest userRequest = new UserRequest();
             userRequest.setUsername(usernameAndPasswordDefault);
             userRequest.setPassword(usernameAndPasswordDefault);
+
+            if (!teacherInput.getPosition().contains("GIẢNG VIÊN")) {
+                teacherInput.getPosition().add("GIẢNG VIÊN");
+            }
+
             userRequest.setNameRoles(teacherInput.getPosition());
             userRequest.setIsGraduate(0);
 
@@ -108,85 +76,98 @@ public class TeacherService implements ITeacherService {
                     throw new AppException(ErrorCode.TEACHER_EXISTED);
                 });
 
-        TeacherEntity teacherEntity = teacherMapper.toEntity(teacherInput);
+        Teacher teacher = teacherMapper.toEntity(teacherInput);
 
-        UserEntity userEntity = userRepository.findById(teacherInput.getUserId())
+        User user = userRepository.findById(teacherInput.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        teacher.setUsers(user);
 
-        teacherEntity.setUsers(userEntity);
-
-        SubjectEntity subjectEntity = subjectRepository.findByName(teacherInput.getSubjectName())
+        Subject subject = subjectRepository.findByName(teacherInput.getSubjectName())
                 .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
+        teacher.setSubjects(subject);
 
-        teacherEntity.setSubjects(subjectEntity);
+        Department department = subject.getDepartments();
+        teacher.setDepartments(department);
 
-        DepartmentEntity departmentEntity = subjectEntity.getDepartments();
-        teacherEntity.setDepartments(departmentEntity);
+        teacher = teacherRepository.save(teacher);
 
-        teacherEntity = teacherRepository.save(teacherEntity);
-
-        return teacherMapper.toDTO(teacherEntity);
+        return teacherMapper.toDTO(teacher);
     }
 
     @Override
-    public TeacherDTO update(String oldTeacherId, TeacherInput teacherInput) {
-        TeacherEntity teacherEntity = teacherRepository.findById(oldTeacherId)
+    public TeacherDTO update(String oldTeacherId, TeacherNormalUpdateInput teacherInput) {
+        Teacher teacher = teacherRepository.findById(oldTeacherId)
                 .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
 
-        teacherEntity.setCode(teacherInput.getCode());
-        teacherEntity.setName(teacherInput.getName());
-        teacherEntity.setDegree(teacherInput.getDegree());
-        teacherEntity.setPosition(teacherInput.getPosition());
-        teacherEntity.setEmail(teacherInput.getEmail());
-        teacherEntity.setPhoneNumber(teacherInput.getPhoneNumber());
+        teacher.setEmail(teacherInput.getEmail());
+        teacher.setPhoneNumber(teacherInput.getPhoneNumber());
 
-        SubjectEntity subjectEntity = subjectRepository.findByName(teacherInput.getSubjectName())
-                .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
+        teacherRepository.save(teacher);
 
-        teacherEntity.setSubjects(subjectEntity);
-
-        teacherEntity.setDepartments(teacherEntity.getSubjects().getDepartments());
-
-        teacherRepository.save(teacherEntity);
-
-        return teacherMapper.toDTO(teacherEntity);
+        return teacherMapper.toDTO(teacher);
     }
+
+    @Override
+    public TeacherDTO updateAdvanced(String oldTeacherId, TeacherInput teacherInput) {
+        Teacher teacher = teacherRepository.findById(oldTeacherId)
+                .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
+
+        teacherRepository.findByCodeAndIdNot(teacherInput.getCode(), oldTeacherId)
+                .ifPresent(item -> {
+                    throw new AppException(ErrorCode.TEACHER_EXISTED);
+                });
+
+        teacher = teacherMapper.toEntity(teacher, teacherInput);
+
+        List<RoleEntity> roles = roleRepository.findByNameIn(teacherInput.getPosition());
+        if (roles.contains(null)) {
+            throw new AppException(ErrorCode.INVALID_NAME_ROLE);
+        }
+        teacher.getUsers().setRoles(roles);
+
+        Subject subject = subjectRepository.findByName(teacherInput.getSubjectName())
+                .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
+        teacher.setSubjects(subject);
+
+        teacher.setDepartments(teacher.getSubjects().getDepartments());
+
+        teacherRepository.save(teacher);
+
+        return teacherMapper.toDTO(teacher);
+    }
+
 
     @Override
     public void delete(String[] ids) {
-        List<TeacherEntity> teacherEntityList = teacherRepository.findAllById(Arrays.stream(ids).toList());
-        teacherEntityList = teacherEntityList.stream().filter(Objects::nonNull).toList();
+        List<Teacher> teacherList = teacherRepository.findAllById(Arrays.stream(ids).toList());
+        teacherList = teacherList.stream().filter(Objects::nonNull).toList();
 
-        List<UserEntity> userEntityList = new ArrayList<>();
-        teacherEntityList.forEach(teacherEntity -> userEntityList.add(teacherEntity.getUsers()));
+        List<User> userList = new ArrayList<>();
+        teacherList.forEach(teacherEntity -> userList.add(teacherEntity.getUsers()));
 
-        teacherRepository.deleteAll(teacherEntityList);
-        userRepository.deleteAll(userEntityList);
+        teacherRepository.deleteAll(teacherList);
+        userRepository.deleteAll(userList);
 
-    }
-
-    @Override
-    public int countAll() {
-        return (int) teacherRepository.count();
     }
 
     @Override
     public ShowAllResponse<TeacherDTO> showAll(ShowAllRequest showAllRequest) {
-        int page = showAllRequest.getPage();
+        int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
-        int totalPages = (int) Math.ceil((1.0 * countAll()) / limit);
-
         Pageable paging = PageRequest.of(
                 page - 1,
                 limit,
                 Sort.by(Sort.Direction.fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
         );
-        Page<TeacherEntity> teacherEntityList = teacherRepository.findAll(paging);
-        List<TeacherEntity> resultEntity = teacherEntityList.getContent();
-        List<TeacherDTO> resultDTO = resultEntity.stream().map(teacherMapper::toDTO).toList();
+        Page<Teacher> teacherEntityList = teacherRepository.findAll(paging);
+        List<TeacherDTO> resultDTO = teacherEntityList.getContent().stream().map(teacherMapper::toDTO).toList();
+
+        int totalElements = resultDTO.size();
+        int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
         return ShowAllResponse.<TeacherDTO>builder()
-                .page(page)
+                .currentPage(page)
+                .totalElements(totalElements)
                 .totalPages(totalPages)
                 .responses(resultDTO)
                 .build();
@@ -199,14 +180,14 @@ public class TeacherService implements ITeacherService {
 
     @Override
     public TeacherDTO findOneById(String id) {
-        TeacherEntity teacher = teacherRepository.findById(id)
+        Teacher teacher = teacherRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
         return teacherMapper.toDTO(teacher);
     }
 
     @Override
     public List<TeacherDTO> findAll() {
-        List<TeacherEntity> result = teacherRepository.findAll();
+        List<Teacher> result = teacherRepository.findAll();
         return result.stream().map(teacherMapper::toDTO).toList();
     }
 

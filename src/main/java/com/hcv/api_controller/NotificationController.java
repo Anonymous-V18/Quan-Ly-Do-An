@@ -24,7 +24,7 @@ public class NotificationController {
 
     @PostMapping("/insert-invitation")
     @PreAuthorize("hasRole('STUDENT')")
-    public ApiResponse<String> insertInvitation(@RequestBody @Valid NotificationTypeInvitationInsertInput invitationInsertInput) {
+    public ApiResponse<String> insertInvitation(@RequestBody NotificationTypeInvitationInsertInput invitationInsertInput) {
         notificationService.insertInvitation(invitationInsertInput);
         return ApiResponse.<String>builder()
                 .message("Gửi lời mời vào nhóm thành công !")
@@ -48,5 +48,6 @@ public class NotificationController {
                 .result(response)
                 .build();
     }
+
 
 }

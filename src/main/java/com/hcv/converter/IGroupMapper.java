@@ -2,7 +2,7 @@ package com.hcv.converter;
 
 import com.hcv.dto.response.GroupDTO;
 import com.hcv.dto.response.GroupResponse;
-import com.hcv.entity.GroupEntity;
+import com.hcv.entity.Group;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -10,10 +10,10 @@ import org.mapstruct.Mapping;
 public interface IGroupMapper {
 
     @Mapping(target = "jobs", ignore = true)
-    GroupEntity toEntity(GroupDTO groupDTO);
+    Group toEntity(GroupDTO groupDTO);
 
-    GroupDTO toDTO(GroupEntity groupEntity);
+    GroupDTO toDTO(Group group);
 
-    GroupResponse toShowDTO(GroupEntity groupEntity);
+    GroupResponse toShowDTO(Group group);
 
 }

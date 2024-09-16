@@ -34,17 +34,17 @@ public class UserController {
 
     @PutMapping("/update-user")
     public ApiResponse<UserDTO> updateUser(@RequestBody @Valid UserUpdateInput updateUserInput) {
-        String username = userService.getClaimsToken().get("username").toString();
-        UserDTO response = userService.update(username, updateUserInput);
+        UserDTO response = userService.update(updateUserInput);
         return ApiResponse.<UserDTO>builder()
                 .result(response)
                 .build();
     }
 
-    @PutMapping("admin/update-user")
+    @PutMapping("admin/update-user/{id}")
     @PreAuthorize("hasRole('DEAN') or hasRole('CATECHISM')")
-    public ApiResponse<UserDTO> updateUserForAdmin(@RequestBody @Valid UserRequest updateUserInput) {
-        UserDTO response = userService.updateForAdmin(updateUserInput);
+    public ApiResponse<UserDTO> updateUserForAdmin(@PathVariable(name = "id") String id,
+                                                   @RequestBody @Valid UserRequest updateUserInput) {
+        UserDTO response = userService.updateForAdmin(id, updateUserInput);
         return ApiResponse.<UserDTO>builder()
                 .result(response)
                 .build();
@@ -60,12 +60,14 @@ public class UserController {
     }
 
     @GetMapping("/showAll")
-    public ApiResponse<ShowAllResponse<UserDTO>> showAll(@RequestParam(name = "page") Integer page,
-                                                         @RequestParam(name = "limit") Integer limit,
-                                                         @RequestParam(name = "orderBy") String orderBy,
-                                                         @RequestParam(name = "orderDirection") String orderDirection) {
+    public ApiResponse<ShowAllResponse<UserDTO>> showAll(
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
+            @RequestParam(value = "orderBy", required = false, defaultValue = "id") String orderBy,
+            @RequestParam(value = "orderDirection", required = false, defaultValue = "ASC") String orderDirection
+    ) {
         ShowAllRequest showAllRequest = ShowAllRequest.builder()
-                .page(page)
+                .currentPage(page)
                 .limit(limit)
                 .orderBy(orderBy)
                 .orderDirection(orderDirection)

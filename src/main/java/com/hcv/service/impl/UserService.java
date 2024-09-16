@@ -7,7 +7,7 @@ import com.hcv.dto.request.UserUpdateInput;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.dto.response.UserDTO;
 import com.hcv.entity.RoleEntity;
-import com.hcv.entity.UserEntity;
+import com.hcv.entity.User;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IRoleRepository;
@@ -48,44 +48,47 @@ public class UserService implements IUserService {
         if (isUserExisted) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
-        UserEntity userEntity = userMapper.toEntity(userRequest, passwordEncoder);
-        List<RoleEntity> listRolesEntity = userRequest.getNameRoles().stream()
-                .map(roleName -> roleRepository.findByName(roleName)
-                        .orElseThrow(() -> new AppException(ErrorCode.INVALID_NAME_ROLE)))
-                .toList();
+        User user = userMapper.toEntity(userRequest, passwordEncoder);
 
-        userEntity.setRoles(listRolesEntity);
-        userEntity = userRepository.save(userEntity);
-        return userMapper.toDTO(userEntity);
+        List<RoleEntity> listRolesEntity = roleRepository.findByNameIn(userRequest.getNameRoles());
+        if (listRolesEntity.contains(null)) {
+            throw new AppException(ErrorCode.INVALID_NAME_ROLE);
+        }
+
+        user.setRoles(listRolesEntity);
+        user = userRepository.save(user);
+        return userMapper.toDTO(user);
     }
 
     @Override
-    public UserDTO update(String oldUsername, UserUpdateInput updateUserInput) {
-        UserEntity userEntity = userRepository.findByUsername(oldUsername)
+    public UserDTO update(UserUpdateInput updateUserInput) {
+        String currentUserId = this.getClaimsToken().get("sub").toString();
+
+        User user = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         String newPassword = passwordEncoder.encode(updateUserInput.getPassword());
-        userEntity.setPassword(newPassword);
-        userRepository.save(userEntity);
-        return userMapper.toDTO(userEntity);
+        user.setPassword(newPassword);
+        user = userRepository.save(user);
+        return userMapper.toDTO(user);
     }
 
     @Override
-    public UserDTO updateForAdmin(UserRequest updateUserInput) {
-        List<RoleEntity> listRolesEntity = updateUserInput.getNameRoles().stream()
-                .map(roleName -> roleRepository.findByName(roleName)
-                        .orElseThrow(() -> new AppException(ErrorCode.INVALID_NAME_ROLE)))
-                .toList();
-
-        UserEntity userEntityOld = userRepository.findByUsername(updateUserInput.getUsername())
+    public UserDTO updateForAdmin(String oldUserId, UserRequest updateUserInput) {
+        User userOld = userRepository.findById(oldUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        userEntityOld.setRoles(listRolesEntity);
-        userEntityOld.setPassword(passwordEncoder.encode(updateUserInput.getPassword()));
-        userEntityOld.setIsGraduate(updateUserInput.getIsGraduate());
-        userRepository.save(userEntityOld);
+        List<RoleEntity> listRolesEntity = roleRepository.findByNameIn(updateUserInput.getNameRoles());
+        if (listRolesEntity.contains(null)) {
+            throw new AppException(ErrorCode.INVALID_NAME_ROLE);
+        }
+        userOld.setRoles(listRolesEntity);
 
-        return userMapper.toDTO(userEntityOld);
+        userOld.setPassword(passwordEncoder.encode(updateUserInput.getPassword()));
+        userOld.setIsGraduate(updateUserInput.getIsGraduate());
+        userOld = userRepository.save(userOld);
+
+        return userMapper.toDTO(userOld);
     }
 
     @Override
@@ -97,9 +100,9 @@ public class UserService implements IUserService {
 
     @Override
     public UserDTO findOneByUsername(String username) {
-        UserEntity userEntity = userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        return userMapper.toDTO(userEntity);
+        return userMapper.toDTO(user);
     }
 
     @Override
@@ -114,32 +117,28 @@ public class UserService implements IUserService {
 
     @Override
     public List<UserDTO> findAll() {
-        List<UserEntity> users = userRepository.findAll();
+        List<User> users = userRepository.findAll();
         return users.stream().map(userMapper::toShowDTO).toList();
     }
 
     @Override
-    public int countAll() {
-        return (int) userRepository.count();
-    }
-
-    @Override
     public ShowAllResponse<UserDTO> showAll(ShowAllRequest showAllRequest) {
-        int page = showAllRequest.getPage();
+        int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
-        int totalPages = (int) Math.ceil((1.0 * countAll()) / limit);
-
         Pageable paging = PageRequest.of(
                 page - 1,
                 limit,
                 Sort.by(Sort.Direction.fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
         );
-        Page<UserEntity> userEntityList = userRepository.findAll(paging);
-        List<UserEntity> resultEntity = userEntityList.getContent();
-        List<UserDTO> resultDTO = resultEntity.stream().map(userMapper::toShowDTO).toList();
+        Page<User> userEntityList = userRepository.findAll(paging);
+        List<UserDTO> resultDTO = userEntityList.getContent().stream().map(userMapper::toShowDTO).toList();
+
+        int totalElements = resultDTO.size();
+        int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
         return ShowAllResponse.<UserDTO>builder()
-                .page(page)
+                .currentPage(page)
+                .totalElements(totalElements)
                 .totalPages(totalPages)
                 .responses(resultDTO)
                 .build();

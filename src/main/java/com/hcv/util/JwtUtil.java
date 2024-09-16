@@ -1,6 +1,6 @@
 package com.hcv.util;
 
-import com.hcv.entity.UserEntity;
+import com.hcv.entity.User;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IInvalidatedTokenRepository;
@@ -46,18 +46,18 @@ public class JwtUtil {
     @Value("${com.hcv.jwt.refreshable-duration}")
     long refreshableDuration;
 
-    public String generateToken(UserEntity userEntity) {
+    public String generateToken(User user) {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(getTeacherOrStudentID(userEntity))
+                .subject(getTeacherOrStudentID(user))
                 .issuer("qlklks-hcv.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(validDuration, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
-                .claim("scope", buildScope(userEntity))
-                .claim("username", userEntity.getUsername())
-                .claim("expirationTime-Refresh", new Date(Instant.now().plus(refreshableDuration, ChronoUnit.SECONDS).toEpochMilli()))
+                .claim("scope", buildScope(user))
+                .claim("username", user.getUsername())
+                .claim("expirationTime_Refresh", new Date(Instant.now().plus(refreshableDuration, ChronoUnit.SECONDS).toEpochMilli()))
                 .build();
 
         Payload payload = jwtClaimsSet.toPayload();
@@ -72,24 +72,30 @@ public class JwtUtil {
         }
     }
 
-    private String getTeacherOrStudentID(UserEntity userEntity) {
-        List<String> roleName = userEntity.getRoles().stream()
+    private String getTeacherOrStudentID(User user) {
+        List<String> roleName = user.getRoles().stream()
                 .map(roleEntity -> roleEntity.getCode().name())
                 .toList();
         String id;
+
         if (roleName.contains("STUDENT")) {
-            id = userEntity.getStudents().getId();
+            id = user.getStudents().getId();
         } else {
-            id = userEntity.getTeachers().getId();
+            id = user.getTeachers().getId();
         }
+        
+        if (id == null) {
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
+
         return id;
     }
 
-    private String buildScope(UserEntity userEntity) {
+    private String buildScope(User user) {
         StringJoiner stringJoiner = new StringJoiner(" ");
 
-        if (!CollectionUtils.isEmpty(userEntity.getRoles())) {
-            userEntity.getRoles().forEach(roleEntity -> stringJoiner.add(roleEntity.getCode().name()));
+        if (!CollectionUtils.isEmpty(user.getRoles())) {
+            user.getRoles().forEach(roleEntity -> stringJoiner.add(roleEntity.getCode().name()));
         }
 
         return stringJoiner.toString();

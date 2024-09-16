@@ -1,9 +1,11 @@
 package com.hcv.repository;
 
-import com.hcv.entity.PointEntity;
+import com.hcv.entity.Point;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface IPointRepository extends JpaRepository<PointEntity, String> {
+@Repository
+public interface IPointRepository extends JpaRepository<Point, String> {
 
     boolean existsById(String id);
 

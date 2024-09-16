@@ -18,7 +18,7 @@ import java.util.List;
 @Setter
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ResearchEntity extends BaseEntity {
+public class Research extends BaseEntity {
 
     @Column(name = "name", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     String name;
@@ -42,19 +42,19 @@ public class ResearchEntity extends BaseEntity {
     @JoinTable(name = "research_teacher"
             , joinColumns = @JoinColumn(name = "research_id")
             , inverseJoinColumns = @JoinColumn(name = "teacher_id"))
-    List<TeacherEntity> teachers = new ArrayList<>();
+    List<Teacher> teachers = new ArrayList<>();
 
     @OneToMany(mappedBy = "researches")
-    List<FeedbackEntity> feedbacks = new ArrayList<>();
+    List<Feedback> feedbacks = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(name = "research_subject"
             , joinColumns = @JoinColumn(name = "research_id")
             , inverseJoinColumns = @JoinColumn(name = "subject_id"))
-    List<SubjectEntity> subjects = new ArrayList<>();
+    List<Subject> subjects = new ArrayList<>();
 
     @OneToOne
     @JoinColumn(name = "group_id")
-    GroupEntity groups;
+    Group groups;
 
 }

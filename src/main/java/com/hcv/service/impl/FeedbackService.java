@@ -3,16 +3,15 @@ package com.hcv.service.impl;
 import com.hcv.converter.IFeedbackMapper;
 import com.hcv.dto.request.FeedbackForResearchInput;
 import com.hcv.dto.response.FeedbackDTO;
-import com.hcv.entity.FeedbackEntity;
-import com.hcv.entity.ResearchEntity;
+import com.hcv.entity.Feedback;
+import com.hcv.entity.Research;
+import com.hcv.entity.Teacher;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IFeedbackRepository;
 import com.hcv.repository.IResearchRepository;
-import com.hcv.repository.IStudentRepository;
 import com.hcv.repository.ITeacherRepository;
 import com.hcv.service.IFeedbackService;
-import com.hcv.service.IGroupService;
 import com.hcv.service.IUserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,47 +30,53 @@ public class FeedbackService implements IFeedbackService {
     IFeedbackRepository feedbackRepository;
     IFeedbackMapper feedbackMapper;
     IUserService userService;
-    IStudentRepository studentRepository;
-    IGroupService groupService;
 
     @Override
     public FeedbackDTO insert(FeedbackForResearchInput feedbackForResearchInput) {
 
-        FeedbackEntity feedbackEntity = feedbackMapper.toEntity(feedbackForResearchInput);
+        String currentUserId = userService.getClaimsToken().get("sub").toString();
+        Teacher teacher = teacherRepository.findById(currentUserId)
+                .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
+
+        Feedback feedback = feedbackMapper.toEntity(feedbackForResearchInput);
 
         String researchId = feedbackForResearchInput.getResearchID();
-        ResearchEntity researchEntity = researchRepository.findById(researchId)
+        Research research = researchRepository.findById(researchId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESEARCH_NOT_EXISTED));
 
-        feedbackEntity.setSendTo(researchId);
-        feedbackEntity.setResearches(researchEntity);
+        feedback.setSendFromName(teacher.getName());
+        feedback.setSendFrom(teacher.getCode());
+        feedback.setSendTo(researchId);
+        feedback.setResearches(research);
 
-        feedbackEntity = feedbackRepository.save(feedbackEntity);
+        feedback = feedbackRepository.save(feedback);
 
-        return feedbackMapper.toDTO(feedbackEntity);
+        return feedbackMapper.toDTO(feedback);
     }
 
 
     @Override
     public FeedbackDTO update(String oldFeedbackId, FeedbackForResearchInput newFeedbackDTOForResearchInput) {
-        FeedbackEntity feedbackEntity = feedbackRepository.findById(oldFeedbackId)
+        Feedback feedback = feedbackRepository.findById(oldFeedbackId)
                 .orElseThrow(() -> new AppException(ErrorCode.FEEDBACK_NOT_EXISTED));
 
-        String authorFeedbackId = feedbackEntity.getSendFrom();
+        String authorFeedbackId = feedback.getCreatedBy();
         String currentUserId = userService.getClaimsToken().get("sub").toString();
         if (!authorFeedbackId.equals(currentUserId)) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
+        feedback.setMessage(newFeedbackDTOForResearchInput.getMessage());
+
         String researchID = newFeedbackDTOForResearchInput.getResearchID();
-        ResearchEntity researchEntity = researchRepository.findById(researchID)
+        Research research = researchRepository.findById(researchID)
                 .orElseThrow(() -> new AppException(ErrorCode.RESEARCH_NOT_EXISTED));
-        feedbackEntity.setResearches(researchEntity);
-        feedbackEntity.setSendTo(researchID);
+        feedback.setResearches(research);
+        feedback.setSendTo(researchID);
 
-        feedbackRepository.save(feedbackEntity);
+        feedbackRepository.save(feedback);
 
-        return feedbackMapper.toDTO(feedbackEntity);
+        return feedbackMapper.toDTO(feedback);
     }
 
     @Override
@@ -81,9 +86,9 @@ public class FeedbackService implements IFeedbackService {
 
     @Override
     public FeedbackDTO findOneById(String id) {
-        FeedbackEntity feedbackEntity = feedbackRepository.findById(id)
+        Feedback feedback = feedbackRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.FEEDBACK_NOT_EXISTED));
-        return feedbackMapper.toDTO(feedbackEntity);
+        return feedbackMapper.toDTO(feedback);
     }
 
 

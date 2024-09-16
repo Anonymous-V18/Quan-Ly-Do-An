@@ -16,21 +16,21 @@ import java.util.List;
 @Setter
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SubjectEntity extends BaseEntity {
+public class Subject extends BaseEntity {
 
     String name;
 
     @ManyToOne
     @JoinColumn(name = "department_id")
-    DepartmentEntity departments;
+    Department departments;
 
     @ManyToMany(mappedBy = "subjects")
-    List<ResearchEntity> researches = new ArrayList<>();
+    List<Research> researches = new ArrayList<>();
 
     @OneToMany(mappedBy = "subjects")
-    List<TeacherEntity> teachers = new ArrayList<>();
+    List<Teacher> teachers = new ArrayList<>();
 
     @OneToMany(mappedBy = "subjects")
-    List<StudentEntity> students = new ArrayList<>();
+    List<Student> students = new ArrayList<>();
 
 }

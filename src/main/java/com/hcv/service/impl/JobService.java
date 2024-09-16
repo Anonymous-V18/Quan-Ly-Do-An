@@ -4,9 +4,9 @@ import com.hcv.constant.JobNameConst;
 import com.hcv.converter.IJobMapper;
 import com.hcv.dto.request.JobInput;
 import com.hcv.dto.response.JobDTO;
-import com.hcv.entity.GroupEntity;
-import com.hcv.entity.JobEntity;
-import com.hcv.entity.TeacherEntity;
+import com.hcv.entity.Group;
+import com.hcv.entity.Job;
+import com.hcv.entity.Teacher;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IGroupRepository;
@@ -34,36 +34,36 @@ public class JobService implements IJobService {
 
     @Override
     public JobDTO insert(JobInput jobInput) {
-        JobEntity jobEntity = jobMapper.toEntity(jobInput);
+        Job job = jobMapper.toEntity(jobInput);
 
-        jobEntity.setIsCompleted(0);
+        job.setIsCompleted(0);
 
         String teacherId = userService.getClaimsToken().get("sub").toString();
-        TeacherEntity sender = teacherRepository.findById(teacherId)
+        Teacher sender = teacherRepository.findById(teacherId)
                 .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
-        jobEntity.setSendFrom(teacherId);
+        job.setSendFrom(teacherId);
 
         String receiverId = jobInput.getSendTo();
         switch (jobInput.getName().trim()) {
 
             case JobNameConst.NAME_PROCESS_1,
                  JobNameConst.NAME_PROCESS_2 -> {
-                TeacherEntity teacherEntity = teacherRepository.findById(receiverId)
+                Teacher teacher = teacherRepository.findById(receiverId)
                         .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
-                jobEntity.setTeachers(List.of(teacherEntity, sender));
+                job.setTeachers(List.of(teacher));
             }
             case JobNameConst.NAME_PROCESS_3 -> {
-                GroupEntity groupEntity = groupRepository.findById(receiverId)
+                Group group = groupRepository.findById(receiverId)
                         .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
-                jobEntity.setTeachers(List.of(sender));
-                jobEntity.setGroups(groupEntity);
+                job.setTeachers(List.of(sender));
+                job.setGroups(group);
             }
         }
 
-        jobEntity.setIsCompleted(0);
-        jobEntity = jobRepository.save(jobEntity);
+        job.setIsCompleted(0);
+        job = jobRepository.save(job);
 
-        return jobMapper.toDTO(jobEntity);
+        return jobMapper.toDTO(job);
     }
 
     @Override
@@ -75,16 +75,16 @@ public class JobService implements IJobService {
 
     @Override
     public JobDTO markCompleted(String id) {
-        JobEntity jobEntity = jobRepository.findById(id)
+        Job job = jobRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.JOB_NOT_EXIST));
-        jobEntity.setIsCompleted(1);
-        jobEntity = jobRepository.save(jobEntity);
-        return jobMapper.toDTO(jobEntity);
+        job.setIsCompleted(1);
+        job = jobRepository.save(job);
+        return jobMapper.toDTO(job);
     }
 
     @Override
     public List<JobDTO> findAll() {
-        List<JobEntity> resultEntity = jobRepository.findAll();
+        List<Job> resultEntity = jobRepository.findAll();
         return resultEntity.stream().map(jobMapper::toDTO).toList();
     }
 

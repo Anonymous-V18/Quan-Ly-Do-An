@@ -19,18 +19,18 @@ import java.util.List;
 @Setter
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class DepartmentEntity extends BaseEntity {
+public class Department extends BaseEntity {
 
     @Column(name = "name", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     String name;
 
     @OneToMany(mappedBy = "departments")
-    List<SubjectEntity> subjects = new ArrayList<>();
+    List<Subject> subjects = new ArrayList<>();
 
     @OneToMany(mappedBy = "departments")
-    List<TeacherEntity> teachers = new ArrayList<>();
+    List<Teacher> teachers = new ArrayList<>();
 
     @OneToMany(mappedBy = "departments")
-    List<StudentEntity> students = new ArrayList<>();
+    List<Student> students = new ArrayList<>();
 
 }

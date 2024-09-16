@@ -4,7 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,8 +14,12 @@ import lombok.experimental.FieldDefaults;
 public class FeedbackResponse {
 
     String id;
-    String message;
-    String sendTo;
+    String createdDate;
+    String createdBy;
+    String modifiedDate;
+    String modifiedBy;
     String sendFrom;
+    String sendFromName;
+    String message;
 
 }

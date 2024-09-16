@@ -10,8 +10,6 @@ import java.util.List;
 
 public interface IResearchService {
 
-    void checkDataBeforeInsert(ResearchInsertFromFileInput researchInsertFromFileInput);
-
     List<ResearchDTO> insertFromFile(ResearchInsertFromFileInput researchInsertFromFileInput);
 
     ResearchDTO insert(ResearchInput researchInput);
@@ -24,15 +22,17 @@ public interface IResearchService {
 
     ResearchResponse showDetail(String id);
 
-    int countAll();
-
-    ShowAllResponse<ResearchResponse> showAll(ShowAllRequest showAllRequest);
-
     void registerResearch(ResearchRegisterInput researchRegisterInput);
 
     void cancelRegistrationResearch(ResearchCancelRegistrationInput researchCancelRegistrationInput);
 
-    ResearchDTO markApproved(String id);
+    ShowAllResponse<ResearchResponse> showAllToFeedback(ShowAllRequest showAllRequest);
 
     ShowAllResponse<ResearchShowToRegistrationResponse> showAllToRegistration(ShowAllRequest showAllRequest);
+
+    ShowAllResponse<ResearchShowToRegistrationResponse> showAllToApprovalProcessing(ShowAllRequest showAllRequest);
+
+    ResearchDTO markApproved(String id);
+
+    ResearchDTO cancelApproval(String id);
 }

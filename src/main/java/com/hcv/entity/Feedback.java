@@ -1,7 +1,6 @@
 package com.hcv.entity;
 
 import com.hcv.dto.StatusNotification;
-import com.hcv.dto.TypeNotification;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,31 +9,30 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 @Entity
-@Table(name = "notification")
+@Table(name = "feedback")
 @Getter
 @Setter
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class NotificationEntity extends BaseEntity {
+public class Feedback extends BaseEntity {
 
     String message;
     String sendTo;
     String sendFrom;
-    @Enumerated(EnumType.STRING)
-    TypeNotification type;
+    String sendFromName;
     @Enumerated(EnumType.STRING)
     StatusNotification status;
 
     @ManyToOne
     @JoinColumn(name = "teacher_id")
-    TeacherEntity teachers;
+    Teacher teachers;
 
     @ManyToOne
     @JoinColumn(name = "student_id")
-    StudentEntity students;
+    Student students;
 
     @ManyToOne
     @JoinColumn(name = "research_id")
-    ResearchEntity researches;
+    Research researches;
 
 }

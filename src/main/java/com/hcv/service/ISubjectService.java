@@ -20,8 +20,6 @@ public interface ISubjectService {
 
     SubjectDTO findOneByName(String name);
 
-    int countAll();
-
     ShowAllResponse<SubjectDTO> showAll(ShowAllRequest showAllRequest);
 
     List<SubjectDTO> findAll();

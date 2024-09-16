@@ -25,7 +25,7 @@ public class RoleEntity extends BaseEntity {
     CodeRole code;
 
     @ManyToMany(mappedBy = "roles")
-    List<UserEntity> users = new ArrayList<>();
+    List<User> users = new ArrayList<>();
 
 }
 

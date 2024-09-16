@@ -54,12 +54,14 @@ public class SubjectController {
     }
 
     @GetMapping("/showAll")
-    public ApiResponse<ShowAllResponse<SubjectDTO>> showAll(@RequestParam(name = "page") Integer page,
-                                                            @RequestParam(name = "limit") Integer limit,
-                                                            @RequestParam(name = "orderBy") String orderBy,
-                                                            @RequestParam(name = "orderDirection") String orderDirection) {
+    public ApiResponse<ShowAllResponse<SubjectDTO>> showAll(
+            @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
+            @RequestParam(value = "orderBy", required = false, defaultValue = "id") String orderBy,
+            @RequestParam(value = "orderDirection", required = false, defaultValue = "ASC") String orderDirection
+    ) {
         ShowAllRequest showAllRequest = ShowAllRequest.builder()
-                .page(page)
+                .currentPage(page)
                 .limit(limit)
                 .orderBy(orderBy)
                 .orderDirection(orderDirection)

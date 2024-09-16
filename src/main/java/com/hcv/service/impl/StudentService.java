@@ -1,18 +1,15 @@
 package com.hcv.service.impl;
 
 import com.hcv.converter.IStudentMapper;
-import com.hcv.dto.request.ShowAllRequest;
-import com.hcv.dto.request.StudentInput;
-import com.hcv.dto.request.StudentInsertFromFileInput;
-import com.hcv.dto.request.UserRequest;
+import com.hcv.dto.request.*;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.dto.response.StudentDTO;
 import com.hcv.dto.response.StudentShowToSelectionResponse;
 import com.hcv.dto.response.UserDTO;
-import com.hcv.entity.DepartmentEntity;
-import com.hcv.entity.StudentEntity;
-import com.hcv.entity.SubjectEntity;
-import com.hcv.entity.UserEntity;
+import com.hcv.entity.Department;
+import com.hcv.entity.Student;
+import com.hcv.entity.Subject;
+import com.hcv.entity.User;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IStudentRepository;
@@ -28,6 +25,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,31 +42,8 @@ public class StudentService implements IStudentService {
     IUserService userService;
 
     @Override
-    public void checkDataBeforeInsert(StudentInsertFromFileInput studentInsertFromFileInput) {
-        for (StudentInput studentInput : studentInsertFromFileInput.getStudents()) {
-            boolean isStudentExisted = studentRepository.existsByCode(studentInput.getCode().trim());
-            if (isStudentExisted) {
-                throw new AppException(ErrorCode.STUDENT_EXISTED);
-            }
-
-            boolean isSubjectExisted = subjectRepository.existsByName(studentInput.getSubjectName().trim());
-            if (!isSubjectExisted) {
-                throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
-            }
-        }
-        List<String> studentCodeList = studentInsertFromFileInput.getStudents()
-                .stream()
-                .map(StudentInput::getCode)
-                .distinct()
-                .toList();
-        if (studentCodeList.size() != studentInsertFromFileInput.getStudents().size()) {
-            throw new AppException(ErrorCode.STUDENT_DUPLICATED);
-        }
-    }
-
-    @Override
+    @Transactional
     public List<StudentDTO> insertFromFile(StudentInsertFromFileInput studentInsertFromFileInput) {
-        this.checkDataBeforeInsert(studentInsertFromFileInput);
         List<StudentDTO> studentDTOList = new ArrayList<>();
         for (StudentInput studentInput : studentInsertFromFileInput.getStudents()) {
 
@@ -95,47 +70,59 @@ public class StudentService implements IStudentService {
                     throw new AppException(ErrorCode.STUDENT_EXISTED);
                 });
 
-        StudentEntity studentEntity = studentMapper.toEntity(studentInput);
+        Student student = studentMapper.toEntity(studentInput);
 
-        UserEntity userEntity = userRepository.findById(studentInput.getUserId().trim())
+        User user = userRepository.findById(studentInput.getUserId().trim())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        student.setUsers(user);
 
-        studentEntity.setUsers(userEntity);
-
-        SubjectEntity subjectEntity = subjectRepository.findByName(studentInput.getSubjectName().trim())
+        Subject subject = subjectRepository.findByName(studentInput.getSubjectName().trim())
                 .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
+        student.setSubjects(subject);
 
-        studentEntity.setSubjects(subjectEntity);
+        Department department = subject.getDepartments();
+        student.setDepartments(department);
 
-        DepartmentEntity departmentEntity = subjectEntity.getDepartments();
-        studentEntity.setDepartments(departmentEntity);
+        student = studentRepository.save(student);
 
-        studentEntity = studentRepository.save(studentEntity);
-
-        return studentMapper.toDTO(studentEntity);
+        return studentMapper.toDTO(student);
     }
 
     @Override
-    public StudentDTO update(String oldStudentId, StudentInput studentInput) {
-        StudentEntity studentEntity = studentRepository.findById(oldStudentId)
+    public StudentDTO update(String oldStudentId, StudentNormalUpdateInput studentInput) {
+        Student student = studentRepository.findById(oldStudentId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
 
-        studentEntity.setCode(studentInput.getCode());
-        studentEntity.setName(studentInput.getName());
-        studentEntity.setMyClass(studentInput.getMyClass());
-        studentEntity.setEmail(studentInput.getEmail());
-        studentEntity.setPhoneNumber(studentInput.getPhoneNumber());
+        student.setEmail(studentInput.getEmail());
+        student.setPhoneNumber(studentInput.getPhoneNumber());
 
-        SubjectEntity subjectEntity = subjectRepository.findByName(studentInput.getSubjectName())
+        studentRepository.save(student);
+
+        return studentMapper.toDTO(student);
+    }
+
+    @Override
+    public StudentDTO updateAdvanced(String oldStudentId, StudentInput studentInput) {
+        Student student = studentRepository.findById(oldStudentId)
+                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
+
+        studentRepository.findByCodeAndIdNot(studentInput.getCode(), oldStudentId)
+                .ifPresent(item -> {
+                    throw new AppException(ErrorCode.STUDENT_DUPLICATED);
+                });
+
+        student = studentMapper.toEntity(student, studentInput);
+
+        Subject subject = subjectRepository.findByName(studentInput.getSubjectName())
                 .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
 
-        studentEntity.setSubjects(subjectEntity);
+        student.setSubjects(subject);
 
-        studentEntity.setDepartments(studentEntity.getSubjects().getDepartments());
+        student.setDepartments(student.getSubjects().getDepartments());
 
-        studentRepository.save(studentEntity);
+        studentRepository.save(student);
 
-        return studentMapper.toDTO(studentEntity);
+        return studentMapper.toDTO(student);
     }
 
     @Override
@@ -147,48 +134,44 @@ public class StudentService implements IStudentService {
 
     @Override
     public StudentDTO findOneById(String id) {
-        StudentEntity student = studentRepository.findById(id)
+        Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
         return studentMapper.toDTO(student);
     }
 
     @Override
-    public int countAll() {
-        return (int) studentRepository.count();
-    }
-
-    @Override
     public ShowAllResponse<StudentDTO> showAll(ShowAllRequest showAllRequest) {
-        int page = showAllRequest.getPage();
+        int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
-        int totalPages = (int) Math.ceil((1.0 * countAll()) / limit);
-
         Pageable paging = PageRequest.of(
                 page - 1,
                 limit,
                 Sort.by(Sort.Direction.fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
         );
-        Page<StudentEntity> studentEntityList = studentRepository.findAll(paging);
-        List<StudentEntity> resultEntity = studentEntityList.getContent();
-        List<StudentDTO> resultDTO = resultEntity.stream().map(studentMapper::toDTO).toList();
+        Page<Student> studentEntityList = studentRepository.findAll(paging);
+        List<StudentDTO> resultDTO = studentEntityList.getContent().stream().map(studentMapper::toDTO).toList();
+
+        int totalElements = resultDTO.size();
+        int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
         return ShowAllResponse.<StudentDTO>builder()
-                .page(page)
+                .currentPage(page)
+                .totalElements(totalElements)
                 .totalPages(totalPages)
                 .responses(resultDTO)
                 .build();
-
     }
 
     @Override
     public List<StudentShowToSelectionResponse> showAllToSelection() {
-        return studentRepository.findAll().stream().map(studentMapper::toShowToSelectionDTO).toList();
+        String currentUserId = userService.getClaimsToken().get("sub").toString();
+        Student student = studentRepository.findById(currentUserId)
+                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
+
+        return studentRepository.findStudentToInvite(currentUserId, List.of(student.getSubjects()), 0)
+                .stream().map(studentMapper::toShowToSelectionDTO)
+                .toList();
     }
 
-    @Override
-    public List<StudentDTO> findAll() {
-        List<StudentEntity> resultEntity = studentRepository.findAll();
-        return resultEntity.stream().map(studentMapper::toDTO).toList();
-    }
 
 }

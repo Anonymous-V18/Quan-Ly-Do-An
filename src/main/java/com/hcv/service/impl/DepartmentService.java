@@ -4,7 +4,7 @@ import com.hcv.converter.IDepartmentMapper;
 import com.hcv.dto.request.ShowAllRequest;
 import com.hcv.dto.response.DepartmentDTO;
 import com.hcv.dto.response.ShowAllResponse;
-import com.hcv.entity.DepartmentEntity;
+import com.hcv.entity.Department;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IDepartmentRepository;
@@ -35,22 +35,22 @@ public class DepartmentService implements IDepartmentService {
                     throw new AppException(ErrorCode.DEPARTMENT_EXISTED);
                 });
 
-        DepartmentEntity departmentEntity = departmentMapper.toEntity(departmentDTO);
-        departmentEntity = departmentRepository.save(departmentEntity);
-        return departmentMapper.toDTO(departmentEntity);
+        Department department = departmentMapper.toEntity(departmentDTO);
+        department = departmentRepository.save(department);
+        return departmentMapper.toDTO(department);
     }
 
     @Override
     public DepartmentDTO update(String oldDepartmentId, DepartmentDTO newDepartmentDTO) {
-        DepartmentEntity departmentEntityUpdate =
+        Department departmentUpdate =
                 departmentRepository.findById(oldDepartmentId)
                         .orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED));
 
-        departmentEntityUpdate.setName(newDepartmentDTO.getName());
+        departmentUpdate.setName(newDepartmentDTO.getName());
 
-        departmentRepository.save(departmentEntityUpdate);
+        departmentRepository.save(departmentUpdate);
 
-        return departmentMapper.toDTO(departmentEntityUpdate);
+        return departmentMapper.toDTO(departmentUpdate);
     }
 
     @Override
@@ -62,33 +62,29 @@ public class DepartmentService implements IDepartmentService {
 
     @Override
     public DepartmentDTO findOneByName(String name) {
-        DepartmentEntity departmentEntity = departmentRepository.findByName(name)
+        Department department = departmentRepository.findByName(name)
                 .orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED));
-        return departmentMapper.toDTO(departmentEntity);
-    }
-
-    @Override
-    public int countAll() {
-        return (int) departmentRepository.count();
+        return departmentMapper.toDTO(department);
     }
 
     @Override
     public ShowAllResponse<DepartmentDTO> showAll(ShowAllRequest showAllRequest) {
-        int page = showAllRequest.getPage();
+        int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
-        int totalPages = (int) Math.ceil((1.0 * countAll()) / limit);
-
         Pageable paging = PageRequest.of(
                 page - 1,
                 limit,
                 Sort.by(Sort.Direction.fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
         );
-        Page<DepartmentEntity> departmentEntityList = departmentRepository.findAll(paging);
-        List<DepartmentEntity> resultEntity = departmentEntityList.getContent();
-        List<DepartmentDTO> resultDTO = resultEntity.stream().map(departmentMapper::toDTO).toList();
+        Page<Department> departmentEntityList = departmentRepository.findAll(paging);
+        List<DepartmentDTO> resultDTO = departmentEntityList.getContent().stream().map(departmentMapper::toDTO).toList();
+
+        int totalElements = resultDTO.size();
+        int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
         return ShowAllResponse.<DepartmentDTO>builder()
-                .page(page)
+                .currentPage(page)
+                .totalElements(totalElements)
                 .totalPages(totalPages)
                 .responses(resultDTO)
                 .build();
@@ -96,7 +92,7 @@ public class DepartmentService implements IDepartmentService {
 
     @Override
     public List<DepartmentDTO> findAll() {
-        List<DepartmentEntity> resultEntity = departmentRepository.findAll();
+        List<Department> resultEntity = departmentRepository.findAll();
         return resultEntity.stream().map(departmentMapper::toDTO).toList();
     }
 }

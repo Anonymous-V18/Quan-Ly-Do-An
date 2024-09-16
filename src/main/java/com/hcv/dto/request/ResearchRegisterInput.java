@@ -1,12 +1,12 @@
 package com.hcv.dto.request;
 
 import lombok.AccessLevel;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-@EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ResearchRegisterInput extends BaseResearchRegistrationProcessInput {
 

@@ -19,18 +19,18 @@ import java.util.List;
 @Setter
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class GroupEntity extends BaseEntity {
+public class Group extends BaseEntity {
 
     Integer maxMember;
     String leaderId;
 
     @OneToOne(mappedBy = "groups")
-    ResearchEntity researches;
+    Research researches;
 
     @OneToMany(mappedBy = "groups")
-    List<StudentEntity> students = new ArrayList<>();
+    List<Student> students = new ArrayList<>();
 
     @OneToMany(mappedBy = "groups")
-    List<JobEntity> jobs = new ArrayList<>();
+    List<Job> jobs = new ArrayList<>();
 
 }

@@ -5,7 +5,7 @@ import com.hcv.dto.request.ResearchUpdateInput;
 import com.hcv.dto.response.ResearchDTO;
 import com.hcv.dto.response.ResearchResponse;
 import com.hcv.dto.response.ResearchShowToRegistrationResponse;
-import com.hcv.entity.ResearchEntity;
+import com.hcv.entity.Research;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -19,7 +19,7 @@ public interface IResearchMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "groups", ignore = true)
     @Mapping(target = "feedbacks", ignore = true)
-    ResearchEntity toEntity(ResearchInput researchInput);
+    Research toEntity(ResearchInput researchInput);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "code", ignore = true)
@@ -30,16 +30,16 @@ public interface IResearchMapper {
     @Mapping(target = "feedbacks", ignore = true)
     @Mapping(target = "instructorsIds", ignore = true)
     @Mapping(target = "thesisAdvisorId", ignore = true)
-    ResearchEntity toEntity(@MappingTarget ResearchEntity oldResearchEntity, ResearchUpdateInput researchUpdateInput);
+    Research toEntity(@MappingTarget Research oldResearch, ResearchUpdateInput researchUpdateInput);
 
     @Mapping(target = "isApproved", ignore = true)
-    ResearchResponse toShowDTO(ResearchEntity researchEntity);
+    ResearchResponse toShowDTO(Research research);
 
     @Mapping(target = "feedbacks", ignore = true)
-    ResearchResponse toShowDTOAfterApproved(ResearchEntity researchEntity);
+    ResearchResponse toShowDTOAfterApproved(Research research);
 
-    ResearchShowToRegistrationResponse toShowToRegistrationDTO(ResearchEntity researchEntity);
+    ResearchShowToRegistrationResponse toShowToRegistrationDTO(Research research);
 
-    ResearchDTO toDTO(ResearchEntity researchEntity);
+    ResearchDTO toDTO(Research research);
 
 }

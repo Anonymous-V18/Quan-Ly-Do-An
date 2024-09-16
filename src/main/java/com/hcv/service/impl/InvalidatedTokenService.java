@@ -1,6 +1,6 @@
 package com.hcv.service.impl;
 
-import com.hcv.entity.InvalidatedTokenEntity;
+import com.hcv.entity.InvalidatedToken;
 import com.hcv.repository.IInvalidatedTokenRepository;
 import com.hcv.service.IInvalidatedTokenService;
 import com.nimbusds.jose.JOSEException;
@@ -14,7 +14,6 @@ import java.text.ParseException;
 import java.util.Date;
 
 @Service
-
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InvalidatedTokenService implements IInvalidatedTokenService {
@@ -26,11 +25,12 @@ public class InvalidatedTokenService implements IInvalidatedTokenService {
         String jwtId = signedJWT.getJWTClaimsSet().getJWTID();
         Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
-        InvalidatedTokenEntity invalidatedTokenEntity = InvalidatedTokenEntity.builder()
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
                 .id(jwtId)
                 .expiryTime(expiryTime)
                 .build();
 
-        invalidatedTokenRepository.save(invalidatedTokenEntity);
+        invalidatedTokenRepository.save(invalidatedToken);
     }
+
 }

@@ -6,8 +6,8 @@ import com.hcv.dto.request.SubjectInput;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.dto.response.SubjectDTO;
 import com.hcv.dto.response.SubjectResponse;
-import com.hcv.entity.DepartmentEntity;
-import com.hcv.entity.SubjectEntity;
+import com.hcv.entity.Department;
+import com.hcv.entity.Subject;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IDepartmentRepository;
@@ -40,30 +40,30 @@ public class SubjectService implements ISubjectService {
                     throw new AppException(ErrorCode.SUBJECT_EXISTED);
                 });
 
-        SubjectEntity subjectEntity = subjectMapper.toEntity(subjectInput);
-        DepartmentEntity departmentEntity = departmentRepository.findByName(subjectInput.getNameDepartment())
+        Subject subject = subjectMapper.toEntity(subjectInput);
+        Department department = departmentRepository.findByName(subjectInput.getNameDepartment())
                 .orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED));
 
-        subjectEntity.setDepartments(departmentEntity);
-        subjectEntity = subjectRepository.save(subjectEntity);
-        return subjectMapper.toDTO(subjectEntity);
+        subject.setDepartments(department);
+        subject = subjectRepository.save(subject);
+        return subjectMapper.toDTO(subject);
     }
 
     @Override
     public SubjectDTO update(String oldSubjectId, SubjectInput subjectInput) {
-        SubjectEntity subjectEntity = subjectRepository.findById(oldSubjectId)
+        Subject subject = subjectRepository.findById(oldSubjectId)
                 .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
 
-        subjectEntity.setName(subjectInput.getName());
+        subject.setName(subjectInput.getName());
 
-        DepartmentEntity departmentEntity = departmentRepository.findByName(subjectInput.getNameDepartment())
+        Department department = departmentRepository.findByName(subjectInput.getNameDepartment())
                 .orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED));
 
-        subjectEntity.setDepartments(departmentEntity);
+        subject.setDepartments(department);
 
-        subjectRepository.save(subjectEntity);
+        subjectRepository.save(subject);
 
-        return subjectMapper.toDTO(subjectEntity);
+        return subjectMapper.toDTO(subject);
     }
 
     @Override
@@ -75,40 +75,36 @@ public class SubjectService implements ISubjectService {
 
     @Override
     public SubjectDTO findOneById(String id) {
-        SubjectEntity subjectEntity = subjectRepository.findById(id)
+        Subject subject = subjectRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
-        return subjectMapper.toDTO(subjectEntity);
+        return subjectMapper.toDTO(subject);
     }
 
     @Override
     public SubjectDTO findOneByName(String name) {
-        SubjectEntity subjectEntity = subjectRepository.findByName(name)
+        Subject subject = subjectRepository.findByName(name)
                 .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
-        return subjectMapper.toDTO(subjectEntity);
-    }
-
-    @Override
-    public int countAll() {
-        return (int) subjectRepository.count();
+        return subjectMapper.toDTO(subject);
     }
 
     @Override
     public ShowAllResponse<SubjectDTO> showAll(ShowAllRequest showAllRequest) {
-        int page = showAllRequest.getPage();
+        int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
-        int totalPages = (int) Math.ceil((1.0 * countAll()) / limit);
-
         Pageable paging = PageRequest.of(
                 page - 1,
                 limit,
                 Sort.by(Sort.Direction.fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
         );
-        Page<SubjectEntity> subjectEntityList = subjectRepository.findAll(paging);
-        List<SubjectEntity> resultEntity = subjectEntityList.getContent();
-        List<SubjectDTO> resultDTO = resultEntity.stream().map(subjectMapper::toDTO).toList();
+        Page<Subject> subjectEntityList = subjectRepository.findAll(paging);
+        List<SubjectDTO> resultDTO = subjectEntityList.getContent().stream().map(subjectMapper::toDTO).toList();
+
+        int totalElements = resultDTO.size();
+        int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
         return ShowAllResponse.<SubjectDTO>builder()
-                .page(page)
+                .currentPage(page)
+                .totalElements(totalElements)
                 .totalPages(totalPages)
                 .responses(resultDTO)
                 .build();
@@ -116,7 +112,7 @@ public class SubjectService implements ISubjectService {
 
     @Override
     public List<SubjectDTO> findAll() {
-        List<SubjectEntity> resultEntity = subjectRepository.findAll();
+        List<Subject> resultEntity = subjectRepository.findAll();
         return resultEntity.stream().map(subjectMapper::toDTO).toList();
     }
 

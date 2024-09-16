@@ -16,7 +16,7 @@ import java.util.List;
 @Setter
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserEntity extends BaseEntity {
+public class User extends BaseEntity {
 
     @Column(name = "username", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     String username;
@@ -30,9 +30,9 @@ public class UserEntity extends BaseEntity {
     List<RoleEntity> roles = new ArrayList<>();
 
     @OneToOne(mappedBy = "users")
-    TeacherEntity teachers;
+    Teacher teachers;
 
     @OneToOne(mappedBy = "users")
-    StudentEntity students;
+    Student students;
 
 }

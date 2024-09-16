@@ -17,8 +17,6 @@ public interface IGroupService {
 
     void delete(String[] ids);
 
-    int countAll();
-
     GroupResponse showInfoMyGroup();
 
     ShowAllResponse<GroupResponse> showAllMyGroup(ShowAllRequest showAllRequest);
