@@ -66,6 +66,29 @@ public class ResearchController {
                 .build();
     }
 
+    @GetMapping("/showAll-my-research")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ApiResponse<ShowAllResponse<ResearchResponse>> showAllMyResearch
+            (
+                    @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
+                    @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
+                    @RequestParam(value = "orderBy", required = false, defaultValue = "id") String orderBy,
+                    @RequestParam(value = "orderDirection", required = false, defaultValue = "ASC") String orderDirection
+            ) {
+
+        ShowAllRequest showAllRequest = ShowAllRequest.builder()
+                .currentPage(page)
+                .limit(limit)
+                .orderBy(orderBy)
+                .orderDirection(orderDirection)
+                .build();
+
+        ShowAllResponse<ResearchResponse> response = researchService.showAllToFeedback(showAllRequest);
+        return ApiResponse.<ShowAllResponse<ResearchResponse>>builder()
+                .result(response)
+                .build();
+    }
+
     @GetMapping("/showAll-to-feedback")
     @PreAuthorize("hasRole('TEACHER')")
     public ApiResponse<ShowAllResponse<ResearchResponse>> showAllToFeedback

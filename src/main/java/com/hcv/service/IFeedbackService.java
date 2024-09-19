@@ -10,7 +10,7 @@ public interface IFeedbackService {
     FeedbackDTO update(String oldFeedbackId, FeedbackForResearchInput newFeedbackDTOForResearchInput);
 
     void delete(String[] ids);
-
+    
     FeedbackDTO findOneById(String id);
 
 }

@@ -138,12 +138,18 @@ public class GroupService implements IGroupService {
         groupRepository.deleteAllById(Arrays.stream(ids).toList());
     }
 
+
     @Override
     public GroupResponse showInfoMyGroup() {
         String currentUserId = userService.getClaimsToken().get("sub").toString();
         Student student = studentRepository.findById(currentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
         return mapper.toShowDTO(student.getGroups());
+    }
+
+    @Override
+    public int countByResearches_Teachers_Id(String currentUserId) {
+        return (int) groupRepository.countByResearches_Teachers_Id(currentUserId);
     }
 
     @Override
@@ -160,7 +166,7 @@ public class GroupService implements IGroupService {
         Page<Group> researchEntityList = groupRepository.findByResearches_Teachers_Id(currentUserId, paging);
         List<GroupResponse> resultDTO = researchEntityList.getContent().stream().map(mapper::toShowDTO).toList();
 
-        int totalElements = resultDTO.size();
+        int totalElements = this.countByResearches_Teachers_Id(currentUserId);
         int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
         return ShowAllResponse.<GroupResponse>builder()

@@ -12,4 +12,9 @@ public interface IResearchRepository extends JpaRepository<Research, String> {
 
     Page<Research> findByStatusInAndSubjects_Id(Collection<StatusResearch> statuses, String id, Pageable pageable);
 
+    Page<Research> findByTeachers_Id(String id, Pageable pageable);
+
+    long countByStatusInAndSubjects_Id(Collection<StatusResearch> statuses, String id);
+
+    long countByTeachers_Id(String id);
 }

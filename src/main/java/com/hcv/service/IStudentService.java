@@ -24,6 +24,8 @@ public interface IStudentService {
 
     StudentDTO findOneById(String id);
 
+    int count();
+
     ShowAllResponse<StudentDTO> showAll(ShowAllRequest showAllRequest);
 
     List<StudentShowToSelectionResponse> showAllToSelection();

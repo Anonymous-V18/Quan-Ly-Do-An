@@ -88,6 +88,11 @@ public class SubjectService implements ISubjectService {
     }
 
     @Override
+    public int count() {
+        return (int) subjectRepository.count();
+    }
+
+    @Override
     public ShowAllResponse<SubjectDTO> showAll(ShowAllRequest showAllRequest) {
         int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
@@ -99,7 +104,7 @@ public class SubjectService implements ISubjectService {
         Page<Subject> subjectEntityList = subjectRepository.findAll(paging);
         List<SubjectDTO> resultDTO = subjectEntityList.getContent().stream().map(subjectMapper::toDTO).toList();
 
-        int totalElements = resultDTO.size();
+        int totalElements = (int) subjectRepository.count();
         int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
         return ShowAllResponse.<SubjectDTO>builder()

@@ -116,6 +116,11 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public int count() {
+        return (int) userRepository.count();
+    }
+
+    @Override
     public List<UserDTO> findAll() {
         List<User> users = userRepository.findAll();
         return users.stream().map(userMapper::toShowDTO).toList();
@@ -133,7 +138,7 @@ public class UserService implements IUserService {
         Page<User> userEntityList = userRepository.findAll(paging);
         List<UserDTO> resultDTO = userEntityList.getContent().stream().map(userMapper::toShowDTO).toList();
 
-        int totalElements = resultDTO.size();
+        int totalElements = (int) userRepository.count();
         int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
         return ShowAllResponse.<UserDTO>builder()

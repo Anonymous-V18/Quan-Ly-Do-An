@@ -151,6 +151,11 @@ public class TeacherService implements ITeacherService {
     }
 
     @Override
+    public int count() {
+        return (int) teacherRepository.count();
+    }
+
+    @Override
     public ShowAllResponse<TeacherDTO> showAll(ShowAllRequest showAllRequest) {
         int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
@@ -162,7 +167,7 @@ public class TeacherService implements ITeacherService {
         Page<Teacher> teacherEntityList = teacherRepository.findAll(paging);
         List<TeacherDTO> resultDTO = teacherEntityList.getContent().stream().map(teacherMapper::toDTO).toList();
 
-        int totalElements = resultDTO.size();
+        int totalElements = (int) teacherRepository.count();
         int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
         return ShowAllResponse.<TeacherDTO>builder()

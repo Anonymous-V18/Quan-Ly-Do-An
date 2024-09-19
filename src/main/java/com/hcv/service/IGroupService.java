@@ -19,6 +19,8 @@ public interface IGroupService {
 
     GroupResponse showInfoMyGroup();
 
+    int countByResearches_Teachers_Id(String currentUserId);
+
     ShowAllResponse<GroupResponse> showAllMyGroup(ShowAllRequest showAllRequest);
 
 }

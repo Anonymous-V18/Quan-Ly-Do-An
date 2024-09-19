@@ -1,11 +1,13 @@
 package com.hcv.service;
 
+import com.hcv.dto.StatusResearch;
 import com.hcv.dto.request.*;
 import com.hcv.dto.response.ResearchDTO;
 import com.hcv.dto.response.ResearchResponse;
 import com.hcv.dto.response.ResearchShowToRegistrationResponse;
 import com.hcv.dto.response.ShowAllResponse;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface IResearchService {
@@ -25,6 +27,12 @@ public interface IResearchService {
     void registerResearch(ResearchRegisterInput researchRegisterInput);
 
     void cancelRegistrationResearch(ResearchCancelRegistrationInput researchCancelRegistrationInput);
+
+    int countByStatusInAndSubjectsId(Collection<StatusResearch> statuses, String id);
+
+    int countByTeachersId(String id);
+
+    ShowAllResponse<ResearchResponse> showAllMyResearch(ShowAllRequest showAllRequest);
 
     ShowAllResponse<ResearchResponse> showAllToFeedback(ShowAllRequest showAllRequest);
 

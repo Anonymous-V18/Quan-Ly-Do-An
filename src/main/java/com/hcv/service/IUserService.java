@@ -23,6 +23,8 @@ public interface IUserService {
 
     Map<String, Object> getClaimsToken();
 
+    int count();
+
     List<UserDTO> findAll();
 
     ShowAllResponse<UserDTO> showAll(ShowAllRequest showAllRequest);

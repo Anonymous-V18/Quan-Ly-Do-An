@@ -28,10 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -185,6 +182,40 @@ public class ResearchService implements IResearchService {
     }
 
     @Override
+    public ShowAllResponse<ResearchResponse> showAllMyResearch(ShowAllRequest showAllRequest) {
+        String currentUserId = userService.getClaimsToken().get("sub").toString();
+        List<StatusResearch> statusList = List.of(
+                StatusResearch.valueOf(StatusResearchConst.PENDING_APPROVE)
+        );
+
+        Pageable paging = PageRequest.of(
+                showAllRequest.getCurrentPage() - 1,
+                showAllRequest.getLimit(),
+                Sort.by(Sort.Direction
+                        .fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
+        );
+
+        Page<Research> researchEntityList = researchRepository.findByTeachers_Id(currentUserId, paging);
+        List<ResearchResponse> resultDTO = researchEntityList.getContent().stream()
+                .map(mapper::toShowDTO)
+                .toList();
+
+        int page = showAllRequest.getCurrentPage();
+        int limit = showAllRequest.getLimit();
+        int totalElements = !resultDTO.isEmpty()
+                ? this.countByStatusInAndSubjectsId(statusList, resultDTO.getFirst().getSubjects().getFirst().getId())
+                : 0;
+        int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
+
+        return ShowAllResponse.<ResearchResponse>builder()
+                .currentPage(page)
+                .totalElements(totalElements)
+                .totalPages(totalPages)
+                .responses(resultDTO)
+                .build();
+    }
+
+    @Override
     public ShowAllResponse<ResearchResponse> showAllToFeedback(ShowAllRequest showAllRequest) {
         List<StatusResearch> statusList = List.of(
                 StatusResearch.valueOf(StatusResearchConst.PENDING_APPROVE)
@@ -197,7 +228,9 @@ public class ResearchService implements IResearchService {
 
         int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
-        int totalElements = resultDTO.size();
+        int totalElements = !resultDTO.isEmpty()
+                ? this.countByStatusInAndSubjectsId(statusList, resultDTO.getFirst().getSubjects().getFirst().getId())
+                : 0;
         int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
         return ShowAllResponse.<ResearchResponse>builder()
@@ -222,7 +255,9 @@ public class ResearchService implements IResearchService {
 
         int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
-        int totalElements = resultDTO.size();
+        int totalElements = !resultDTO.isEmpty()
+                ? this.countByStatusInAndSubjectsId(statusList, resultDTO.getFirst().getSubjects().getFirst().getId())
+                : 0;
         int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
         return ShowAllResponse.<ResearchShowToRegistrationResponse>builder()
@@ -248,7 +283,9 @@ public class ResearchService implements IResearchService {
 
         int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
-        int totalElements = resultDTO.size();
+        int totalElements = !resultDTO.isEmpty()
+                ? this.countByStatusInAndSubjectsId(statusList, resultDTO.getFirst().getSubjects().getFirst().getId())
+                : 0;
         int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
         return ShowAllResponse.<ResearchShowToRegistrationResponse>builder()
@@ -311,6 +348,16 @@ public class ResearchService implements IResearchService {
 
         research.setStatus(StatusResearch.valueOf(StatusResearchConst.APPROVED));
         researchRepository.save(research);
+    }
+
+    @Override
+    public int countByStatusInAndSubjectsId(Collection<StatusResearch> statuses, String id) {
+        return (int) researchRepository.countByStatusInAndSubjects_Id(statuses, id);
+    }
+
+    @Override
+    public int countByTeachersId(String id) {
+        return (int) researchRepository.countByTeachers_Id(id);
     }
 
     private String generateResearchCode(ResearchInput researchInput) {

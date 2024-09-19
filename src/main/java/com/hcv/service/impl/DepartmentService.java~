@@ -85,7 +85,7 @@ public class DepartmentService implements IDepartmentService {
         Page<Department> departmentEntityList = departmentRepository.findAll(paging);
         List<DepartmentDTO> resultDTO = departmentEntityList.getContent().stream().map(departmentMapper::toDTO).toList();
 
-        int totalElements = this.count();
+        int totalElements = (int) departmentRepository.count();
         int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
         return ShowAllResponse.<DepartmentDTO>builder()

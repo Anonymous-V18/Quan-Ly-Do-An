@@ -11,4 +11,6 @@ public interface IGroupRepository extends JpaRepository<Group, String> {
 
     Page<Group> findByResearches_Teachers_Id(String id, Pageable pageable);
 
+    long countByResearches_Teachers_Id(String id);
+
 }

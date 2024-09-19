@@ -140,6 +140,11 @@ public class StudentService implements IStudentService {
     }
 
     @Override
+    public int count() {
+        return (int) studentRepository.count();
+    }
+
+    @Override
     public ShowAllResponse<StudentDTO> showAll(ShowAllRequest showAllRequest) {
         int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
@@ -151,7 +156,7 @@ public class StudentService implements IStudentService {
         Page<Student> studentEntityList = studentRepository.findAll(paging);
         List<StudentDTO> resultDTO = studentEntityList.getContent().stream().map(studentMapper::toDTO).toList();
 
-        int totalElements = resultDTO.size();
+        int totalElements = (int) studentRepository.count();
         int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
         return ShowAllResponse.<StudentDTO>builder()

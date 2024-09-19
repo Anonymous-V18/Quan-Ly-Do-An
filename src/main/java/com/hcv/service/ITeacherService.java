@@ -22,6 +22,8 @@ public interface ITeacherService {
 
     void delete(String[] ids);
 
+    int count();
+    
     ShowAllResponse<TeacherDTO> showAll(ShowAllRequest showAllRequest);
 
     List<TeacherShowToSelectionResponse> showAllToSelection();

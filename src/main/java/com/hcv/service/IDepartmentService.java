@@ -14,6 +14,8 @@ public interface IDepartmentService {
 
     void delete(String[] ids);
 
+    int count();
+
     DepartmentDTO findOneByName(String name);
 
     ShowAllResponse<DepartmentDTO> showAll(ShowAllRequest showAllRequest);
