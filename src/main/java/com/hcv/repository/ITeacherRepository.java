@@ -9,7 +9,6 @@ public interface ITeacherRepository extends JpaRepository<Teacher, String> {
 
     Optional<Teacher> findByCode(String code);
 
-
     boolean existsById(String id);
 
     Optional<Teacher> findByCodeAndIdNot(String code, String id);

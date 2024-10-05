@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 @Mapper
 public interface IGroupMapper {
 
-    @Mapping(target = "jobs", ignore = true)
+    @Mapping(target = "jobGroups", ignore = true)
     Group toEntity(GroupDTO groupDTO);
 
     GroupDTO toDTO(Group group);

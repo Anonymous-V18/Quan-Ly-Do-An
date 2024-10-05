@@ -19,11 +19,14 @@ import lombok.experimental.FieldDefaults;
 public class Point extends BaseEntity {
 
     Double point;
-    String type;
     String teacherId;
 
     @ManyToOne
+    @JoinColumn(name = "type_point_id")
+    TypePoint typePoint;
+
+    @ManyToOne
     @JoinColumn(name = "student_id")
-    Student students;
+    Student student;
 
 }

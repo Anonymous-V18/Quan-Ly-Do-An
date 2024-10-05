@@ -44,10 +44,10 @@ public class NotificationService implements INotificationService {
         Student studentEntity = studentRepository.findById(currentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
 
-        if (studentEntity.getGroups() == null) {
+        if (studentEntity.getGroup() == null) {
             throw new AppException(ErrorCode.STUDENT_HAS_NOT_GROUP);
         }
-        
+
         String message = studentEntity.getName() + " muốn mời bạn vào nhóm !";
         String status = StatusNotificationConst.PENDING;
         String type = NotificationTypeConst.INVITATION;
@@ -55,7 +55,7 @@ public class NotificationService implements INotificationService {
         List<Student> studentList;
         if (Boolean.TRUE.equals(invitationInsertInput.getIsSendAllStudent())) {
             studentList = studentRepository
-                    .findStudentToInvite(currentUserId, List.of(studentEntity.getSubjects()), 0)
+                    .findStudentToInvite(currentUserId, List.of(studentEntity.getSubject()), 0)
                     .stream().toList();
         } else {
             if (invitationInsertInput.getStudentIds().isEmpty()) {
@@ -90,7 +90,7 @@ public class NotificationService implements INotificationService {
             invitationForm.setStatus(StatusNotification.valueOf(status));
             invitationForm.setType(TypeNotification.valueOf(type));
             invitationForm.setSendTo(student.getId());
-            invitationForm.setStudents(student);
+            invitationForm.setStudent(student);
             invitationList.add(invitationForm);
         }
 

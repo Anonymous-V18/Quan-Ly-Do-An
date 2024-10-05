@@ -25,9 +25,9 @@ public class UserDTO {
 
     List<RoleDTO> roles = new ArrayList<>();
 
-    TeacherResponse teachers;
+    TeacherResponse teacher;
 
-    StudentResponse students;
+    StudentResponse student;
 
 
 }

@@ -15,7 +15,7 @@ public class PointResponse {
 
     String id;
     Double point;
-    String type;
     String teacherId;
 
+    TypePointResponse typePoint;
 }

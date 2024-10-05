@@ -1,0 +1,53 @@
+package com.hcv.service.impl;
+
+import com.hcv.converter.IJobMapper;
+import com.hcv.dto.request.BaseJobGroupInput;
+import com.hcv.dto.request.BaseJobTeacherInput;
+import com.hcv.dto.response.JobGroupResponse;
+import com.hcv.dto.response.JobTeacherResponse;
+import com.hcv.repository.IGroupRepository;
+import com.hcv.repository.IJobRepository;
+import com.hcv.repository.ITeacherRepository;
+import com.hcv.service.IJobService;
+import com.hcv.service.IUserService;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class JobService implements IJobService {
+
+    IJobRepository jobRepository;
+    IJobMapper jobMapper;
+    ITeacherRepository teacherRepository;
+    IUserService userService;
+    IGroupRepository groupRepository;
+
+
+    @Override
+    public JobGroupResponse insertJobForGroupOfResearch(BaseJobGroupInput jobInput) {
+
+        return null;
+    }
+
+    @Override
+    public JobTeacherResponse insertJobForTeacher(BaseJobTeacherInput jobInput) {
+        return null;
+    }
+
+    @Override
+    public void deleteJobOfTeacherCompleted(String[] ids) {
+        for (String id : ids) {
+            jobRepository.deleteById(id);
+        }
+    }
+
+    @Override
+    public void markCompleted(String id) {
+
+    }
+
+}

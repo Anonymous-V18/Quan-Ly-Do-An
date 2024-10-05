@@ -20,8 +20,8 @@ public class NotificationDTO {
     String type;
     String status;
 
-    TeacherDTO teachers;
-    StudentDTO students;
-    ResearchDTO researches;
+    TeacherDTO teacher;
+    StudentDTO student;
+    ResearchDTO research;
 
 }

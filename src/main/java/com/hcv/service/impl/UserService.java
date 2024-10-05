@@ -6,7 +6,7 @@ import com.hcv.dto.request.UserRequest;
 import com.hcv.dto.request.UserUpdateInput;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.dto.response.UserDTO;
-import com.hcv.entity.RoleEntity;
+import com.hcv.entity.Role;
 import com.hcv.entity.User;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
@@ -50,7 +50,7 @@ public class UserService implements IUserService {
         }
         User user = userMapper.toEntity(userRequest, passwordEncoder);
 
-        List<RoleEntity> listRolesEntity = roleRepository.findByNameIn(userRequest.getNameRoles());
+        List<Role> listRolesEntity = roleRepository.findByNameIn(userRequest.getNameRoles());
         if (listRolesEntity.contains(null)) {
             throw new AppException(ErrorCode.INVALID_NAME_ROLE);
         }
@@ -78,7 +78,7 @@ public class UserService implements IUserService {
         User userOld = userRepository.findById(oldUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        List<RoleEntity> listRolesEntity = roleRepository.findByNameIn(updateUserInput.getNameRoles());
+        List<Role> listRolesEntity = roleRepository.findByNameIn(updateUserInput.getNameRoles());
         if (listRolesEntity.contains(null)) {
             throw new AppException(ErrorCode.INVALID_NAME_ROLE);
         }

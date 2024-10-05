@@ -20,5 +20,6 @@ public class GroupResponse {
     String id;
     String leaderId;
     List<StudentResponse> students = new ArrayList<>();
-
+    List<JobGroupShortenedResponse> jobGroups = new ArrayList<>();
+    
 }

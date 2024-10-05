@@ -15,11 +15,13 @@ import com.hcv.repository.IResearchRepository;
 import com.hcv.repository.IStudentRepository;
 import com.hcv.repository.ITeacherRepository;
 import com.hcv.repository.IUserRepository;
+import com.hcv.service.IJobTeacherDetailService;
 import com.hcv.service.IResearchService;
 import com.hcv.service.IUserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,11 +43,20 @@ public class ResearchService implements IResearchService {
     IStudentRepository studentRepository;
     IUserService userService;
     IUserRepository userRepository;
+    IJobTeacherDetailService jobTeacherDetailService;
+
+    @NonFinal
+    Teacher teacher;
 
     @Override
     @Transactional
     public List<ResearchDTO> insertFromFile(ResearchInsertFromFileInput researchInsertFromFileInput) {
-        return researchInsertFromFileInput.getResearches().stream().map(this::insert).toList();
+        List<ResearchDTO> response = researchInsertFromFileInput.getResearches().stream().map(this::insert).toList();
+
+        JobTeacherDetail jobTeacherDetail = jobTeacherDetailService.findJobTeacherDetailId(teacher.getJobTeacherDetails());
+        jobTeacherDetailService.updateQuantityCompleted(jobTeacherDetail, response.size(), true);
+
+        return response;
     }
 
     @Override
@@ -60,26 +71,29 @@ public class ResearchService implements IResearchService {
         List<Teacher> teachers = teacherIds.stream()
                 .map(teacherId -> teacherRepository.findById(teacherId)
                         .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED)))
+                .distinct()
                 .toList();
+        if (teacher == null) {
+            teacher = teachers.stream()
+                    .filter(teacher1 -> teacher1.getId().equals(creatorId))
+                    .findFirst()
+                    .orElse(null);
+        }
 
         research.setInstructorsIds(teacherIds);
         research.setTeachers(teachers);
 
         List<Subject> subjects = teachers.stream()
-                .map(Teacher::getSubjects)
+                .map(Teacher::getSubject)
                 .distinct()
                 .toList();
-
         if (subjects.contains(null)) {
             throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
         }
-
         research.setSubjects(subjects);
 
         research.setStatus(StatusResearch.valueOf(StatusResearchConst.PENDING_APPROVE));
-
         research = researchRepository.save(research);
-
         return mapper.toDTO(research);
     }
 
@@ -118,7 +132,7 @@ public class ResearchService implements IResearchService {
             research.setTeachers(teachers);
 
             List<Subject> subjects = teachers.stream()
-                    .map(Teacher::getSubjects)
+                    .map(Teacher::getSubject)
                     .distinct()
                     .toList();
             if (subjects.contains(null)) {
@@ -154,9 +168,20 @@ public class ResearchService implements IResearchService {
 
     @Override
     public void delete(String[] ids) {
-        List<Research> researchList = researchRepository.findAllById(Arrays.asList(ids));
+        List<Research> researchList = researchRepository.findAllById(Arrays.asList(ids)).stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
         researchList.forEach(researchEntity ->
                 researchEntity.setStatus(StatusResearch.valueOf(StatusResearchConst.DELETED)));
+
+        String currentUserId = userService.getClaimsToken().get("sub").toString();
+        teacher = teacherRepository.findById(currentUserId)
+                .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
+
+        JobTeacherDetail jobTeacherDetail = jobTeacherDetailService.findJobTeacherDetailId(teacher.getJobTeacherDetails());
+        jobTeacherDetailService.updateQuantityCompleted(jobTeacherDetail, researchList.size(), false);
 
         researchRepository.saveAll(researchList);
     }
@@ -203,7 +228,7 @@ public class ResearchService implements IResearchService {
         int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
         int totalElements = !resultDTO.isEmpty()
-                ? this.countByStatusInAndSubjectsId(statusList, resultDTO.getFirst().getSubjects().getFirst().getId())
+                ? this.countByTeachersId(currentUserId)
                 : 0;
         int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
@@ -311,28 +336,31 @@ public class ResearchService implements IResearchService {
     }
 
     @Override
-    public void registerResearch(ResearchRegisterInput researchRegisterInput) {
-        researchRegisterInput.setStudentID(userService.getClaimsToken().get("sub").toString());
+    public void registerResearch(ResearchRegistrationInput researchRegistrationInput) {
+        String currentUserID = userService.getClaimsToken().get("sub").toString();
 
-        String researchID = researchRegisterInput.getResearchID();
+        String researchID = researchRegistrationInput.getResearchID();
         Research research = researchRepository.findById(researchID)
                 .orElseThrow(() -> new AppException(ErrorCode.RESEARCH_NOT_EXISTED));
         if (research.getStatus().name().equals("AS")) {
             throw new AppException(ErrorCode.RESEARCH_HAS_BEEN_ASSIGNED);
         }
 
-        String studentID = researchRegisterInput.getStudentID();
-        Student student = studentRepository.findById(studentID)
+        Student student = studentRepository.findById(currentUserID)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
-        if (student.getGroups() == null) {
+        if (student.getGroup() == null) {
             throw new AppException(ErrorCode.STUDENT_HAS_NOT_GROUP);
         }
-        if (student.getGroups().getResearches() != null) {
+        if (student.getGroup().getResearch() != null) {
             throw new AppException(ErrorCode.STUDENT_EXISTED_IN_OTHER_RESEARCH);
         }
+        int minMemberRequired = research.getMinMembers();
+        int membersInGroup = student.getGroup().getStudents().size();
+        if (membersInGroup < minMemberRequired) {
+            throw new AppException(ErrorCode.GROUP_NOT_ENOUGH_MEMBER_REQUIRED);
+        }
 
-        research.setGroups(student.getGroups());
-
+        research.setGroup(student.getGroup());
         research.setStatus(StatusResearch.valueOf(StatusResearchConst.ASSIGNED));
         researchRepository.save(research);
     }
@@ -343,8 +371,8 @@ public class ResearchService implements IResearchService {
         Research research = researchRepository.findById(researchID)
                 .orElseThrow(() -> new AppException(ErrorCode.RESEARCH_NOT_EXISTED));
 
-        research.getGroups().setResearches(null);
-        research.setGroups(null);
+        research.getGroup().setResearch(null);
+        research.setGroup(null);
 
         research.setStatus(StatusResearch.valueOf(StatusResearchConst.APPROVED));
         researchRepository.save(research);
@@ -382,9 +410,9 @@ public class ResearchService implements IResearchService {
         User user = userRepository.findByUsername(currentUserName)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        String subjectId = user.getStudents() != null
-                ? user.getStudents().getSubjects().getId()
-                : user.getTeachers().getSubjects().getId();
+        String subjectId = user.getStudent() != null
+                ? user.getStudent().getSubject().getId()
+                : user.getTeacher().getSubject().getId();
 
 
         Pageable paging = PageRequest.of(

@@ -12,7 +12,7 @@ import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.util.Date;
+import java.time.Instant;
 
 @MappedSuperclass
 @Getter
@@ -29,14 +29,17 @@ public abstract class BaseEntity {
     @CreatedBy
     @Column(name = "created_by", nullable = false, updatable = false)
     String createdBy;
+
     @CreatedDate
     @Column(name = "created_date", nullable = false, updatable = false)
-    Date createdDate;
+    Instant createdDate;
+
     @LastModifiedBy
     @Column(name = "modified_by", insertable = false)
     String modifiedBy;
+
     @LastModifiedDate
     @Column(name = "modified_date", insertable = false)
-    Date modifiedDate;
+    Instant modifiedDate;
 
 }

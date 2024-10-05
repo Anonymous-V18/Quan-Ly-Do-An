@@ -19,6 +19,6 @@ public class StudentDTO {
     String myClass;
     String email;
     String phoneNumber;
-    SubjectDTO subjects;
+    SubjectDTO subject;
 
 }

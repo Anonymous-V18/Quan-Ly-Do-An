@@ -21,16 +21,17 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Group extends BaseEntity {
 
+    Integer minMember;
     Integer maxMember;
     String leaderId;
 
-    @OneToOne(mappedBy = "groups")
-    Research researches;
+    @OneToOne(mappedBy = "group")
+    Research research;
 
-    @OneToMany(mappedBy = "groups")
+    @OneToMany(mappedBy = "group")
     List<Student> students = new ArrayList<>();
 
-    @OneToMany(mappedBy = "groups")
-    List<Job> jobs = new ArrayList<>();
+    @OneToMany(mappedBy = "group")
+    List<JobGroup> jobGroups = new ArrayList<>();
 
 }

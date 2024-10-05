@@ -1,18 +1,23 @@
 package com.hcv.service;
 
 import com.hcv.dto.request.PointInsertInput;
+import com.hcv.dto.request.PointInsertListInput;
 import com.hcv.dto.request.PointUpdateInput;
 import com.hcv.dto.response.PointResponse;
+import com.hcv.entity.Student;
+import com.hcv.entity.TypePoint;
+
+import java.util.List;
 
 public interface IPointService {
 
-    PointResponse insert(PointInsertInput pointInsertInput);
+    List<PointResponse> insertList(PointInsertListInput pointInsertListInput);
+
+    PointResponse insert(String teacherId, TypePoint typePoint, PointInsertInput pointInsertInput);
 
     PointResponse update(String oldPointId, PointUpdateInput newPointDTO);
 
-    void checkTypePoint(String typePoint);
-
-    void checkPointTeacherValid(String teacherId, String studentId, String typePoint);
+    void checkPointTeacher(String teacherId, Student student, String typePoint);
 
     void delete(String[] ids);
 

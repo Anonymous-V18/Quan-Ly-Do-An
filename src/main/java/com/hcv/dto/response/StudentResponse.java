@@ -21,6 +21,6 @@ public class StudentResponse {
     String myClass;
     String email;
     String phoneNumber;
-    SubjectDTO subjects;
+    SubjectDTO subject;
     List<PointResponse> points = new ArrayList<>();
 }

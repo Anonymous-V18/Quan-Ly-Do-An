@@ -1,10 +1,9 @@
 package com.hcv.repository;
 
-import com.hcv.entity.Job;
+import com.hcv.entity.TypePoint;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface IJobRepository extends JpaRepository<Job, String> {
-
+public interface ITypePointRepository extends JpaRepository<TypePoint, String> {
 }

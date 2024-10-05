@@ -80,14 +80,14 @@ public class TeacherService implements ITeacherService {
 
         User user = userRepository.findById(teacherInput.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        teacher.setUsers(user);
+        teacher.setUser(user);
 
         Subject subject = subjectRepository.findByName(teacherInput.getSubjectName())
                 .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
-        teacher.setSubjects(subject);
+        teacher.setSubject(subject);
 
-        Department department = subject.getDepartments();
-        teacher.setDepartments(department);
+        Department department = subject.getDepartment();
+        teacher.setDepartment(department);
 
         teacher = teacherRepository.save(teacher);
 
@@ -119,17 +119,17 @@ public class TeacherService implements ITeacherService {
 
         teacher = teacherMapper.toEntity(teacher, teacherInput);
 
-        List<RoleEntity> roles = roleRepository.findByNameIn(teacherInput.getPosition());
+        List<Role> roles = roleRepository.findByNameIn(teacherInput.getPosition());
         if (roles.contains(null)) {
             throw new AppException(ErrorCode.INVALID_NAME_ROLE);
         }
-        teacher.getUsers().setRoles(roles);
+        teacher.getUser().setRoles(roles);
 
         Subject subject = subjectRepository.findByName(teacherInput.getSubjectName())
                 .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
-        teacher.setSubjects(subject);
+        teacher.setSubject(subject);
 
-        teacher.setDepartments(teacher.getSubjects().getDepartments());
+        teacher.setDepartment(teacher.getSubject().getDepartment());
 
         teacherRepository.save(teacher);
 
@@ -143,7 +143,7 @@ public class TeacherService implements ITeacherService {
         teacherList = teacherList.stream().filter(Objects::nonNull).toList();
 
         List<User> userList = new ArrayList<>();
-        teacherList.forEach(teacherEntity -> userList.add(teacherEntity.getUsers()));
+        teacherList.forEach(teacherEntity -> userList.add(teacherEntity.getUser()));
 
         teacherRepository.deleteAll(teacherList);
         userRepository.deleteAll(userList);

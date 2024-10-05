@@ -16,8 +16,8 @@ public interface IUserMapper {
     UserDTO toShowDTO(User user);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "teachers", ignore = true)
-    @Mapping(target = "students", ignore = true)
+    @Mapping(target = "teacher", ignore = true)
+    @Mapping(target = "student", ignore = true)
     @Mapping(target = "roles", ignore = true)
     @Mapping(target = "password", expression = "java(passwordEncoder.encode(userRequest.getPassword()))")
     User toEntity(UserRequest userRequest, PasswordEncoder passwordEncoder);

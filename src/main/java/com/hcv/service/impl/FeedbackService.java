@@ -46,8 +46,7 @@ public class FeedbackService implements IFeedbackService {
 
         feedback.setSendFromName(teacher.getName());
         feedback.setSendFrom(teacher.getCode());
-        feedback.setSendTo(researchId);
-        feedback.setResearches(research);
+        feedback.setResearch(research);
 
         feedback = feedbackRepository.save(feedback);
 
@@ -71,9 +70,7 @@ public class FeedbackService implements IFeedbackService {
         String researchID = newFeedbackDTOForResearchInput.getResearchID();
         Research research = researchRepository.findById(researchID)
                 .orElseThrow(() -> new AppException(ErrorCode.RESEARCH_NOT_EXISTED));
-        feedback.setResearches(research);
-        feedback.setSendTo(researchID);
-
+        feedback.setResearch(research);
         feedbackRepository.save(feedback);
 
         return feedbackMapper.toDTO(feedback);

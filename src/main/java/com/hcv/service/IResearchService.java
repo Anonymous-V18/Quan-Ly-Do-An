@@ -24,7 +24,7 @@ public interface IResearchService {
 
     ResearchResponse showDetail(String id);
 
-    void registerResearch(ResearchRegisterInput researchRegisterInput);
+    void registerResearch(ResearchRegistrationInput researchRegistrationInput);
 
     void cancelRegistrationResearch(ResearchCancelRegistrationInput researchCancelRegistrationInput);
 

@@ -15,13 +15,13 @@ public interface ITeacherMapper {
 
     TeacherShowToSelectionResponse toShowDTOToSelection(Teacher teacher);
 
-    @Mapping(target = "users", ignore = true)
-    @Mapping(target = "subjects", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "subject", ignore = true)
     @Mapping(target = "researches", ignore = true)
-    @Mapping(target = "jobs", ignore = true)
+    @Mapping(target = "jobTeacherDetails", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "feedbacks", ignore = true)
-    @Mapping(target = "departments", ignore = true)
+    @Mapping(target = "department", ignore = true)
     Teacher toEntity(TeacherInput teacherInput);
 
     @Mapping(target = "position", expression = "java(teacherInput.getPosition())")

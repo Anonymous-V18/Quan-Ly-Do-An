@@ -11,9 +11,9 @@ public interface IFeedbackMapper {
 
     FeedbackDTO toDTO(Feedback feedback);
 
-    @Mapping(target = "teachers", ignore = true)
-    @Mapping(target = "students", ignore = true)
-    @Mapping(target = "researches", ignore = true)
+    @Mapping(target = "teacher", ignore = true)
+    @Mapping(target = "student", ignore = true)
+    @Mapping(target = "research", ignore = true)
     @Mapping(target = "id", ignore = true)
     Feedback toEntity(FeedbackForResearchInput newFeedbackDTOForResearch);
 

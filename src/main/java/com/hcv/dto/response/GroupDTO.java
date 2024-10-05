@@ -18,7 +18,7 @@ import java.util.List;
 public class GroupDTO {
 
     String id;
-    ResearchDTO researches;
+    ResearchDTO research;
     List<StudentDTO> students = new ArrayList<>();
 
 }

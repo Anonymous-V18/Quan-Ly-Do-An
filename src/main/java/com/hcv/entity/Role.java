@@ -17,10 +17,11 @@ import java.util.List;
 @Setter
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RoleEntity extends BaseEntity {
+public class Role extends BaseEntity {
 
+    @Column(name = "name", unique = true, nullable = false, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     String name;
-
+    @Column(name = "code", unique = true, nullable = false, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     @Enumerated(EnumType.STRING)
     CodeRole code;
 

@@ -13,13 +13,13 @@ public interface IStudentMapper {
 
     StudentDTO toDTO(Student student);
 
-    @Mapping(target = "users", ignore = true)
-    @Mapping(target = "subjects", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "subject", ignore = true)
     @Mapping(target = "points", ignore = true)
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "groups", ignore = true)
+    @Mapping(target = "group", ignore = true)
     @Mapping(target = "feedbacks", ignore = true)
-    @Mapping(target = "departments", ignore = true)
+    @Mapping(target = "department", ignore = true)
     Student toEntity(StudentInput studentInput);
 
     StudentShowToSelectionResponse toShowToSelectionDTO(Student student);

@@ -23,6 +23,6 @@ public class TeacherDTO {
     String email;
     String phoneNumber;
     List<String> position = new ArrayList<>();
-    SubjectDTO subjects;
+    SubjectDTO subject;
 
 }

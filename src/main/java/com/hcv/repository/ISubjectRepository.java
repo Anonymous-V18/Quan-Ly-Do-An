@@ -12,7 +12,6 @@ public interface ISubjectRepository extends JpaRepository<Subject, String> {
 
     Optional<Subject> findByName(String name);
 
-    List<Subject> findByDepartments_Id(String id);
-
+    List<Subject> findByDepartment_Id(String id);
 
 }

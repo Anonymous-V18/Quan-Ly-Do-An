@@ -17,11 +17,15 @@ public interface IStudentRepository extends JpaRepository<Student, String> {
 
     Optional<Student> findByCodeAndIdNot(String code, String id);
 
-    List<Student> findByGroups_IdIn(List<String> ids);
+    List<Student> findByGroup_IdIn(List<String> ids);
 
     @Query(value = "select s from Student s where s.id <> :id " +
-            "and s.subjects in :subjects and s.users.isGraduate = :isGraduate " +
-            "and s.groups is null")
+            "and s.subject in :subjects and s.user.isGraduate = :isGraduate " +
+            "and s.group is null")
     List<Student> findStudentToInvite(String id, Collection<Subject> subjects, Integer isGraduate);
+
+    @Query(value = "select count(s) from Student s where " +
+            "s.user.isGraduate = :isGraduate and s.subject.id = :id")
+    long countStudentInTheSameSubject(Integer isGraduate, String id);
 
 }

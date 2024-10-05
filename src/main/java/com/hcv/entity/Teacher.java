@@ -32,9 +32,9 @@ public class Teacher extends BaseEntity {
 
     @OneToOne
     @JoinColumn(name = "user_id")
-    User users;
+    User user;
 
-    @OneToMany(mappedBy = "teachers")
+    @OneToMany(mappedBy = "teacher")
     List<Feedback> feedbacks = new ArrayList<>();
 
     @ManyToMany(mappedBy = "teachers")
@@ -42,13 +42,13 @@ public class Teacher extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "department_id")
-    Department departments;
+    Department department;
 
     @ManyToOne
     @JoinColumn(name = "subject_id")
-    Subject subjects;
+    Subject subject;
 
-    @ManyToMany(mappedBy = "teachers")
-    List<Job> jobs = new ArrayList<>();
+    @OneToMany(mappedBy = "teacher")
+    List<JobTeacherDetail> jobTeacherDetails = new ArrayList<>();
 
 }

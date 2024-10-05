@@ -16,8 +16,7 @@ public class PointDTO {
 
     String id;
     Double point;
-    String type;
     String teacherId;
-    StudentDTO students;
+    StudentDTO student;
 
 }

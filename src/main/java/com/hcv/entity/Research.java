@@ -37,14 +37,13 @@ public class Research extends BaseEntity {
     @Enumerated(EnumType.STRING)
     StatusResearch status;
 
-
     @ManyToMany
     @JoinTable(name = "research_teacher"
             , joinColumns = @JoinColumn(name = "research_id")
             , inverseJoinColumns = @JoinColumn(name = "teacher_id"))
     List<Teacher> teachers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "researches")
+    @OneToMany(mappedBy = "research")
     List<Feedback> feedbacks = new ArrayList<>();
 
     @ManyToMany
@@ -55,6 +54,6 @@ public class Research extends BaseEntity {
 
     @OneToOne
     @JoinColumn(name = "group_id")
-    Group groups;
+    Group group;
 
 }

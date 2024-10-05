@@ -79,11 +79,11 @@ public class JwtUtil {
         String id;
 
         if (roleName.contains("STUDENT")) {
-            id = user.getStudents().getId();
+            id = user.getStudent().getId();
         } else {
-            id = user.getTeachers().getId();
+            id = user.getTeacher().getId();
         }
-        
+
         if (id == null) {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }

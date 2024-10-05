@@ -44,15 +44,14 @@ public class WebSecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {
             "/log-in", "/register", "/log-out", "/refresh",
             "/auth/**", "/subjects/**", "/departments/**", "/teachers/**", "/students/**", "/jobs/**", "/users/**",
-            "/researches/**", "/feedbacks/**", "/groups/**", "/notifications/**"
+            "/researches/**", "/feedbacks/**", "/groups/**", "/notifications/**", "/job-teacher/**", "/job-group/**"
     };
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-
+    
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);

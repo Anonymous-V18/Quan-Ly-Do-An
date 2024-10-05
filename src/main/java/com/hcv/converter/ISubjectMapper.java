@@ -18,7 +18,7 @@ public interface ISubjectMapper {
     @Mapping(target = "students", ignore = true)
     @Mapping(target = "researches", ignore = true)
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "departments", ignore = true)
+    @Mapping(target = "department", ignore = true)
     Subject toEntity(SubjectInput subjectInput);
 
 }

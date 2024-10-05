@@ -1,24 +1,24 @@
 package com.hcv.service.impl;
 
-import com.hcv.constant.PointTypeConst;
+import com.hcv.constant.TypePointConst;
 import com.hcv.converter.IPointMapper;
 import com.hcv.dto.request.PointInsertInput;
+import com.hcv.dto.request.PointInsertListInput;
 import com.hcv.dto.request.PointUpdateInput;
 import com.hcv.dto.response.PointResponse;
-import com.hcv.entity.BaseEntity;
-import com.hcv.entity.Point;
-import com.hcv.entity.Research;
-import com.hcv.entity.Student;
+import com.hcv.entity.*;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IPointRepository;
 import com.hcv.repository.IStudentRepository;
+import com.hcv.repository.ITypePointRepository;
 import com.hcv.service.IPointService;
 import com.hcv.service.IUserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,34 +31,44 @@ public class PointService implements IPointService {
     IUserService userService;
     IStudentRepository studentRepository;
     IPointRepository pointRepository;
+    ITypePointRepository typePointRepository;
     IPointMapper pointMapper;
 
     @Override
-    public PointResponse insert(PointInsertInput pointInsertInput) {
-        this.checkTypePoint(pointInsertInput.getType());
-        this.checkPointTeacherValid(userService.getClaimsToken().get("sub").toString()
-                , pointInsertInput.getStudentId()
-                , pointInsertInput.getType());
-
-        Point point = pointMapper.toEntity(pointInsertInput);
-
+    @Transactional
+    public List<PointResponse> insertList(PointInsertListInput pointInsertListInput) {
         String teacherId = userService.getClaimsToken().get("sub").toString();
-        point.setTeacherId(teacherId);
 
+        String typePointId = pointInsertListInput.getTypePointId();
+        TypePoint typePoint = typePointRepository.findById(typePointId)
+                .orElseThrow(() -> new AppException(ErrorCode.POINT_TYPE_INVALID));
+
+        return pointInsertListInput.getPoints().stream()
+                .map(pointInsertInput -> this.insert(teacherId, typePoint, pointInsertInput))
+                .toList();
+    }
+
+    @Override
+    public PointResponse insert(String teacherId, TypePoint typePoint, PointInsertInput pointInsertInput) {
         String studentId = pointInsertInput.getStudentId();
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
 
+        this.checkPointTeacher(teacherId, student, typePoint.getName());
+
+        Point point = pointMapper.toEntity(pointInsertInput);
+        point.setTeacherId(teacherId);
+        point.setTypePoint(typePoint);
+
         List<Point> pointListOfStudent = student.getPoints();
-        pointListOfStudent.forEach(pointEntity1 -> {
-            if (pointEntity1.getTeacherId().equals(teacherId)) {
+        pointListOfStudent.forEach(point1 -> {
+            if (point1.getTeacherId().equals(teacherId)) {
                 throw new AppException(ErrorCode.POINT_EXIST);
             }
         });
-        point.setStudents(student);
+        point.setStudent(student);
 
         point = pointRepository.save(point);
-
         return pointMapper.toDTO(point);
     }
 
@@ -67,13 +77,13 @@ public class PointService implements IPointService {
         Point oldPoint = pointRepository.findById(oldPointId)
                 .orElseThrow(() -> new AppException(ErrorCode.POINT_NOT_EXIST));
 
-        this.checkPointTeacherValid(userService.getClaimsToken().get("sub").toString(),
-                oldPoint.getStudents().getId(),
-                oldPoint.getType());
+        this.checkPointTeacher(userService.getClaimsToken().get("sub").toString(),
+                oldPoint.getStudent(),
+                oldPoint.getTypePoint().getName());
 
         oldPoint.setPoint(newPointDTO.getPoint());
-        oldPoint = pointRepository.save(oldPoint);
 
+        oldPoint = pointRepository.save(oldPoint);
         return pointMapper.toDTO(oldPoint);
     }
 
@@ -82,31 +92,18 @@ public class PointService implements IPointService {
         pointRepository.deleteAllById(Arrays.stream(ids).toList());
     }
 
-
     @Override
-    public void checkTypePoint(String typePoint) {
-        List<String> listOfTypePoint = List.of(PointTypeConst.POINT_INSTRUCTORS, PointTypeConst.POINT_THESIS_ADVISOR, PointTypeConst.POINT_COUNCIL);
-        boolean isTypePointValid = listOfTypePoint.contains(typePoint);
-        if (!isTypePointValid) {
-            throw new AppException(ErrorCode.POINT_TYPE_INVALID);
-        }
-    }
-
-    @Override
-    public void checkPointTeacherValid(String teacherId, String studentId, String typePoint) {
-        Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
-
-        Research research = student.getGroups().getResearches();
+    public void checkPointTeacher(String teacherId, Student student, String typePointName) {
+        Research research = student.getGroup().getResearch();
 
         List<String> instructorsIds = research.getInstructorsIds();
         String thesisAdvisorsId = research.getThesisAdvisorId();
 
         boolean isValid;
-        switch (typePoint) {
-            case PointTypeConst.POINT_INSTRUCTORS -> isValid = instructorsIds.contains(teacherId);
-            case PointTypeConst.POINT_THESIS_ADVISOR -> isValid = thesisAdvisorsId.equals(teacherId);
-            case PointTypeConst.POINT_COUNCIL -> {
+        switch (typePointName) {
+            case TypePointConst.POINT_INSTRUCTORS -> isValid = instructorsIds.contains(teacherId);
+            case TypePointConst.POINT_THESIS_ADVISOR -> isValid = thesisAdvisorsId != null && thesisAdvisorsId.equals(teacherId);
+            case TypePointConst.POINT_COUNCIL -> {
                 List<String> councilIdList = research.getTeachers().stream()
                         .filter(teacherEntity -> instructorsIds.contains(teacherEntity.getId())
                                 || teacherEntity.getId().equals(thesisAdvisorsId)
@@ -117,7 +114,7 @@ public class PointService implements IPointService {
             }
             default -> throw new AppException(ErrorCode.POINT_TYPE_INVALID);
         }
-        
+
         if (!isValid) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }

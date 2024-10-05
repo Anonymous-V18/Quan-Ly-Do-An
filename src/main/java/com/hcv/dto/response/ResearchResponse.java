@@ -33,6 +33,6 @@ public class ResearchResponse {
     List<TeacherResponse> teachers = new ArrayList<>();
     List<SubjectResponse> subjects = new ArrayList<>();
     List<FeedbackResponse> feedbacks = new ArrayList<>();
-    GroupResponse groups;
+    GroupResponse group;
 
 }

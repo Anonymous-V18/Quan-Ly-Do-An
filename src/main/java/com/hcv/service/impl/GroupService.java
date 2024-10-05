@@ -44,15 +44,24 @@ public class GroupService implements IGroupService {
         Student student = studentRepository.findById(currentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
 
-        if (student.getGroups() != null) {
+        if (student.getGroup() != null) {
             throw new AppException(ErrorCode.STUDENT_EXISTED_IN_OTHER_GROUP);
+        }
+
+        long countStudentInTheSameSubject =
+                studentRepository.countStudentInTheSameSubject(0, student.getSubject().getId());
+        long countGroupHaveTheSameSubject =
+                groupRepository.countGroupHaveTheSameSubject(0, student.getSubject().getId());
+        int quantityGroupLimit = (int) Math.ceil(countStudentInTheSameSubject / 3.0);
+        if (countGroupHaveTheSameSubject == quantityGroupLimit) {
+            throw new AppException(ErrorCode.THE_NUMBER_OF_GROUPS_HAS_REACHED);
         }
 
         Group group = new Group();
         group.setLeaderId(currentUserId);
         group.setMaxMember(groupInsertInput.getMaxMember());
         Group finalGroup = group;
-        student.setGroups(finalGroup);
+        student.setGroup(finalGroup);
 
         group.setStudents(List.of(student));
 
@@ -68,30 +77,27 @@ public class GroupService implements IGroupService {
         Student student = studentRepository.findById(currentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
 
-        if (student.getGroups() != null) {
+        if (student.getGroup() != null) {
             throw new AppException(ErrorCode.STUDENT_EXISTED_IN_OTHER_GROUP);
         }
 
         Student leaderGroup = studentRepository.findById(leaderGroupId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
 
-        if (leaderGroup.getGroups() == null) {
+        if (leaderGroup.getGroup() == null) {
             throw new AppException(ErrorCode.LEADER_HAS_NOT_GROUP);
         }
 
-        String groupId = leaderGroup.getGroups().getId();
+        String groupId = leaderGroup.getGroup().getId();
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new AppException(ErrorCode.GROUP_NOT_EXIST));
-        if (group.getResearches() != null) {
-            throw new AppException(ErrorCode.GROUP_NOT_CHANGE_MEMBER);
-        }
 
         List<Student> oldStudentList = group.getStudents();
         if (oldStudentList.size() == group.getMaxMember()) {
             throw new AppException(ErrorCode.GROUP_ENOUGH_MEMBER);
         }
 
-        student.setGroups(group);
+        student.setGroup(group);
         group.getStudents().add(student);
 
         group = groupRepository.save(group);
@@ -122,7 +128,7 @@ public class GroupService implements IGroupService {
                 )
                 .toList();
 
-        memberRemoveList.forEach(member -> member.setGroups(null));
+        memberRemoveList.forEach(member -> member.setGroup(null));
         studentRepository.saveAll(memberRemoveList);
 
         group.setStudents(newMember);
@@ -130,9 +136,9 @@ public class GroupService implements IGroupService {
 
     @Override
     public void delete(String[] ids) {
-        List<Student> studentList = studentRepository.findByGroups_IdIn(Arrays.stream(ids).toList());
+        List<Student> studentList = studentRepository.findByGroup_IdIn(Arrays.stream(ids).toList());
         if (!studentList.isEmpty()) {
-            studentList.forEach(studentEntity -> studentEntity.setGroups(null));
+            studentList.forEach(studentEntity -> studentEntity.setGroup(null));
             studentRepository.saveAll(studentList);
         }
         groupRepository.deleteAllById(Arrays.stream(ids).toList());
@@ -144,12 +150,12 @@ public class GroupService implements IGroupService {
         String currentUserId = userService.getClaimsToken().get("sub").toString();
         Student student = studentRepository.findById(currentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
-        return mapper.toShowDTO(student.getGroups());
+        return mapper.toShowDTO(student.getGroup());
     }
 
     @Override
     public int countByResearches_Teachers_Id(String currentUserId) {
-        return (int) groupRepository.countByResearches_Teachers_Id(currentUserId);
+        return (int) groupRepository.countByResearch_Teachers_Id(currentUserId);
     }
 
     @Override
@@ -163,7 +169,7 @@ public class GroupService implements IGroupService {
         );
 
         String currentUserId = userService.getClaimsToken().get("sub").toString();
-        Page<Group> researchEntityList = groupRepository.findByResearches_Teachers_Id(currentUserId, paging);
+        Page<Group> researchEntityList = groupRepository.findByResearch_Teachers_Id(currentUserId, paging);
         List<GroupResponse> resultDTO = researchEntityList.getContent().stream().map(mapper::toShowDTO).toList();
 
         int totalElements = this.countByResearches_Teachers_Id(currentUserId);

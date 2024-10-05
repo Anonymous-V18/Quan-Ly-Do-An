@@ -1,15 +1,18 @@
 package com.hcv.api_controller;
 
-import com.hcv.dto.request.PointInsertInput;
+import com.hcv.dto.request.PointInsertListInput;
 import com.hcv.dto.request.PointUpdateInput;
 import com.hcv.dto.response.ApiResponse;
 import com.hcv.dto.response.PointResponse;
 import com.hcv.service.IPointService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,9 +24,9 @@ public class PointController {
 
     @PostMapping("/insert")
     @PreAuthorize("hasRole('TEACHER')")
-    public ApiResponse<PointResponse> insert(@RequestBody PointInsertInput pointInsertInput) {
-        PointResponse response = pointService.insert(pointInsertInput);
-        return ApiResponse.<PointResponse>builder()
+    public ApiResponse<List<PointResponse>> insert(@RequestBody @Valid PointInsertListInput pointInsertListInput) {
+        List<PointResponse> response = pointService.insertList(pointInsertListInput);
+        return ApiResponse.<List<PointResponse>>builder()
                 .result(response)
                 .build();
     }
@@ -37,6 +40,6 @@ public class PointController {
                 .result(response)
                 .build();
     }
-    
+
 
 }

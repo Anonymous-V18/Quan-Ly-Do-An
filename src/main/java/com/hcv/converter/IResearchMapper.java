@@ -17,7 +17,7 @@ public interface IResearchMapper {
     @Mapping(target = "teachers", ignore = true)
     @Mapping(target = "subjects", ignore = true)
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "groups", ignore = true)
+    @Mapping(target = "group", ignore = true)
     @Mapping(target = "feedbacks", ignore = true)
     Research toEntity(ResearchInput researchInput);
 
@@ -26,7 +26,7 @@ public interface IResearchMapper {
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "teachers", ignore = true)
     @Mapping(target = "subjects", ignore = true)
-    @Mapping(target = "groups", ignore = true)
+    @Mapping(target = "group", ignore = true)
     @Mapping(target = "feedbacks", ignore = true)
     @Mapping(target = "instructorsIds", ignore = true)
     @Mapping(target = "thesisAdvisorId", ignore = true)

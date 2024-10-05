@@ -27,27 +27,26 @@ public class Student extends BaseEntity {
 
     @OneToOne
     @JoinColumn(name = "user_id")
-    User users;
+    User user;
 
-    @OneToMany(mappedBy = "students")
+    @OneToMany(mappedBy = "student")
     List<Feedback> feedbacks = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "group_id")
-    Group groups;
+    Group group;
 
     @ManyToOne
     @JoinColumn(name = "subject_id")
-    Subject subjects;
+    Subject subject;
 
     @ManyToOne
     @JoinColumn(name = "department_id")
-    Department departments;
+    Department department;
 
-    @OneToMany(mappedBy = "students")
+    @OneToMany(mappedBy = "student")
     List<Point> points = new ArrayList<>();
 
-    @OneToMany(mappedBy = "students")
+    @OneToMany(mappedBy = "student")
     List<Notification> notifications = new ArrayList<>();
-
 }

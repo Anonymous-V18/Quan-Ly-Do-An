@@ -29,14 +29,14 @@ public class Notification extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "teacher_id")
-    Teacher teachers;
+    Teacher teacher;
 
     @ManyToOne
     @JoinColumn(name = "student_id")
-    Student students;
+    Student student;
 
     @ManyToOne
     @JoinColumn(name = "research_id")
-    Research researches;
+    Research research;
 
 }

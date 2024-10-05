@@ -9,11 +9,9 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PointInsertInput extends PointBaseInput {
-
-    @NotNull(message = "POINT_TYPE_INVALID")
-    String type;
+public class PointInsertInput extends BasePointInput {
 
     @NotNull(message = "STUDENT_NOT_EXIST")
     String studentId;
+
 }

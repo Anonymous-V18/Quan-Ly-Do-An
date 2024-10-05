@@ -44,7 +44,7 @@ public class SubjectService implements ISubjectService {
         Department department = departmentRepository.findByName(subjectInput.getNameDepartment())
                 .orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED));
 
-        subject.setDepartments(department);
+        subject.setDepartment(department);
         subject = subjectRepository.save(subject);
         return subjectMapper.toDTO(subject);
     }
@@ -59,7 +59,7 @@ public class SubjectService implements ISubjectService {
         Department department = departmentRepository.findByName(subjectInput.getNameDepartment())
                 .orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED));
 
-        subject.setDepartments(department);
+        subject.setDepartment(department);
 
         subjectRepository.save(subject);
 
@@ -123,6 +123,6 @@ public class SubjectService implements ISubjectService {
 
     @Override
     public List<SubjectResponse> showAllByDepartment(String departmentId) {
-        return subjectRepository.findByDepartments_Id(departmentId).stream().map(subjectMapper::toShowDTO).toList();
+        return subjectRepository.findByDepartment_Id(departmentId).stream().map(subjectMapper::toShowDTO).toList();
     }
 }

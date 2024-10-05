@@ -27,12 +27,12 @@ public class User extends BaseEntity {
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
-    List<RoleEntity> roles = new ArrayList<>();
+    List<Role> roles = new ArrayList<>();
 
-    @OneToOne(mappedBy = "users")
-    Teacher teachers;
+    @OneToOne(mappedBy = "user")
+    Teacher teacher;
 
-    @OneToOne(mappedBy = "users")
-    Student students;
+    @OneToOne(mappedBy = "user")
+    Student student;
 
 }

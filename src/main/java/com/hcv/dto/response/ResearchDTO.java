@@ -33,5 +33,5 @@ public class ResearchDTO {
 
     List<TeacherResponse> teachers = new ArrayList<>();
     List<SubjectResponse> subjects = new ArrayList<>();
-    GroupDTO groups;
+    GroupDTO group;
 }

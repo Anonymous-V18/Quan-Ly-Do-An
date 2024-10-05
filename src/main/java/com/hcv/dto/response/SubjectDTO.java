@@ -15,6 +15,6 @@ public class SubjectDTO {
 
     String id;
     String name;
-    DepartmentDTO departments;
+    DepartmentDTO department;
 
 }

@@ -24,13 +24,13 @@ public class Department extends BaseEntity {
     @Column(name = "name", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     String name;
 
-    @OneToMany(mappedBy = "departments")
+    @OneToMany(mappedBy = "department")
     List<Subject> subjects = new ArrayList<>();
 
-    @OneToMany(mappedBy = "departments")
+    @OneToMany(mappedBy = "department")
     List<Teacher> teachers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "departments")
+    @OneToMany(mappedBy = "department")
     List<Student> students = new ArrayList<>();
 
 }

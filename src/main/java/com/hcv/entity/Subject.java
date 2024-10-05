@@ -22,15 +22,15 @@ public class Subject extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "department_id")
-    Department departments;
+    Department department;
 
     @ManyToMany(mappedBy = "subjects")
     List<Research> researches = new ArrayList<>();
 
-    @OneToMany(mappedBy = "subjects")
+    @OneToMany(mappedBy = "subject")
     List<Teacher> teachers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "subjects")
+    @OneToMany(mappedBy = "subject")
     List<Student> students = new ArrayList<>();
 
 }

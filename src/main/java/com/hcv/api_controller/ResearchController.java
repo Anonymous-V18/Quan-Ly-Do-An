@@ -83,7 +83,7 @@ public class ResearchController {
                 .orderDirection(orderDirection)
                 .build();
 
-        ShowAllResponse<ResearchResponse> response = researchService.showAllToFeedback(showAllRequest);
+        ShowAllResponse<ResearchResponse> response = researchService.showAllMyResearch(showAllRequest);
         return ApiResponse.<ShowAllResponse<ResearchResponse>>builder()
                 .result(response)
                 .build();
@@ -167,8 +167,8 @@ public class ResearchController {
 
     @PostMapping("/register")
     @PreAuthorize("hasRole('STUDENT')")
-    public ApiResponse<String> register(@RequestBody ResearchRegisterInput researchRegisterInput) {
-        researchService.registerResearch(researchRegisterInput);
+    public ApiResponse<String> register(@RequestBody ResearchRegistrationInput researchRegistrationInput) {
+        researchService.registerResearch(researchRegistrationInput);
         return ApiResponse.<String>builder()
                 .message("Đăng ký đề tài thành công !")
                 .build();

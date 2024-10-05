@@ -74,14 +74,14 @@ public class StudentService implements IStudentService {
 
         User user = userRepository.findById(studentInput.getUserId().trim())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        student.setUsers(user);
+        student.setUser(user);
 
         Subject subject = subjectRepository.findByName(studentInput.getSubjectName().trim())
                 .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
-        student.setSubjects(subject);
+        student.setSubject(subject);
 
-        Department department = subject.getDepartments();
-        student.setDepartments(department);
+        Department department = subject.getDepartment();
+        student.setDepartment(department);
 
         student = studentRepository.save(student);
 
@@ -116,9 +116,9 @@ public class StudentService implements IStudentService {
         Subject subject = subjectRepository.findByName(studentInput.getSubjectName())
                 .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
 
-        student.setSubjects(subject);
+        student.setSubject(subject);
 
-        student.setDepartments(student.getSubjects().getDepartments());
+        student.setDepartment(student.getSubject().getDepartment());
 
         studentRepository.save(student);
 
@@ -173,7 +173,7 @@ public class StudentService implements IStudentService {
         Student student = studentRepository.findById(currentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
 
-        return studentRepository.findStudentToInvite(currentUserId, List.of(student.getSubjects()), 0)
+        return studentRepository.findStudentToInvite(currentUserId, List.of(student.getSubject()), 0)
                 .stream().map(studentMapper::toShowToSelectionDTO)
                 .toList();
     }
