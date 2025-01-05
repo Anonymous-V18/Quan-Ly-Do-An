@@ -10,7 +10,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -21,13 +20,9 @@ public class UserDTO {
     String username;
     @JsonIgnore
     String password;
-    Integer isGraduate;
-
+    Integer isActivated;
     List<RoleDTO> roles = new ArrayList<>();
-
     TeacherResponse teacher;
-
     StudentResponse student;
-
 
 }

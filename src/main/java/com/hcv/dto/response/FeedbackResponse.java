@@ -18,8 +18,8 @@ public class FeedbackResponse {
     String createdBy;
     String modifiedDate;
     String modifiedBy;
-    String sendFrom;
-    String sendFromName;
+    String senderCode;
+    String senderName;
     String message;
 
 }

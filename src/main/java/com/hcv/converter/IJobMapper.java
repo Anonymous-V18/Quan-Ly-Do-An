@@ -4,7 +4,6 @@ import com.hcv.dto.request.JobGroupInput;
 import com.hcv.dto.request.JobTeacherInput;
 import com.hcv.dto.request.JobTeacherUpdateInput;
 import com.hcv.dto.response.JobGroupResponse;
-import com.hcv.dto.response.JobGroupShortenedResponse;
 import com.hcv.dto.response.JobTeacherResponse;
 import com.hcv.dto.response.JobTeacherShortenedResponse;
 import com.hcv.entity.JobGroup;
@@ -16,11 +15,13 @@ import org.mapstruct.MappingTarget;
 @Mapper
 public interface IJobMapper {
 
+    @Mapping(target = "quantityCompleted",
+            expression = "java(jobTeacher.getJobTeacherDetails().stream()" +
+                    ".reduce(0, (start, next) -> start + next.getQuantityCompleted(), Integer::sum))")
+    @Mapping(target = "totalQuantityRequired", expression = "java(jobTeacher.getJobTeacherDetails().size() * jobTeacher.getQuantityRequirement())")
     JobTeacherShortenedResponse toShortenedDTO(JobTeacher jobTeacher);
 
     JobTeacherResponse toDTO(JobTeacher jobTeacher);
-
-    JobGroupShortenedResponse toShortenedDTO(JobGroup jobGroup);
 
     JobGroupResponse toDTO(JobGroup jobGroup);
 

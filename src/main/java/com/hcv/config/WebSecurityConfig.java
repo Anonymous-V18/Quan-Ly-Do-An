@@ -37,21 +37,22 @@ public class WebSecurityConfig {
 
     private final CustomJwtDecoder customJwtDecoder;
 
-    public WebSecurityConfig(CustomJwtDecoder customJwtDecoder) {
-        this.customJwtDecoder = customJwtDecoder;
-    }
-
     private static final String[] PUBLIC_ENDPOINTS = {
             "/log-in", "/register", "/log-out", "/refresh",
             "/auth/**", "/subjects/**", "/departments/**", "/teachers/**", "/students/**", "/jobs/**", "/users/**",
-            "/researches/**", "/feedbacks/**", "/groups/**", "/notifications/**", "/job-teacher/**", "/job-group/**"
+            "/researches/**", "/feedbacks/**", "/groups/**", "/notifications/**", "/job-teacher/**", "/job-group/**", "/councils/**",
+            "/type-points/**", "/system-variables/**", "/roles/**"
     };
+
+    public WebSecurityConfig(CustomJwtDecoder customJwtDecoder) {
+        this.customJwtDecoder = customJwtDecoder;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);
@@ -71,7 +72,6 @@ public class WebSecurityConfig {
                 .logoutUrl("/log-out")
                 .addLogoutHandler(new HeaderWriterLogoutHandler(new ClearSiteDataHeaderWriter(ALL)))
         );
-
         return http.build();
     }
 

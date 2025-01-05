@@ -10,7 +10,7 @@ public enum ErrorCode {
     INVALID_KEY(1000, "Invalid key in message validation !", HttpStatus.BAD_REQUEST),
     INVALID_USERNAME(1001, "Username must be at least 8 characters !", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1002, "Password must be at least 8 characters !", HttpStatus.BAD_REQUEST),
-    INVALID_NAME_ROLE(1003, "Role is null or not exist name of the role !", HttpStatus.BAD_REQUEST),
+    INVALID_ROLE(1003, "Role is null or not exist role !", HttpStatus.BAD_REQUEST),
     USER_EXISTED(1004, "User existed !", HttpStatus.CONFLICT),
     USER_NOT_EXISTED(1005, "User not existed !", HttpStatus.NOT_FOUND),
     INVALID_USERNAME_OR_PASSWORD(1006, "Username or password is invalid !", HttpStatus.BAD_REQUEST),
@@ -86,10 +86,17 @@ public enum ErrorCode {
     INVALID_MAX_MEMBER_PARAM(1068, "Max member parameter is invalid !", HttpStatus.BAD_REQUEST),
     INVALID_MIN_MEMBER_PARAM(1069, "Min member parameter is invalid !", HttpStatus.BAD_REQUEST),
     GROUP_HAS_NOT_REGISTERED_RESEARCH(1070, "Group has not registered research !", HttpStatus.BAD_REQUEST),
+    TYPE_TEACHER_INVALID(1071, "Type teacher is invalid !", HttpStatus.BAD_REQUEST),
+    SYSTEM_VARIABLE_INVALID(1072, "System variable is invalid !", HttpStatus.BAD_REQUEST),
+    COUNCIL_NOT_EXISTED(1073, "Council isn't existed !", HttpStatus.NOT_FOUND),
+    COUNCIL_EXISTED(1074, "Council existed !", HttpStatus.CONFLICT),
+    INVALID_DEPARTMENT_ID_PARAM(1075, "Department id is invalid !", HttpStatus.BAD_REQUEST),
+    SUBJECT_ID_INVALID(1016, "Subject id is invalid !", HttpStatus.BAD_REQUEST),
     EXPIRATION_TOKEN(9990, "Token expired !", HttpStatus.UNAUTHORIZED),
     TOKEN_INVALID(9991, "Token invalid !", HttpStatus.REQUEST_TIMEOUT),
     UNAUTHORIZED(9992, "User is not permitted !", HttpStatus.UNAUTHORIZED),
     UNAUTHENTICATED(9993, "Unauthenticated error !", HttpStatus.UNAUTHORIZED),
+    OPERATION_NOT_SUPPORTED(9994, "Operation not supported !", HttpStatus.METHOD_NOT_ALLOWED),
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error !", HttpStatus.INTERNAL_SERVER_ERROR);
 
     private final int code;

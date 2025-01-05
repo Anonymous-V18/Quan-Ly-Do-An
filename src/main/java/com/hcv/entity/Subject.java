@@ -20,17 +20,20 @@ public class Subject extends BaseEntity {
 
     String name;
 
-    @ManyToOne
-    @JoinColumn(name = "department_id")
-    Department department;
-
-    @ManyToMany(mappedBy = "subjects")
-    List<Research> researches = new ArrayList<>();
-
     @OneToMany(mappedBy = "subject")
     List<Teacher> teachers = new ArrayList<>();
 
     @OneToMany(mappedBy = "subject")
     List<Student> students = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    Department department;
+
+    @OneToMany(mappedBy = "subject")
+    List<Research> researches = new ArrayList<>();
+
+    @OneToOne(mappedBy = "subject")
+    Council council;
 
 }

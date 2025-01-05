@@ -4,12 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -22,5 +18,6 @@ public class TeacherResponse {
     String degree;
     String email;
     String phoneNumber;
-    List<String> position = new ArrayList<>();
+    SubjectDTO subject;
+
 }

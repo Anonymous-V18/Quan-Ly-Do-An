@@ -2,11 +2,15 @@ package com.hcv.service.impl;
 
 import com.hcv.constant.TypePointConst;
 import com.hcv.converter.IPointMapper;
+import com.hcv.dto.TypeTeacherEnum;
 import com.hcv.dto.request.PointInsertInput;
 import com.hcv.dto.request.PointInsertListInput;
 import com.hcv.dto.request.PointUpdateInput;
 import com.hcv.dto.response.PointResponse;
-import com.hcv.entity.*;
+import com.hcv.entity.Point;
+import com.hcv.entity.Research;
+import com.hcv.entity.Student;
+import com.hcv.entity.TypePoint;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IPointRepository;
@@ -54,7 +58,7 @@ public class PointService implements IPointService {
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
 
-        this.checkPointTeacher(teacherId, student, typePoint.getName());
+        this.checkPointTeacher(teacherId, student.getGroup().getResearch(), typePoint.getName());
 
         Point point = pointMapper.toEntity(pointInsertInput);
         point.setTeacherId(teacherId);
@@ -78,7 +82,7 @@ public class PointService implements IPointService {
                 .orElseThrow(() -> new AppException(ErrorCode.POINT_NOT_EXIST));
 
         this.checkPointTeacher(userService.getClaimsToken().get("sub").toString(),
-                oldPoint.getStudent(),
+                oldPoint.getStudent().getGroup().getResearch(),
                 oldPoint.getTypePoint().getName());
 
         oldPoint.setPoint(newPointDTO.getPoint());
@@ -93,30 +97,33 @@ public class PointService implements IPointService {
     }
 
     @Override
-    public void checkPointTeacher(String teacherId, Student student, String typePointName) {
-        Research research = student.getGroup().getResearch();
-
-        List<String> instructorsIds = research.getInstructorsIds();
-        String thesisAdvisorsId = research.getThesisAdvisorId();
-
-        boolean isValid;
+    public void checkPointTeacher(String teacherId, Research research, String typePointName) {
         switch (typePointName) {
-            case TypePointConst.POINT_INSTRUCTORS -> isValid = instructorsIds.contains(teacherId);
-            case TypePointConst.POINT_THESIS_ADVISOR -> isValid = thesisAdvisorsId != null && thesisAdvisorsId.equals(teacherId);
-            case TypePointConst.POINT_COUNCIL -> {
-                List<String> councilIdList = research.getTeachers().stream()
-                        .filter(teacherEntity -> instructorsIds.contains(teacherEntity.getId())
-                                || teacherEntity.getId().equals(thesisAdvisorsId)
-                        )
-                        .map(BaseEntity::getId)
-                        .toList();
-                isValid = councilIdList.contains(teacherId);
-            }
-            default -> throw new AppException(ErrorCode.POINT_TYPE_INVALID);
-        }
+            case TypePointConst.POINT_INSTRUCTORS -> research.getResearchTeachers().stream()
+                    .filter(researchTeacher ->
+                            researchTeacher.getTeacher().getId().equals(teacherId)
+                                    && researchTeacher.getTypeTeacher().getCode().equals(TypeTeacherEnum.INSTRUCTOR.name())
+                    )
+                    .findFirst()
+                    .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
 
-        if (!isValid) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
+            case TypePointConst.POINT_THESIS_ADVISOR -> research.getResearchTeachers().stream()
+                    .filter(researchTeacher ->
+                            researchTeacher.getTeacher().getId().equals(teacherId)
+                                    && researchTeacher.getTypeTeacher().getCode().equals(TypeTeacherEnum.THESIS_ADVISOR.name())
+                    )
+                    .findFirst()
+                    .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
+
+            case TypePointConst.POINT_COUNCIL -> research.getResearchTeachers().stream()
+                    .filter(researchTeacher ->
+                            researchTeacher.getTeacher().getId().equals(teacherId)
+                                    && researchTeacher.getTypeTeacher().getCode().equals(TypeTeacherEnum.COUNCIL.name())
+                    )
+                    .findFirst()
+                    .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
+
+            default -> throw new AppException(ErrorCode.POINT_TYPE_INVALID);
         }
     }
 }

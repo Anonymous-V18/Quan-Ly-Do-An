@@ -1,6 +1,5 @@
 package com.hcv.entity;
 
-import com.hcv.config.StringListConverterConfig;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -26,19 +25,15 @@ public class Teacher extends BaseEntity {
     String email;
     String phoneNumber;
 
-    @Convert(converter = StringListConverterConfig.class)
-    @Column(name = "position", nullable = false)
-    List<String> position = new ArrayList<>();
-
     @OneToOne
     @JoinColumn(name = "user_id")
     User user;
 
     @OneToMany(mappedBy = "teacher")
-    List<Feedback> feedbacks = new ArrayList<>();
+    List<JobTeacherDetail> jobTeacherDetails = new ArrayList<>();
 
-    @ManyToMany(mappedBy = "teachers")
-    List<Research> researches = new ArrayList<>();
+    @OneToMany(mappedBy = "teacher")
+    List<Feedback> feedbacks = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "department_id")
@@ -48,7 +43,11 @@ public class Teacher extends BaseEntity {
     @JoinColumn(name = "subject_id")
     Subject subject;
 
+    @ManyToOne
+    @JoinColumn(name = "council_id")
+    Council council;
+
     @OneToMany(mappedBy = "teacher")
-    List<JobTeacherDetail> jobTeacherDetails = new ArrayList<>();
+    List<ResearchTeacher> researchTeachers = new ArrayList<>();
 
 }

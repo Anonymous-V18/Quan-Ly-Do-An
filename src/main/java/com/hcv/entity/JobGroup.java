@@ -1,9 +1,6 @@
 package com.hcv.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +22,7 @@ public class JobGroup extends BaseEntity {
     String senderId;
     String name;
     String description;
+    @Column(name = "detail", columnDefinition = "LONGTEXT COLLATE utf8mb4_unicode_ci")
     String detail;
     Integer isCompleted;
 

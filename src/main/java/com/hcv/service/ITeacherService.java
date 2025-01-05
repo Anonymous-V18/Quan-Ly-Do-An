@@ -23,10 +23,12 @@ public interface ITeacherService {
     void delete(String[] ids);
 
     int count();
-    
+
     ShowAllResponse<TeacherDTO> showAll(ShowAllRequest showAllRequest);
 
-    List<TeacherShowToSelectionResponse> showAllToSelection();
+    List<TeacherShowToSelectionResponse> showAllToSelection(Boolean theSameSubject);
+
+    List<TeacherShowToSelectionResponse> showAllHeadOfDepartment();
 
     TeacherDTO findOneById(String id);
 

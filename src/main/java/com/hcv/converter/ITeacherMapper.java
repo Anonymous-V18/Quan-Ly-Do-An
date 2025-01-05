@@ -17,14 +17,12 @@ public interface ITeacherMapper {
 
     @Mapping(target = "user", ignore = true)
     @Mapping(target = "subject", ignore = true)
-    @Mapping(target = "researches", ignore = true)
+    @Mapping(target = "researchTeachers", ignore = true)
     @Mapping(target = "jobTeacherDetails", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "feedbacks", ignore = true)
     @Mapping(target = "department", ignore = true)
     Teacher toEntity(TeacherInput teacherInput);
 
-    @Mapping(target = "position", expression = "java(teacherInput.getPosition())")
     Teacher toEntity(@MappingTarget Teacher oldTeacher, TeacherInput teacherInput);
-
 }

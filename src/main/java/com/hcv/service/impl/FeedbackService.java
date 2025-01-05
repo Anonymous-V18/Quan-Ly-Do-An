@@ -44,8 +44,8 @@ public class FeedbackService implements IFeedbackService {
         Research research = researchRepository.findById(researchId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESEARCH_NOT_EXISTED));
 
-        feedback.setSendFromName(teacher.getName());
-        feedback.setSendFrom(teacher.getCode());
+        feedback.setSenderName(teacher.getName());
+        feedback.setSenderCode(teacher.getCode());
         feedback.setResearch(research);
 
         feedback = feedbackRepository.save(feedback);

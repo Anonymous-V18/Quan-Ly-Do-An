@@ -5,9 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -18,9 +15,6 @@ public class ResearchUpdateInput {
     String notes;
     Integer maxMembers;
     Integer minMembers;
-    List<String> instructorsIds = new ArrayList<>();
-    String thesisAdvisorId;
-    String stage;
-    String schoolYear;
+    String subInstructorId;
 
 }

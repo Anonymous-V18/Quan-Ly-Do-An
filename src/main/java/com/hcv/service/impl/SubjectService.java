@@ -35,13 +35,13 @@ public class SubjectService implements ISubjectService {
 
     @Override
     public SubjectDTO insert(SubjectInput subjectInput) {
-        subjectRepository.findByName(subjectInput.getName())
+        subjectRepository.findById(subjectInput.getName())
                 .ifPresent(item -> {
                     throw new AppException(ErrorCode.SUBJECT_EXISTED);
                 });
 
         Subject subject = subjectMapper.toEntity(subjectInput);
-        Department department = departmentRepository.findByName(subjectInput.getNameDepartment())
+        Department department = departmentRepository.findById(subjectInput.getDepartmentId())
                 .orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED));
 
         subject.setDepartment(department);
@@ -56,11 +56,11 @@ public class SubjectService implements ISubjectService {
 
         subject.setName(subjectInput.getName());
 
-        Department department = departmentRepository.findByName(subjectInput.getNameDepartment())
+        Department department = departmentRepository.findById(subjectInput.getDepartmentId())
                 .orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED));
 
         subject.setDepartment(department);
-
+        
         subjectRepository.save(subject);
 
         return subjectMapper.toDTO(subject);

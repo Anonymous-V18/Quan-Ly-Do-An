@@ -1,12 +1,16 @@
 package com.hcv.service.impl;
 
 import com.hcv.converter.ITeacherMapper;
+import com.hcv.dto.CodeRole;
 import com.hcv.dto.request.*;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.dto.response.TeacherDTO;
 import com.hcv.dto.response.TeacherShowToSelectionResponse;
 import com.hcv.dto.response.UserDTO;
-import com.hcv.entity.*;
+import com.hcv.entity.Department;
+import com.hcv.entity.Subject;
+import com.hcv.entity.Teacher;
+import com.hcv.entity.User;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IRoleRepository;
@@ -25,10 +29,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -53,12 +54,8 @@ public class TeacherService implements ITeacherService {
             userRequest.setUsername(usernameAndPasswordDefault);
             userRequest.setPassword(usernameAndPasswordDefault);
 
-            if (!teacherInput.getPosition().contains("GIẢNG VIÊN")) {
-                teacherInput.getPosition().add("GIẢNG VIÊN");
-            }
-
-            userRequest.setNameRoles(teacherInput.getPosition());
-            userRequest.setIsGraduate(0);
+            userRequest.setRoleIds(teacherInput.getRoleIds());
+            userRequest.setIsActivated(0);
 
             UserDTO userDTO = userService.create(userRequest);
 
@@ -82,7 +79,7 @@ public class TeacherService implements ITeacherService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         teacher.setUser(user);
 
-        Subject subject = subjectRepository.findByName(teacherInput.getSubjectName())
+        Subject subject = subjectRepository.findById(teacherInput.getSubjectId())
                 .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
         teacher.setSubject(subject);
 
@@ -117,15 +114,13 @@ public class TeacherService implements ITeacherService {
                     throw new AppException(ErrorCode.TEACHER_EXISTED);
                 });
 
+        User user = teacher.getUser();
+        user = userService.updateRoles(user, teacherInput.getRoleIds());
+        teacher.setUser(user);
+
         teacher = teacherMapper.toEntity(teacher, teacherInput);
 
-        List<Role> roles = roleRepository.findByNameIn(teacherInput.getPosition());
-        if (roles.contains(null)) {
-            throw new AppException(ErrorCode.INVALID_NAME_ROLE);
-        }
-        teacher.getUser().setRoles(roles);
-
-        Subject subject = subjectRepository.findByName(teacherInput.getSubjectName())
+        Subject subject = subjectRepository.findById(teacherInput.getSubjectId())
                 .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
         teacher.setSubject(subject);
 
@@ -179,8 +174,19 @@ public class TeacherService implements ITeacherService {
     }
 
     @Override
-    public List<TeacherShowToSelectionResponse> showAllToSelection() {
-        return teacherRepository.findAll().stream().map(teacherMapper::toShowDTOToSelection).toList();
+    public List<TeacherShowToSelectionResponse> showAllToSelection(Boolean theSameSubject) {
+        String teacherId = userService.getClaimsToken().get("sub").toString();
+        Teacher teacher = teacherRepository.findById(teacherId)
+                .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
+        Subject subject = Optional.of(teacher.getSubject())
+                .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
+        if (theSameSubject) {
+            return teacherRepository.findAllBySubject_Id(subject.getId()).stream()
+                    .map(teacherMapper::toShowDTOToSelection)
+                    .toList();
+        }
+        return teacherRepository.findAllBySubject_Department_Id(subject.getDepartment().getId()).stream()
+                .map(teacherMapper::toShowDTOToSelection).toList();
     }
 
     @Override
@@ -196,5 +202,19 @@ public class TeacherService implements ITeacherService {
         return result.stream().map(teacherMapper::toDTO).toList();
     }
 
+    @Override
+    public List<TeacherShowToSelectionResponse> showAllHeadOfDepartment() {
+        String teacherId = userService.getClaimsToken().get("sub").toString();
+        Teacher teacher = teacherRepository.findById(teacherId)
+                .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
+        String departmentId = Optional.of(teacher.getDepartment())
+                .orElseThrow(() -> new AppException(ErrorCode.DEPARTMENT_NOT_EXISTED))
+                .getId();
+        return teacherRepository
+                .findAllByUser_Roles_CodeAndDepartment_Id(CodeRole.HEAD_OF_DEPARTMENT, departmentId)
+                .stream()
+                .map(teacherMapper::toShowDTOToSelection)
+                .toList();
+    }
 
 }

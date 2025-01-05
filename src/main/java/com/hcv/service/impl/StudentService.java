@@ -1,17 +1,16 @@
 package com.hcv.service.impl;
 
 import com.hcv.converter.IStudentMapper;
+import com.hcv.dto.CodeRole;
 import com.hcv.dto.request.*;
 import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.dto.response.StudentDTO;
 import com.hcv.dto.response.StudentShowToSelectionResponse;
 import com.hcv.dto.response.UserDTO;
-import com.hcv.entity.Department;
-import com.hcv.entity.Student;
-import com.hcv.entity.Subject;
-import com.hcv.entity.User;
+import com.hcv.entity.*;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
+import com.hcv.repository.IRoleRepository;
 import com.hcv.repository.IStudentRepository;
 import com.hcv.repository.ISubjectRepository;
 import com.hcv.repository.IUserRepository;
@@ -29,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -40,19 +40,21 @@ public class StudentService implements IStudentService {
     ISubjectRepository subjectRepository;
     IUserRepository userRepository;
     IUserService userService;
+    IRoleRepository roleRepository;
 
     @Override
     @Transactional
     public List<StudentDTO> insertFromFile(StudentInsertFromFileInput studentInsertFromFileInput) {
         List<StudentDTO> studentDTOList = new ArrayList<>();
+        Role role = roleRepository.findOneByCode(CodeRole.STUDENT)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_ROLE));
         for (StudentInput studentInput : studentInsertFromFileInput.getStudents()) {
-
             String usernameAndPasswordDefault = studentInput.getCode().trim();
             UserRequest userRequest = new UserRequest();
             userRequest.setUsername(usernameAndPasswordDefault);
             userRequest.setPassword(usernameAndPasswordDefault);
-            userRequest.setNameRoles(List.of("SINH VIÊN"));
-            userRequest.setIsGraduate(0);
+            userRequest.setRoleIds(Set.of(role.getId()));
+            userRequest.setIsActivated(0);
 
             UserDTO userDTO = userService.create(userRequest);
 
@@ -76,7 +78,7 @@ public class StudentService implements IStudentService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         student.setUser(user);
 
-        Subject subject = subjectRepository.findByName(studentInput.getSubjectName().trim())
+        Subject subject = subjectRepository.findById(studentInput.getSubjectId().trim())
                 .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
         student.setSubject(subject);
 
@@ -113,9 +115,8 @@ public class StudentService implements IStudentService {
 
         student = studentMapper.toEntity(student, studentInput);
 
-        Subject subject = subjectRepository.findByName(studentInput.getSubjectName())
+        Subject subject = subjectRepository.findById(studentInput.getSubjectId())
                 .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
-
         student.setSubject(subject);
 
         student.setDepartment(student.getSubject().getDepartment());

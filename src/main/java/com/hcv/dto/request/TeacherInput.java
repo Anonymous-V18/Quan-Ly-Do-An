@@ -8,8 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -38,12 +38,10 @@ public class TeacherInput {
     @Size(min = 9, message = "PHONE_NUMBER_INVALID")
     String phoneNumber;
 
-    @NotNull(message = "POSITION_INVALID")
-    @Size(min = 1, message = "POSITION_INVALID")
-    List<String> position = new ArrayList<>();
+    Set<String> roleIds = new HashSet<>();
 
-    @NotNull(message = "SUBJECT_NAME_INVALID")
-    @Size(min = 4, message = "SUBJECT_NAME_INVALID")
-    String subjectName;
+    @NotNull(message = "SUBJECT_ID_INVALID")
+    @Size(min = 4, message = "SUBJECT_ID_INVALID")
+    String subjectId;
 
 }

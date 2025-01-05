@@ -15,8 +15,8 @@ public class SubjectInput {
     @NotNull(message = "INVALID_SUBJECT_NAME_PARAM")
     @Size(min = 4, message = "INVALID_SUBJECT_NAME_PARAM")
     String name;
-    @NotNull(message = "INVALID_DEPARTMENT_NAME_PARAM")
-    @Size(min = 4, message = "INVALID_DEPARTMENT_NAME_PARAM")
-    String nameDepartment;
+    @NotNull(message = "INVALID_DEPARTMENT_ID_PARAM")
+    @Size(min = 4, message = "INVALID_DEPARTMENT_ID_PARAM")
+    String departmentId;
 
 }

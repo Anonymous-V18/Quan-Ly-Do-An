@@ -27,9 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -50,12 +48,12 @@ public class UserService implements IUserService {
         }
         User user = userMapper.toEntity(userRequest, passwordEncoder);
 
-        List<Role> listRolesEntity = roleRepository.findByNameIn(userRequest.getNameRoles());
-        if (listRolesEntity.contains(null)) {
-            throw new AppException(ErrorCode.INVALID_NAME_ROLE);
+        Set<Role> roles = new HashSet<>(roleRepository.findAllById(userRequest.getRoleIds()));
+        if (roles.size() != userRequest.getRoleIds().size()) {
+            throw new AppException(ErrorCode.INVALID_ROLE);
         }
+        user.setRoles(roles);
 
-        user.setRoles(listRolesEntity);
         user = userRepository.save(user);
         return userMapper.toDTO(user);
     }
@@ -78,17 +76,21 @@ public class UserService implements IUserService {
         User userOld = userRepository.findById(oldUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        List<Role> listRolesEntity = roleRepository.findByNameIn(updateUserInput.getNameRoles());
-        if (listRolesEntity.contains(null)) {
-            throw new AppException(ErrorCode.INVALID_NAME_ROLE);
-        }
-        userOld.setRoles(listRolesEntity);
-
         userOld.setPassword(passwordEncoder.encode(updateUserInput.getPassword()));
-        userOld.setIsGraduate(updateUserInput.getIsGraduate());
-        userOld = userRepository.save(userOld);
+        userOld.setIsActivated(updateUserInput.getIsActivated());
+        userOld = this.updateRoles(userOld, updateUserInput.getRoleIds());
 
         return userMapper.toDTO(userOld);
+    }
+
+    @Override
+    public User updateRoles(User user, Set<String> roleIds) {
+        Set<Role> roles = new HashSet<>(roleRepository.findAllById(roleIds));
+        if (roles.size() != roleIds.size()) {
+            throw new AppException(ErrorCode.INVALID_ROLE);
+        }
+        user.setRoles(roles);
+        return userRepository.save(user);
     }
 
     @Override

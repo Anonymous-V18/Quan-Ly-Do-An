@@ -22,7 +22,7 @@ public class FeedbackDTO {
     String modifiedBy;
     String message;
     String sendTo;
-    String sendFrom;
-    String sendFromName;
+    String senderCode;
+    String senderName;
 
 }

@@ -8,12 +8,8 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -42,14 +38,6 @@ public class ResearchInput {
     @Max(value = 4, message = "MIN_MEMBER_PRAM_RESEARCH_INVALID")
     Integer minMembers = 3;
 
-    List<String> instructorsIds = new ArrayList<>();
-
-    @NotNull(message = "STAGE_PARAM_RESEARCH_INVALID")
-    @Min(value = 1, message = "STAGE_PARAM_RESEARCH_INVALID")
-    String stage;
-
-    @NotNull(message = "SCHOOL_YEAR_PARAM_RESEARCH_INVALID")
-    @Size(min = 4, message = "SCHOOL_YEAR_PARAM_RESEARCH_INVALID")
-    String schoolYear;
+    String subInstructorId;
 
 }

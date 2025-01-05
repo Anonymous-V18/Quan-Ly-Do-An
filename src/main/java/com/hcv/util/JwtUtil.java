@@ -77,13 +77,11 @@ public class JwtUtil {
                 .map(roleEntity -> roleEntity.getCode().name())
                 .toList();
         String id;
-
         if (roleName.contains("STUDENT")) {
             id = user.getStudent().getId();
         } else {
             id = user.getTeacher().getId();
         }
-
         if (id == null) {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
@@ -106,16 +104,14 @@ public class JwtUtil {
 
         JWSVerifier jwsVerifier = new MACVerifier(secretKey.getBytes());
         boolean isTokenValid = signedJWT.verify(jwsVerifier);
-
         if (!isTokenValid) {
             throw new AppException(ErrorCode.TOKEN_INVALID);
         }
 
         Date expirationTimeToken = isRefresh
-                ? new Date(Instant.now().plus(validDuration, ChronoUnit.SECONDS).toEpochMilli())
+                ? new Date(Long.parseLong(signedJWT.getJWTClaimsSet().getClaim("expirationTime_Refresh").toString()))
                 : signedJWT.getJWTClaimsSet().getExpirationTime();
         boolean isTokenExpired = expirationTimeToken.before(new Date());
-
         if (isTokenExpired) {
             throw new AppException(ErrorCode.EXPIRATION_TOKEN);
         }

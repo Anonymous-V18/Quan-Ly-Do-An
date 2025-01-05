@@ -32,6 +32,12 @@ public class Student extends BaseEntity {
     @OneToMany(mappedBy = "student")
     List<Feedback> feedbacks = new ArrayList<>();
 
+    @OneToMany(mappedBy = "student")
+    List<Point> points = new ArrayList<>();
+
+    @OneToMany(mappedBy = "student")
+    List<Notification> notifications = new ArrayList<>();
+
     @ManyToOne
     @JoinColumn(name = "group_id")
     Group group;
@@ -44,9 +50,5 @@ public class Student extends BaseEntity {
     @JoinColumn(name = "department_id")
     Department department;
 
-    @OneToMany(mappedBy = "student")
-    List<Point> points = new ArrayList<>();
 
-    @OneToMany(mappedBy = "student")
-    List<Notification> notifications = new ArrayList<>();
 }

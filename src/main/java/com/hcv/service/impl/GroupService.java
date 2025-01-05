@@ -155,7 +155,7 @@ public class GroupService implements IGroupService {
 
     @Override
     public int countByResearches_Teachers_Id(String currentUserId) {
-        return (int) groupRepository.countByResearch_Teachers_Id(currentUserId);
+        return (int) groupRepository.countByResearch_ResearchTeachers_Teacher_Id(currentUserId);
     }
 
     @Override
@@ -169,7 +169,7 @@ public class GroupService implements IGroupService {
         );
 
         String currentUserId = userService.getClaimsToken().get("sub").toString();
-        Page<Group> researchEntityList = groupRepository.findByResearch_Teachers_Id(currentUserId, paging);
+        Page<Group> researchEntityList = groupRepository.findByResearch_ResearchTeachers_Teacher_Id(currentUserId, paging);
         List<GroupResponse> resultDTO = researchEntityList.getContent().stream().map(mapper::toShowDTO).toList();
 
         int totalElements = this.countByResearches_Teachers_Id(currentUserId);

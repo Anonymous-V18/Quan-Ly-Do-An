@@ -16,7 +16,6 @@ import java.util.List;
 public class PointInsertListInput {
 
     @NotNull(message = "POINT_TYPE_INVALID")
-    //@Size(min = 8, message = "POINT_TYPE_INVALID")
     String typePointId;
 
     @Valid

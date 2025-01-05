@@ -14,25 +14,22 @@ import org.mapstruct.MappingTarget;
 public interface IResearchMapper {
 
     @Mapping(target = "status", ignore = true)
-    @Mapping(target = "teachers", ignore = true)
-    @Mapping(target = "subjects", ignore = true)
+    @Mapping(target = "subject", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "group", ignore = true)
     @Mapping(target = "feedbacks", ignore = true)
+    @Mapping(target = "researchTeachers", ignore = true)
     Research toEntity(ResearchInput researchInput);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "code", ignore = true)
     @Mapping(target = "status", ignore = true)
-    @Mapping(target = "teachers", ignore = true)
-    @Mapping(target = "subjects", ignore = true)
+    @Mapping(target = "subject", ignore = true)
     @Mapping(target = "group", ignore = true)
     @Mapping(target = "feedbacks", ignore = true)
-    @Mapping(target = "instructorsIds", ignore = true)
-    @Mapping(target = "thesisAdvisorId", ignore = true)
+    @Mapping(target = "researchTeachers", ignore = true)
     Research toEntity(@MappingTarget Research oldResearch, ResearchUpdateInput researchUpdateInput);
 
-    @Mapping(target = "isApproved", ignore = true)
     ResearchResponse toShowDTO(Research research);
 
     @Mapping(target = "feedbacks", ignore = true)

@@ -20,12 +20,12 @@ public interface IStudentRepository extends JpaRepository<Student, String> {
     List<Student> findByGroup_IdIn(List<String> ids);
 
     @Query(value = "select s from Student s where s.id <> :id " +
-            "and s.subject in :subjects and s.user.isGraduate = :isGraduate " +
+            "and s.subject in :subjects and s.user.isActivated = :isActivated " +
             "and s.group is null")
-    List<Student> findStudentToInvite(String id, Collection<Subject> subjects, Integer isGraduate);
+    List<Student> findStudentToInvite(String id, Collection<Subject> subjects, Integer isActivated);
 
     @Query(value = "select count(s) from Student s where " +
-            "s.user.isGraduate = :isGraduate and s.subject.id = :id")
-    long countStudentInTheSameSubject(Integer isGraduate, String id);
+            "s.user.isActivated = :isActivated and s.subject.id = :id")
+    long countStudentInTheSameSubject(Integer isActivated, String id);
 
 }

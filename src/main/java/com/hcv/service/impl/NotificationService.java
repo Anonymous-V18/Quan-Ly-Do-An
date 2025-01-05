@@ -66,7 +66,7 @@ public class NotificationService implements INotificationService {
                     .distinct()
                     .toList();
             studentList = studentRepository.findAllById(studentIds);
-            if (studentList.contains(null)) {
+            if (studentList.isEmpty()) {
                 throw new AppException(ErrorCode.STUDENT_NOT_EXIST);
             }
         }

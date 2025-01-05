@@ -60,7 +60,7 @@ public class JobTeacherService implements IJobTeacherService {
 
         List<String> teacherIds = jobInput.getTeacherIds();
         List<Teacher> teachers = teacherRepository.findAllById(teacherIds);
-        if (teachers.contains(null)) {
+        if (teachers.size() != teacherIds.size()) {
             throw new AppException(ErrorCode.TEACHER_NOT_EXISTED);
         }
 
@@ -86,7 +86,8 @@ public class JobTeacherService implements IJobTeacherService {
                     )
                     .findFirst()
                     .orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
-            jobTeacherDetailService.updateQuantityCompleted(jobTeacherDetailRoot, jobTeacher.getQuantityRequirement(), true);
+            int quantityCompleted = jobTeacher.getQuantityRequirement() * jobTeacher.getJobTeacherDetails().size();
+            jobTeacherDetailService.updateQuantityCompleted(jobTeacherDetailRoot, quantityCompleted, true);
         }
         return jobTeacherMapper.toDTO(jobTeacher);
     }

@@ -1,6 +1,5 @@
 package com.hcv.entity;
 
-import com.hcv.config.StringListConverterConfig;
 import com.hcv.dto.StatusResearch;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -24,36 +23,29 @@ public class Research extends BaseEntity {
     String name;
     @Column(name = "code", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     String code;
+    @Column(name = "detail", columnDefinition = "LONGTEXT COLLATE utf8mb4_unicode_ci")
     String detail;
+    @Column(name = "notes", columnDefinition = "LONGTEXT COLLATE utf8mb4_unicode_ci")
     String notes;
     Integer maxMembers;
     Integer minMembers;
-    @Convert(converter = StringListConverterConfig.class)
-    @Column(name = "instructors_ids", nullable = false)
-    List<String> instructorsIds = new ArrayList<>();
-    String thesisAdvisorId;
     String stage;
     String schoolYear;
     @Enumerated(EnumType.STRING)
     StatusResearch status;
 
-    @ManyToMany
-    @JoinTable(name = "research_teacher"
-            , joinColumns = @JoinColumn(name = "research_id")
-            , inverseJoinColumns = @JoinColumn(name = "teacher_id"))
-    List<Teacher> teachers = new ArrayList<>();
+    @OneToOne
+    @JoinColumn(name = "group_id")
+    Group group;
 
     @OneToMany(mappedBy = "research")
     List<Feedback> feedbacks = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(name = "research_subject"
-            , joinColumns = @JoinColumn(name = "research_id")
-            , inverseJoinColumns = @JoinColumn(name = "subject_id"))
-    List<Subject> subjects = new ArrayList<>();
+    @OneToMany(mappedBy = "research")
+    List<ResearchTeacher> researchTeachers = new ArrayList<>();
 
-    @OneToOne
-    @JoinColumn(name = "group_id")
-    Group group;
+    @ManyToOne
+    @JoinColumn(name = "subject_id")
+    Subject subject;
 
 }

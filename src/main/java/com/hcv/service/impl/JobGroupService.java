@@ -1,6 +1,7 @@
 package com.hcv.service.impl;
 
 import com.hcv.converter.IJobMapper;
+import com.hcv.dto.TypeTeacherEnum;
 import com.hcv.dto.request.JobGroupInput;
 import com.hcv.dto.response.JobGroupResponse;
 import com.hcv.entity.Group;
@@ -9,7 +10,6 @@ import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
 import com.hcv.repository.IGroupRepository;
 import com.hcv.repository.IJobGroupRepository;
-import com.hcv.repository.IUserRepository;
 import com.hcv.service.IJobGroupService;
 import com.hcv.service.IUserService;
 import lombok.AccessLevel;
@@ -28,7 +28,6 @@ public class JobGroupService implements IJobGroupService {
     IJobGroupRepository jobGroupRepository;
     IJobMapper jobMapper;
     IUserService userService;
-    IUserRepository userRepository;
     IGroupRepository groupRepository;
 
 
@@ -50,8 +49,11 @@ public class JobGroupService implements IJobGroupService {
         boolean isInstructorOfGroup = Objects.requireNonNullElseGet(group.getResearch(), () -> {
                     throw new AppException(ErrorCode.GROUP_HAS_NOT_REGISTERED_RESEARCH);
                 })
-                .getInstructorsIds()
-                .contains(currentUserId);
+                .getResearchTeachers()
+                .stream()
+                .anyMatch(researchTeacher -> researchTeacher.getTeacher().getId().equals(currentUserId)
+                        && researchTeacher.getTypeTeacher().getCode().equals(TypeTeacherEnum.INSTRUCTOR.name())
+                );
         if (!isInstructorOfGroup) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }

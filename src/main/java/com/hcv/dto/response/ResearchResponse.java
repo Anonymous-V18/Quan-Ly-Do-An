@@ -9,7 +9,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -23,15 +22,12 @@ public class ResearchResponse {
     String notes;
     Integer maxMembers;
     Integer minMembers;
-    List<String> instructorsIds = new ArrayList<>();
-    String thesisAdvisorId;
     String stage;
     String schoolYear;
-    Integer isApproved;
     String status;
 
-    List<TeacherResponse> teachers = new ArrayList<>();
-    List<SubjectResponse> subjects = new ArrayList<>();
+    SubjectResponse subject;
+    List<ResearchTeacherResponse> researchTeachers = new ArrayList<>();
     List<FeedbackResponse> feedbacks = new ArrayList<>();
     GroupResponse group;
 

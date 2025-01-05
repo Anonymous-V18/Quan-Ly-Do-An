@@ -6,6 +6,8 @@ import com.hcv.dto.response.ResearchDTO;
 import com.hcv.dto.response.ResearchResponse;
 import com.hcv.dto.response.ResearchShowToRegistrationResponse;
 import com.hcv.dto.response.ShowAllResponse;
+import com.hcv.entity.Teacher;
+import com.hcv.entity.TypeTeacher;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,7 +16,7 @@ public interface IResearchService {
 
     List<ResearchDTO> insertFromFile(ResearchInsertFromFileInput researchInsertFromFileInput);
 
-    ResearchDTO insert(ResearchInput researchInput);
+    ResearchDTO insert(ResearchInput researchInput, Teacher creator, TypeTeacher typeTeacher);
 
     ResearchDTO update(String oldResearchId, ResearchUpdateInput newResearchUpdateInput);
 
@@ -40,7 +42,13 @@ public interface IResearchService {
 
     ShowAllResponse<ResearchShowToRegistrationResponse> showAllToApprovalProcessing(ShowAllRequest showAllRequest);
 
+    ShowAllResponse<ResearchResponse> searchCriteria(Integer page, Integer limit, String sortBy, String... search);
+
     ResearchDTO markApproved(String id);
 
     ResearchDTO cancelApproval(String id);
+
+    void updateThesisAdvisor(String researchId, String thesisAdvisorId);
+
+    void broughtToTheCouncil(String researchId);
 }

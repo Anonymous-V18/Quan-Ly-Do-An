@@ -1,5 +1,6 @@
 package com.hcv.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -27,8 +28,9 @@ public class JobTeacher extends BaseEntity {
     String senderName;
     String name;
     String description;
+    @Column(name = "detail", columnDefinition = "LONGTEXT COLLATE utf8mb4_unicode_ci")
     String detail;
-    String type; // TODO: Create table to save type of job
+    String type;
     Integer quantityRequirement;
 
     @OneToMany(mappedBy = "jobTeacher")

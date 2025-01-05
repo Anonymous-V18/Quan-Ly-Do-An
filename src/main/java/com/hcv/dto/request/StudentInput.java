@@ -35,8 +35,8 @@ public class StudentInput {
     @Size(min = 9, message = "PHONE_NUMBER_INVALID")
     String phoneNumber;
 
-    @NotNull(message = "SUBJECT_NAME_INVALID")
-    @Size(min = 4, message = "SUBJECT_NAME_INVALID")
-    String subjectName;
+    @NotNull(message = "SUBJECT_ID_INVALID")
+    @Size(min = 4, message = "SUBJECT_ID_INVALID")
+    String subjectId;
 
 }

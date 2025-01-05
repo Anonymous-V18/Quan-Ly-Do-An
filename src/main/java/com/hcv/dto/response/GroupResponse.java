@@ -10,7 +10,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -21,5 +20,5 @@ public class GroupResponse {
     String leaderId;
     List<StudentResponse> students = new ArrayList<>();
     List<JobGroupShortenedResponse> jobGroups = new ArrayList<>();
-    
+
 }

@@ -20,5 +20,6 @@ public class StudentDTO {
     String email;
     String phoneNumber;
     SubjectDTO subject;
+    UserResponse user;
 
 }

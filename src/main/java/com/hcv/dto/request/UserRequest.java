@@ -5,15 +5,15 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserRequest extends BaseAuthInput {
 
-    List<String> nameRoles = new ArrayList<>();
-    Integer isGraduate = 0;
+    Set<String> roleIds = new HashSet<>();
+    Integer isActivated = 0;
 
 }

@@ -3,6 +3,8 @@ package com.hcv.service.impl;
 import com.hcv.constant.StatusResearchConst;
 import com.hcv.converter.IResearchMapper;
 import com.hcv.dto.StatusResearch;
+import com.hcv.dto.SystemVariablesEnum;
+import com.hcv.dto.TypeTeacherEnum;
 import com.hcv.dto.request.*;
 import com.hcv.dto.response.ResearchDTO;
 import com.hcv.dto.response.ResearchResponse;
@@ -11,17 +13,15 @@ import com.hcv.dto.response.ShowAllResponse;
 import com.hcv.entity.*;
 import com.hcv.exception.AppException;
 import com.hcv.exception.ErrorCode;
-import com.hcv.repository.IResearchRepository;
-import com.hcv.repository.IStudentRepository;
-import com.hcv.repository.ITeacherRepository;
-import com.hcv.repository.IUserRepository;
+import com.hcv.repository.*;
+import com.hcv.repository.impl.ResearchRepositoryImpl;
 import com.hcv.service.IJobTeacherDetailService;
 import com.hcv.service.IResearchService;
+import com.hcv.service.IResearchTeacherService;
 import com.hcv.service.IUserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,115 +39,120 @@ public class ResearchService implements IResearchService {
 
     ITeacherRepository teacherRepository;
     IResearchRepository researchRepository;
+    ResearchRepositoryImpl researchRepositoryImpl;
     IResearchMapper mapper;
+    ITypeTeacherRepository typeTeacherRepository;
+    ISystemVariableRepository systemVariablesRepository;
+    IResearchTeacherRepository researchTeacherRepository;
     IStudentRepository studentRepository;
     IUserService userService;
     IUserRepository userRepository;
     IJobTeacherDetailService jobTeacherDetailService;
-
-    @NonFinal
-    Teacher teacher;
+    ICouncilRepository councilRepository;
+    IResearchTeacherService researchTeacherService;
 
     @Override
     @Transactional
     public List<ResearchDTO> insertFromFile(ResearchInsertFromFileInput researchInsertFromFileInput) {
-        List<ResearchDTO> response = researchInsertFromFileInput.getResearches().stream().map(this::insert).toList();
+        String creatorId = userService.getClaimsToken().get("sub").toString();
+        Teacher creator = teacherRepository.findById(creatorId)
+                .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
+        TypeTeacher typeTeacher = typeTeacherRepository.findByCode(TypeTeacherEnum.INSTRUCTOR.name())
+                .orElseThrow(() -> new AppException(ErrorCode.TYPE_TEACHER_INVALID));
+        List<ResearchDTO> response = researchInsertFromFileInput.getResearches().stream()
+                .map(researchInput -> this.insert(researchInput, creator, typeTeacher))
+                .toList();
 
-        JobTeacherDetail jobTeacherDetail = jobTeacherDetailService.findJobTeacherDetailId(teacher.getJobTeacherDetails());
+        JobTeacherDetail jobTeacherDetail = jobTeacherDetailService.findJobTeacherDetailId(creator.getJobTeacherDetails());
         jobTeacherDetailService.updateQuantityCompleted(jobTeacherDetail, response.size(), true);
 
         return response;
     }
 
     @Override
-    public ResearchDTO insert(ResearchInput researchInput) {
-        researchInput.setCode(this.generateResearchCode(researchInput));
+    public ResearchDTO insert(ResearchInput researchInput, Teacher creator, TypeTeacher typeTeacher) {
+        SystemVariable stage = systemVariablesRepository.findByCode(SystemVariablesEnum.STAGE.name())
+                .orElseThrow(() -> new AppException(ErrorCode.SYSTEM_VARIABLE_INVALID));
+        SystemVariable schoolYear = systemVariablesRepository.findByCode(SystemVariablesEnum.SCHOOL_YEAR.name())
+                .orElseThrow(() -> new AppException(ErrorCode.SYSTEM_VARIABLE_INVALID));
 
+        researchInput.setCode(this.generateResearchCode(researchInput.getName(), stage.getValue(), schoolYear.getValue()));
         Research research = mapper.toEntity(researchInput);
+        research.setSchoolYear(schoolYear.getValue());
+        research.setStage(stage.getValue());
 
-        List<String> teacherIds = researchInput.getInstructorsIds();
-        String creatorId = userService.getClaimsToken().get("sub").toString();
-        teacherIds.add(creatorId);
-        List<Teacher> teachers = teacherIds.stream()
-                .map(teacherId -> teacherRepository.findById(teacherId)
-                        .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED)))
-                .distinct()
-                .toList();
-        if (teacher == null) {
-            teacher = teachers.stream()
-                    .filter(teacher1 -> teacher1.getId().equals(creatorId))
-                    .findFirst()
-                    .orElse(null);
+        List<Teacher> teachers = new ArrayList<>();
+        teachers.add(creator);
+        if (!researchInput.getSubInstructorId().isBlank() && !researchInput.getSubInstructorId().equals(creator.getId())) {
+            Teacher subInstructor = teacherRepository.findById(researchInput.getSubInstructorId())
+                    .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
+            teachers.add(subInstructor);
         }
 
-        research.setInstructorsIds(teacherIds);
-        research.setTeachers(teachers);
-
-        List<Subject> subjects = teachers.stream()
-                .map(Teacher::getSubject)
-                .distinct()
-                .toList();
-        if (subjects.contains(null)) {
-            throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
-        }
-        research.setSubjects(subjects);
+        research.setSubject(creator.getSubject());
 
         research.setStatus(StatusResearch.valueOf(StatusResearchConst.PENDING_APPROVE));
         research = researchRepository.save(research);
+
+        List<ResearchTeacher> researchTeachers = new ArrayList<>();
+        for (Teacher teacher : teachers) {
+            ResearchTeacher researchTeacher = new ResearchTeacher();
+            researchTeacher.setId(new ResearchTeacherId(teacher.getId(), research.getId()));
+            researchTeacher.setTeacher(teacher);
+            researchTeacher.setResearch(research);
+            if (!creator.getId().equals(teacher.getId())) {
+                typeTeacher = typeTeacherRepository.findByCode(TypeTeacherEnum.SUB_INSTRUCTOR.name())
+                        .orElseThrow(() -> new AppException(ErrorCode.TYPE_TEACHER_INVALID));
+            }
+            researchTeacher.setTypeTeacher(typeTeacher);
+            researchTeachers.add(researchTeacher);
+        }
+        researchTeacherRepository.saveAll(researchTeachers);
+
         return mapper.toDTO(research);
     }
 
     @Override
+    @Transactional
     public ResearchDTO update(String oldResearchId, ResearchUpdateInput newResearchUpdateInput) {
         Research research = researchRepository.findById(oldResearchId)
                 .orElseThrow(() -> new AppException(ErrorCode.RESEARCH_NOT_EXISTED));
 
         String currentUserId = userService.getClaimsToken().get("sub").toString();
-        if (!research.getInstructorsIds().contains(currentUserId)) {
+        boolean isCreator = researchTeacherRepository.
+                isTeacherValidWithTypeTeacherInResearch(currentUserId, research.getId(), TypeTeacherEnum.INSTRUCTOR.name());
+        if (!isCreator) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        research = mapper.toEntity(research, newResearchUpdateInput);
+        if (!newResearchUpdateInput.getSubInstructorId().isBlank() &&
+                !newResearchUpdateInput.getSubInstructorId().equals(currentUserId)
+        ) {
+            Teacher oldSubInstructor = research.getResearchTeachers().stream()
+                    .filter(teacher ->
+                            teacher.getTypeTeacher().getCode().equals(TypeTeacherEnum.SUB_INSTRUCTOR.name()))
+                    .map(ResearchTeacher::getTeacher)
+                    .findFirst()
+                    .orElse(null);
 
-        List<String> newTeacherIds = new ArrayList<>();
+            if (oldSubInstructor != null && !oldSubInstructor.getId().equals(newResearchUpdateInput.getSubInstructorId())) {
+                ResearchTeacher researchTeacher = research.getResearchTeachers().stream()
+                        .filter(teacher ->
+                                teacher.getTypeTeacher().getCode().equals(TypeTeacherEnum.SUB_INSTRUCTOR.name())
+                        )
+                        .findFirst()
+                        .orElseThrow(() -> new AppException(ErrorCode.INVALID_KEY));
 
-        List<String> newInstructorsIds = newResearchUpdateInput.getInstructorsIds();
-        if (!new HashSet<>(research.getInstructorsIds()).containsAll(newInstructorsIds)) {
-            newTeacherIds.addAll(newInstructorsIds);
-        }
+                Teacher subInstructor = teacherRepository.findById(newResearchUpdateInput.getSubInstructorId())
+                        .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
 
-        String newThesisAdvisor = newResearchUpdateInput.getThesisAdvisorId();
-        if (newThesisAdvisor != null && !newThesisAdvisor.equals(research.getThesisAdvisorId().trim())) {
-            newTeacherIds.add(newThesisAdvisor);
-        }
-
-        if (!newTeacherIds.isEmpty()) {
-            List<Teacher> teachers = newTeacherIds.stream()
-                    .map(teacherId -> teacherRepository.findById(teacherId)
-                            .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED)))
-                    .toList();
-
-            research.setInstructorsIds(newResearchUpdateInput.getInstructorsIds());
-            research.setThesisAdvisorId(newThesisAdvisor);
-            research.setTeachers(teachers);
-
-            List<Subject> subjects = teachers.stream()
-                    .map(Teacher::getSubject)
-                    .distinct()
-                    .toList();
-            if (subjects.contains(null)) {
-                throw new AppException(ErrorCode.SUBJECT_NOT_EXISTED);
+                assert researchTeacher != null;
+                researchTeacher.setTeacher(subInstructor);
+                researchTeacherRepository.save(researchTeacher);
             }
-            research.setSubjects(subjects);
         }
 
-        research.setCode(this.generateResearchCode(
-                ResearchInput.builder()
-                        .name(newResearchUpdateInput.getName())
-                        .stage(newResearchUpdateInput.getStage())
-                        .schoolYear(newResearchUpdateInput.getSchoolYear())
-                        .build())
-        );
+        research.setCode(this.generateResearchCode(research.getName(), research.getCode(), research.getSchoolYear()));
 
         research = researchRepository.save(research);
 
@@ -177,7 +182,7 @@ public class ResearchService implements IResearchService {
                 researchEntity.setStatus(StatusResearch.valueOf(StatusResearchConst.DELETED)));
 
         String currentUserId = userService.getClaimsToken().get("sub").toString();
-        teacher = teacherRepository.findById(currentUserId)
+        Teacher teacher = teacherRepository.findById(currentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
 
         JobTeacherDetail jobTeacherDetail = jobTeacherDetailService.findJobTeacherDetailId(teacher.getJobTeacherDetails());
@@ -209,9 +214,6 @@ public class ResearchService implements IResearchService {
     @Override
     public ShowAllResponse<ResearchResponse> showAllMyResearch(ShowAllRequest showAllRequest) {
         String currentUserId = userService.getClaimsToken().get("sub").toString();
-        List<StatusResearch> statusList = List.of(
-                StatusResearch.valueOf(StatusResearchConst.PENDING_APPROVE)
-        );
 
         Pageable paging = PageRequest.of(
                 showAllRequest.getCurrentPage() - 1,
@@ -220,7 +222,7 @@ public class ResearchService implements IResearchService {
                         .fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
         );
 
-        Page<Research> researchEntityList = researchRepository.findByTeachers_Id(currentUserId, paging);
+        Page<Research> researchEntityList = researchRepository.findByResearchTeachers_Teacher_Id(currentUserId, paging);
         List<ResearchResponse> resultDTO = researchEntityList.getContent().stream()
                 .map(mapper::toShowDTO)
                 .toList();
@@ -254,7 +256,7 @@ public class ResearchService implements IResearchService {
         int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
         int totalElements = !resultDTO.isEmpty()
-                ? this.countByStatusInAndSubjectsId(statusList, resultDTO.getFirst().getSubjects().getFirst().getId())
+                ? this.countByStatusInAndSubjectsId(statusList, resultDTO.getFirst().getSubject().getId())
                 : 0;
         int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
@@ -281,7 +283,7 @@ public class ResearchService implements IResearchService {
         int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
         int totalElements = !resultDTO.isEmpty()
-                ? this.countByStatusInAndSubjectsId(statusList, resultDTO.getFirst().getSubjects().getFirst().getId())
+                ? this.countByStatusInAndSubjectsId(statusList, resultDTO.getFirst().getSubject().getId())
                 : 0;
         int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
@@ -309,7 +311,7 @@ public class ResearchService implements IResearchService {
         int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
         int totalElements = !resultDTO.isEmpty()
-                ? this.countByStatusInAndSubjectsId(statusList, resultDTO.getFirst().getSubjects().getFirst().getId())
+                ? this.countByStatusInAndSubjectsId(statusList, resultDTO.getFirst().getSubject().getId())
                 : 0;
         int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
@@ -380,26 +382,26 @@ public class ResearchService implements IResearchService {
 
     @Override
     public int countByStatusInAndSubjectsId(Collection<StatusResearch> statuses, String id) {
-        return (int) researchRepository.countByStatusInAndSubjects_Id(statuses, id);
+        return (int) researchRepository.countByStatusInAndSubject_Id(statuses, id);
     }
 
     @Override
     public int countByTeachersId(String id) {
-        return (int) researchRepository.countByTeachers_Id(id);
+        return (int) researchRepository.countByResearchTeachers_Teacher_Id(id);
     }
 
-    private String generateResearchCode(ResearchInput researchInput) {
+    private String generateResearchCode(String name, String stage, String schoolYear) {
         StringBuilder code = new StringBuilder();
-        code.append("KLKS");
+        code.append("KS");
 
         code.append("Đ");
-        code.append(researchInput.getStage());
+        code.append(stage);
 
-        String[] schoolYears = researchInput.getSchoolYear().split(("-"));
+        String[] schoolYears = schoolYear.split(("-"));
         code.append(schoolYears[0], 2, 4);
         code.append(schoolYears[1], 2, 4);
 
-        String[] allLetterName = researchInput.getName().toUpperCase().split(" ");
+        String[] allLetterName = name.toUpperCase().split(" ");
         Arrays.stream(allLetterName).toList().forEach(l -> code.append(l, 0, 1));
 
         return Normalizer.normalize(code.toString(), Normalizer.Form.NFKD).replaceAll("\\p{M}", "");
@@ -414,7 +416,6 @@ public class ResearchService implements IResearchService {
                 ? user.getStudent().getSubject().getId()
                 : user.getTeacher().getSubject().getId();
 
-
         Pageable paging = PageRequest.of(
                 showAllRequest.getCurrentPage() - 1,
                 showAllRequest.getLimit(),
@@ -422,7 +423,69 @@ public class ResearchService implements IResearchService {
                         .fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
         );
 
-        return researchRepository.findByStatusInAndSubjects_Id(statusList, subjectId, paging);
+        return researchRepository.findByStatusInAndSubject_Id(statusList, subjectId, paging);
     }
 
+    @Override
+    public ShowAllResponse<ResearchResponse> searchCriteria(Integer page, Integer limit, String sortBy, String... search) {
+        ShowAllResponse<Research> response = researchRepositoryImpl.searchCriteria(page, limit, sortBy, search);
+        return ShowAllResponse.<ResearchResponse>builder()
+                .currentPage(page)
+                .totalPages(response.getTotalPages())
+                .totalElements(response.getTotalElements())
+                .responses(response.getResponses().stream().map(mapper::toShowDTO).toList())
+                .build();
+    }
+
+    @Override
+    public void updateThesisAdvisor(String researchId, String thesisAdvisorId) {
+        String currentTeacherId = userService.getClaimsToken().get("sub").toString();
+        boolean isCreator = researchTeacherRepository
+                .isTeacherValidWithTypeTeacherInResearch(currentTeacherId, researchId, TypeTeacherEnum.INSTRUCTOR.name());
+        if (!isCreator) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        Research research = researchRepository.findById(researchId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESEARCH_NOT_EXISTED));
+        Teacher thesisAdvisor = teacherRepository.findById(thesisAdvisorId)
+                .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
+
+        ResearchTeacher researchTeacher = researchTeacherRepository.findByTypeTeacher_CodeAndResearch_Id(TypeTeacherEnum.THESIS_ADVISOR.name(), researchId)
+                .orElse(null);
+        if (researchTeacher != null) {
+            researchTeacher.setTeacher(thesisAdvisor);
+            researchTeacherRepository.save(researchTeacher);
+        } else {
+            researchTeacher = new ResearchTeacher();
+            researchTeacher.setId(new ResearchTeacherId(thesisAdvisor.getId(), research.getId()));
+            TypeTeacher typeTeacher = typeTeacherRepository.findByCode(TypeTeacherEnum.THESIS_ADVISOR.name())
+                    .orElseThrow(() -> new AppException(ErrorCode.TYPE_TEACHER_INVALID));
+            researchTeacher.setTypeTeacher(typeTeacher);
+            researchTeacher.setTeacher(thesisAdvisor);
+            researchTeacher.setResearch(research);
+            researchTeacherRepository.save(researchTeacher);
+        }
+    }
+
+    @Transactional
+    @Override
+    public void broughtToTheCouncil(String researchId) {
+        String currentTeacherId = userService.getClaimsToken().get("sub").toString();
+        boolean isCreator = researchTeacherRepository
+                .isTeacherValidWithTypeTeacherInResearch(currentTeacherId, researchId, TypeTeacherEnum.INSTRUCTOR.name());
+        if (!isCreator) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        Research research = researchRepository.findById(researchId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESEARCH_NOT_EXISTED));
+
+        Council council = councilRepository.findBySubject_id(research.getSubject().getId())
+                .orElseThrow(() -> new AppException(ErrorCode.COUNCIL_NOT_EXISTED));
+
+        TypeTeacher typeTeacher = typeTeacherRepository.findByCode(TypeTeacherEnum.COUNCIL.name())
+                .orElseThrow(() -> new AppException(ErrorCode.TYPE_TEACHER_INVALID));
+
+        researchTeacherService.insert(research, council.getTeachers().stream().toList(), typeTeacher);
+    }
 }

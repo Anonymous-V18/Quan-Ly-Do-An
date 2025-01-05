@@ -1,0 +1,11 @@
+package com.hcv.converter;
+
+import com.hcv.dto.response.RoleDTO;
+import org.mapstruct.Mapper;
+
+@Mapper
+public interface IRoleMapper {
+
+    RoleDTO toDTO(Role role);
+
+}

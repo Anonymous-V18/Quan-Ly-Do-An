@@ -10,15 +10,15 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IGroupRepository extends JpaRepository<Group, String> {
 
-    Page<Group> findByResearch_Teachers_Id(String id, Pageable pageable);
+    Page<Group> findByResearch_ResearchTeachers_Teacher_Id(String id, Pageable pageable);
 
-    long countByResearch_Teachers_Id(String id);
+    long countByResearch_ResearchTeachers_Teacher_Id(String id);
 
     @Query("""
               select count(distinct g) from Group g inner join g.students students
-              where students.user.isGraduate = ?1 and students.subject.id = ?2
+              where students.user.isActivated = ?1 and students.subject.id = ?2
             """)
-    long countGroupHaveTheSameSubject(Integer isGraduate, String id);
+    long countGroupHaveTheSameSubject(Integer isActivated, String id);
 
 
 }

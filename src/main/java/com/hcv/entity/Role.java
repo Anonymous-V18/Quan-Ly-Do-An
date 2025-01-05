@@ -8,8 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "role")
@@ -26,7 +26,7 @@ public class Role extends BaseEntity {
     CodeRole code;
 
     @ManyToMany(mappedBy = "roles")
-    List<User> users = new ArrayList<>();
+    Set<User> users = new HashSet<>();
 
 }
 

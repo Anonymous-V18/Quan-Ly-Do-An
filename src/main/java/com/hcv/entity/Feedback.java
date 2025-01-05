@@ -17,8 +17,8 @@ import lombok.experimental.FieldDefaults;
 public class Feedback extends BaseEntity {
 
     String message;
-    String sendFrom;
-    String sendFromName;
+    String senderCode;
+    String senderName;
     @Enumerated(EnumType.STRING)
     StatusNotification status;
 
