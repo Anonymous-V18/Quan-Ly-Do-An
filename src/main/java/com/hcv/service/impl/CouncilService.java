@@ -40,7 +40,8 @@ public class CouncilService implements ICouncilService {
     @Transactional
     @Override
     public void insert(CouncilInput councilInput) {
-        boolean isExistBySubjectAndActivated = councilRepository.existsBySubject_IdAndIsActivated(councilInput.getSubjectId(), true);
+        boolean isExistBySubjectAndActivated =
+                councilRepository.existsBySubject_IdAndIsActivated(councilInput.getSubjectId(), true);
         if (isExistBySubjectAndActivated) {
             throw new AppException(ErrorCode.COUNCIL_EXISTED);
         }
@@ -48,6 +49,10 @@ public class CouncilService implements ICouncilService {
         Set<Teacher> teachers = new HashSet<>(teacherRepository.findAllById(councilInput.getTeacherIds()));
         if (teachers.size() != councilInput.getTeacherIds().size()) {
             throw new AppException(ErrorCode.TEACHER_NOT_EXISTED);
+        }
+        boolean isTeacherExistedOtherCouncil = teachers.stream().anyMatch(teacher -> teacher.getCouncil() != null);
+        if (isTeacherExistedOtherCouncil) {
+            throw new AppException(ErrorCode.TEACHER_EXISTED_OTHER_COUNCIL);
         }
 
         Subject subject = subjectRepository.findById(councilInput.getSubjectId())

@@ -32,9 +32,11 @@ public interface IResearchService {
 
     int countByStatusInAndSubjectsId(Collection<StatusResearch> statuses, String id);
 
-    int countByTeachersId(String id);
+    int countByTeacherId(String id);
 
-    ShowAllResponse<ResearchResponse> showAllMyResearch(ShowAllRequest showAllRequest);
+    int countByCurrentResearch(String teacherId, String typeTeacherCode, String schoolYear, String stage);
+
+    ShowAllResponse<ResearchResponse> showAllMyResearch(ShowAllRequest showAllRequest, Boolean isRoleCouncil, Boolean isRoleThesisAdvisor, Boolean isRoleInstructor);
 
     ShowAllResponse<ResearchResponse> showAllToFeedback(ShowAllRequest showAllRequest);
 

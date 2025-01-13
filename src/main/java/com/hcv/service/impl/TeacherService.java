@@ -174,7 +174,7 @@ public class TeacherService implements ITeacherService {
     }
 
     @Override
-    public List<TeacherShowToSelectionResponse> showAllToSelection(Boolean theSameSubject) {
+    public List<TeacherShowToSelectionResponse> showAllToSelection(Boolean theSameSubject, String subjectId) {
         String teacherId = userService.getClaimsToken().get("sub").toString();
         Teacher teacher = teacherRepository.findById(teacherId)
                 .orElseThrow(() -> new AppException(ErrorCode.TEACHER_NOT_EXISTED));
@@ -182,6 +182,10 @@ public class TeacherService implements ITeacherService {
                 .orElseThrow(() -> new AppException(ErrorCode.SUBJECT_NOT_EXISTED));
         if (theSameSubject) {
             return teacherRepository.findAllBySubject_Id(subject.getId()).stream()
+                    .map(teacherMapper::toShowDTOToSelection)
+                    .toList();
+        } else if (!subjectId.equals("EMPTY")) {
+            return teacherRepository.findAllBySubject_Id(subjectId).stream()
                     .map(teacherMapper::toShowDTOToSelection)
                     .toList();
         }

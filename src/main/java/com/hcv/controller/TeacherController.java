@@ -88,9 +88,10 @@ public class TeacherController {
 
     @GetMapping("/showAll-to-selection")
     public ApiResponse<List<TeacherShowToSelectionResponse>> showAllToSelection(
-            @RequestParam(value = "theSameSubject", required = false, defaultValue = "false") Boolean theSameSubject
+            @RequestParam(value = "theSameSubject", required = false, defaultValue = "false") Boolean theSameSubject,
+            @RequestParam(value = "subjectId", required = false, defaultValue = "EMPTY") String subjectId
     ) {
-        List<TeacherShowToSelectionResponse> response = teacherService.showAllToSelection(theSameSubject);
+        List<TeacherShowToSelectionResponse> response = teacherService.showAllToSelection(theSameSubject, subjectId);
         return ApiResponse.<List<TeacherShowToSelectionResponse>>builder()
                 .result(response)
                 .build();

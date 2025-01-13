@@ -73,7 +73,10 @@ public class ResearchController {
                     @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
                     @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
                     @RequestParam(value = "orderBy", required = false, defaultValue = "id") String orderBy,
-                    @RequestParam(value = "orderDirection", required = false, defaultValue = "ASC") String orderDirection
+                    @RequestParam(value = "orderDirection", required = false, defaultValue = "ASC") String orderDirection,
+                    @RequestParam(value = "roleCouncil", required = false, defaultValue = "false") Boolean isRoleCouncil,
+                    @RequestParam(value = "roleThesisAdvisor", required = false, defaultValue = "false") Boolean isRoleThesisAdvisor,
+                    @RequestParam(value = "roleInstructor", required = false, defaultValue = "true") Boolean isRoleInstructor
             ) {
 
         ShowAllRequest showAllRequest = ShowAllRequest.builder()
@@ -83,11 +86,12 @@ public class ResearchController {
                 .orderDirection(orderDirection)
                 .build();
 
-        ShowAllResponse<ResearchResponse> response = researchService.showAllMyResearch(showAllRequest);
+        ShowAllResponse<ResearchResponse> response = researchService.showAllMyResearch(showAllRequest, isRoleCouncil, isRoleThesisAdvisor, isRoleInstructor);
         return ApiResponse.<ShowAllResponse<ResearchResponse>>builder()
                 .result(response)
                 .build();
     }
+
 
     @GetMapping("/showAll-to-feedback")
     @PreAuthorize("hasRole('TEACHER')")
@@ -121,7 +125,6 @@ public class ResearchController {
                     @RequestParam(value = "orderBy", required = false, defaultValue = "id") String orderBy,
                     @RequestParam(value = "orderDirection", required = false, defaultValue = "ASC") String orderDirection
             ) {
-
         ShowAllRequest showAllRequest = ShowAllRequest.builder()
                 .currentPage(page)
                 .limit(limit)

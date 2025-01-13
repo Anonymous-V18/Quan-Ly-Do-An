@@ -41,7 +41,7 @@ public class WebSecurityConfig {
             "/log-in", "/register", "/log-out", "/refresh",
             "/auth/**", "/subjects/**", "/departments/**", "/teachers/**", "/students/**", "/jobs/**", "/users/**",
             "/researches/**", "/feedbacks/**", "/groups/**", "/notifications/**", "/job-teacher/**", "/job-group/**", "/councils/**",
-            "/type-points/**", "/system-variables/**", "/roles/**"
+            "/type-points/**", "/system-variables/**", "/roles/**", "/points/**"
     };
 
     public WebSecurityConfig(CustomJwtDecoder customJwtDecoder) {

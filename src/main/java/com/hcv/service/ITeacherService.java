@@ -26,7 +26,7 @@ public interface ITeacherService {
 
     ShowAllResponse<TeacherDTO> showAll(ShowAllRequest showAllRequest);
 
-    List<TeacherShowToSelectionResponse> showAllToSelection(Boolean theSameSubject);
+    List<TeacherShowToSelectionResponse> showAllToSelection(Boolean theSameSubject, String subjectId);
 
     List<TeacherShowToSelectionResponse> showAllHeadOfDepartment();
 

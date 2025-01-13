@@ -212,7 +212,8 @@ public class ResearchService implements IResearchService {
     }
 
     @Override
-    public ShowAllResponse<ResearchResponse> showAllMyResearch(ShowAllRequest showAllRequest) {
+    public ShowAllResponse<ResearchResponse> showAllMyResearch(ShowAllRequest showAllRequest, Boolean isRoleCouncil,
+                                                               Boolean isRoleThesisAdvisor, Boolean isRoleInstructor) {
         String currentUserId = userService.getClaimsToken().get("sub").toString();
 
         Pageable paging = PageRequest.of(
@@ -222,15 +223,32 @@ public class ResearchService implements IResearchService {
                         .fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
         );
 
-        Page<Research> researchEntityList = researchRepository.findByResearchTeachers_Teacher_Id(currentUserId, paging);
+        String stage = systemVariablesRepository.findByCode(SystemVariablesEnum.STAGE.name())
+                .orElseThrow(() -> new AppException(ErrorCode.SYSTEM_VARIABLE_INVALID))
+                .getValue();
+        String schoolYear = systemVariablesRepository.findByCode(SystemVariablesEnum.SCHOOL_YEAR.name())
+                .orElseThrow(() -> new AppException(ErrorCode.SYSTEM_VARIABLE_INVALID))
+                .getValue();
+        String typeTeacherCode = null;
+        if (isRoleInstructor) {
+            typeTeacherCode = TypeTeacherEnum.INSTRUCTOR.name();
+        } else if (isRoleThesisAdvisor) {
+            typeTeacherCode = TypeTeacherEnum.THESIS_ADVISOR.name();
+        } else if (isRoleCouncil) {
+            typeTeacherCode = TypeTeacherEnum.COUNCIL.name();
+        } else {
+            typeTeacherCode = TypeTeacherEnum.INSTRUCTOR.name();
+        }
+        Page<Research> researchEntityList =
+                researchRepository.getAllCurrentResearch(currentUserId, typeTeacherCode, schoolYear, stage, paging);
         List<ResearchResponse> resultDTO = researchEntityList.getContent().stream()
                 .map(mapper::toShowDTO)
                 .toList();
-
+        
         int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
         int totalElements = !resultDTO.isEmpty()
-                ? this.countByTeachersId(currentUserId)
+                ? this.countByCurrentResearch(currentUserId, typeTeacherCode, schoolYear, stage)
                 : 0;
         int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
 
@@ -386,8 +404,13 @@ public class ResearchService implements IResearchService {
     }
 
     @Override
-    public int countByTeachersId(String id) {
+    public int countByTeacherId(String id) {
         return (int) researchRepository.countByResearchTeachers_Teacher_Id(id);
+    }
+
+    @Override
+    public int countByCurrentResearch(String teacherId, String typeTeacherCode, String schoolYear, String stage) {
+        return (int) researchRepository.countByCurrentResearch(teacherId, typeTeacherCode, schoolYear, stage);
     }
 
     private String generateResearchCode(String name, String stage, String schoolYear) {
