@@ -86,12 +86,12 @@ public class ResearchController {
                 .orderDirection(orderDirection)
                 .build();
 
-        ShowAllResponse<ResearchResponse> response = researchService.showAllMyResearch(showAllRequest, isRoleCouncil, isRoleThesisAdvisor, isRoleInstructor);
+        ShowAllResponse<ResearchResponse> response =
+                researchService.showAllMyResearch(showAllRequest, isRoleCouncil, isRoleThesisAdvisor, isRoleInstructor);
         return ApiResponse.<ShowAllResponse<ResearchResponse>>builder()
                 .result(response)
                 .build();
     }
-
 
     @GetMapping("/showAll-to-feedback")
     @PreAuthorize("hasRole('TEACHER')")

@@ -30,9 +30,7 @@ public interface IResearchService {
 
     void cancelRegistrationResearch(ResearchCancelRegistrationInput researchCancelRegistrationInput);
 
-    int countByStatusInAndSubjectsId(Collection<StatusResearch> statuses, String id);
-
-    int countByTeacherId(String id);
+    int countByStatusInAndSubjectsIdAndStageAndSchoolYear(Collection<StatusResearch> statuses, String id, String stage, String schoolYear);
 
     int countByCurrentResearch(String teacherId, String typeTeacherCode, String schoolYear, String stage);
 

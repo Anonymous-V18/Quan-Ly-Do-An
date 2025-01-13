@@ -11,11 +11,9 @@ import java.util.Collection;
 
 public interface IResearchRepository extends JpaRepository<Research, String> {
 
-    Page<Research> findByStatusInAndSubject_Id(Collection<StatusResearch> statuses, String id, Pageable pageable);
+    Page<Research> findByStatusInAndSubject_IdAndStageAndSchoolYear(Collection<StatusResearch> statuses, String subjectId, String stage, String schoolYear, Pageable pageable);
 
-    long countByStatusInAndSubject_Id(Collection<StatusResearch> statuses, String id);
-
-    long countByResearchTeachers_Teacher_Id(String id);
+    long countByStatusInAndSubject_IdAndStageAndSchoolYear(Collection<StatusResearch> statuses, String subjectId, String stage, String schoolYear);
 
     @Query("""
             select r from Research r inner join r.researchTeachers researchTeachers

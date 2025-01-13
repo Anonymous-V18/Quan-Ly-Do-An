@@ -244,7 +244,7 @@ public class ResearchService implements IResearchService {
         List<ResearchResponse> resultDTO = researchEntityList.getContent().stream()
                 .map(mapper::toShowDTO)
                 .toList();
-        
+
         int page = showAllRequest.getCurrentPage();
         int limit = showAllRequest.getLimit();
         int totalElements = !resultDTO.isEmpty()
@@ -266,22 +266,15 @@ public class ResearchService implements IResearchService {
                 StatusResearch.valueOf(StatusResearchConst.PENDING_APPROVE)
         );
 
-        Page<Research> researchEntityList = showAllBase(showAllRequest, statusList);
-        List<ResearchResponse> resultDTO = researchEntityList.getContent().stream()
+        ShowAllResponse<Research> response = showAllBase(showAllRequest, statusList);
+        List<ResearchResponse> resultDTO = response.getResponses().stream()
                 .map(mapper::toShowDTO)
                 .toList();
 
-        int page = showAllRequest.getCurrentPage();
-        int limit = showAllRequest.getLimit();
-        int totalElements = !resultDTO.isEmpty()
-                ? this.countByStatusInAndSubjectsId(statusList, resultDTO.getFirst().getSubject().getId())
-                : 0;
-        int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
-
         return ShowAllResponse.<ResearchResponse>builder()
-                .currentPage(page)
-                .totalElements(totalElements)
-                .totalPages(totalPages)
+                .currentPage(response.getCurrentPage())
+                .totalElements(response.getTotalElements())
+                .totalPages(response.getTotalPages())
                 .responses(resultDTO)
                 .build();
     }
@@ -292,23 +285,16 @@ public class ResearchService implements IResearchService {
                 StatusResearch.valueOf(StatusResearchConst.APPROVED)
         );
 
-        Page<Research> researchEntityList = showAllBase(showAllRequest, statusList);
+        ShowAllResponse<Research> response = showAllBase(showAllRequest, statusList);
         List<ResearchShowToRegistrationResponse> resultDTO =
-                researchEntityList.getContent().stream()
+                response.getResponses().stream()
                         .map(mapper::toShowToRegistrationDTO)
                         .toList();
 
-        int page = showAllRequest.getCurrentPage();
-        int limit = showAllRequest.getLimit();
-        int totalElements = !resultDTO.isEmpty()
-                ? this.countByStatusInAndSubjectsId(statusList, resultDTO.getFirst().getSubject().getId())
-                : 0;
-        int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
-
         return ShowAllResponse.<ResearchShowToRegistrationResponse>builder()
-                .currentPage(page)
-                .totalElements(totalElements)
-                .totalPages(totalPages)
+                .currentPage(response.getCurrentPage())
+                .totalElements(response.getTotalElements())
+                .totalPages(response.getTotalPages())
                 .responses(resultDTO)
                 .build();
     }
@@ -320,23 +306,16 @@ public class ResearchService implements IResearchService {
                 StatusResearch.valueOf(StatusResearchConst.APPROVED)
         );
 
-        Page<Research> researchEntityList = showAllBase(showAllRequest, statusList);
+        ShowAllResponse<Research> response = showAllBase(showAllRequest, statusList);
         List<ResearchShowToRegistrationResponse> resultDTO =
-                researchEntityList.getContent().stream()
+                response.getResponses().stream()
                         .map(mapper::toShowToRegistrationDTO)
                         .toList();
 
-        int page = showAllRequest.getCurrentPage();
-        int limit = showAllRequest.getLimit();
-        int totalElements = !resultDTO.isEmpty()
-                ? this.countByStatusInAndSubjectsId(statusList, resultDTO.getFirst().getSubject().getId())
-                : 0;
-        int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
-
         return ShowAllResponse.<ResearchShowToRegistrationResponse>builder()
-                .currentPage(page)
-                .totalElements(totalElements)
-                .totalPages(totalPages)
+                .currentPage(response.getCurrentPage())
+                .totalElements(response.getTotalElements())
+                .totalPages(response.getTotalPages())
                 .responses(resultDTO)
                 .build();
     }
@@ -399,13 +378,8 @@ public class ResearchService implements IResearchService {
     }
 
     @Override
-    public int countByStatusInAndSubjectsId(Collection<StatusResearch> statuses, String id) {
-        return (int) researchRepository.countByStatusInAndSubject_Id(statuses, id);
-    }
-
-    @Override
-    public int countByTeacherId(String id) {
-        return (int) researchRepository.countByResearchTeachers_Teacher_Id(id);
+    public int countByStatusInAndSubjectsIdAndStageAndSchoolYear(Collection<StatusResearch> statuses, String id, String stage, String schoolYear) {
+        return (int) researchRepository.countByStatusInAndSubject_IdAndStageAndSchoolYear(statuses, id, stage, schoolYear);
     }
 
     @Override
@@ -430,7 +404,7 @@ public class ResearchService implements IResearchService {
         return Normalizer.normalize(code.toString(), Normalizer.Form.NFKD).replaceAll("\\p{M}", "");
     }
 
-    private Page<Research> showAllBase(ShowAllRequest showAllRequest, List<StatusResearch> statusList) {
+    private ShowAllResponse<Research> showAllBase(ShowAllRequest showAllRequest, List<StatusResearch> statusList) {
         String currentUserName = userService.getClaimsToken().get("username").toString();
         User user = userRepository.findByUsername(currentUserName)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -446,7 +420,32 @@ public class ResearchService implements IResearchService {
                         .fromString(showAllRequest.getOrderDirection()), showAllRequest.getOrderBy())
         );
 
-        return researchRepository.findByStatusInAndSubject_Id(statusList, subjectId, paging);
+        String stage = systemVariablesRepository.findByCode(SystemVariablesEnum.STAGE.name())
+                .orElseThrow(() -> new AppException(ErrorCode.SYSTEM_VARIABLE_INVALID))
+                .getValue();
+        String schoolYear = systemVariablesRepository.findByCode(SystemVariablesEnum.SCHOOL_YEAR.name())
+                .orElseThrow(() -> new AppException(ErrorCode.SYSTEM_VARIABLE_INVALID))
+                .getValue();
+
+        Page<Research> result =
+                researchRepository.
+                        findByStatusInAndSubject_IdAndStageAndSchoolYear(statusList, subjectId, stage, schoolYear, paging);
+
+        List<Research> response = result.getContent();
+        int page = showAllRequest.getCurrentPage();
+        int limit = showAllRequest.getLimit();
+        int totalElements = !response.isEmpty()
+                ? this.countByStatusInAndSubjectsIdAndStageAndSchoolYear(statusList, response.getFirst().getSubject().getId()
+                , stage, schoolYear)
+                : 0;
+        int totalPages = (int) Math.ceil((1.0 * totalElements) / limit);
+
+        return ShowAllResponse.<Research>builder()
+                .currentPage(page)
+                .totalElements(totalElements)
+                .totalPages(totalPages)
+                .responses(response)
+                .build();
     }
 
     @Override

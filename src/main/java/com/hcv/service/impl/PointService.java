@@ -6,6 +6,7 @@ import com.hcv.dto.TypeTeacherEnum;
 import com.hcv.dto.request.PointInsertInput;
 import com.hcv.dto.request.PointInsertListInput;
 import com.hcv.dto.request.PointUpdateInput;
+import com.hcv.dto.request.PointUpdateListInput;
 import com.hcv.dto.response.PointResponse;
 import com.hcv.entity.Point;
 import com.hcv.entity.Research;
@@ -47,13 +48,19 @@ public class PointService implements IPointService {
         TypePoint typePoint = typePointRepository.findById(typePointId)
                 .orElseThrow(() -> new AppException(ErrorCode.POINT_TYPE_INVALID));
 
-        return pointInsertListInput.getPoints().stream()
+        List<Point> points = pointInsertListInput.getPoints().stream()
                 .map(pointInsertInput -> this.insert(teacherId, typePoint, pointInsertInput))
+                .toList();
+
+        points = pointRepository.saveAll(points);
+
+        return points.stream()
+                .map(pointMapper::toDTO)
                 .toList();
     }
 
     @Override
-    public PointResponse insert(String teacherId, TypePoint typePoint, PointInsertInput pointInsertInput) {
+    public Point insert(String teacherId, TypePoint typePoint, PointInsertInput pointInsertInput) {
         String studentId = pointInsertInput.getStudentId();
         Student student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
@@ -72,23 +79,30 @@ public class PointService implements IPointService {
         });
         point.setStudent(student);
 
-        point = pointRepository.save(point);
-        return pointMapper.toDTO(point);
+        return point;
     }
 
     @Override
-    public PointResponse update(String oldPointId, PointUpdateInput newPointDTO) {
-        Point oldPoint = pointRepository.findById(oldPointId)
+    @Transactional
+    public List<PointResponse> updateList(PointUpdateListInput pointUpdateListInput) {
+        String teacherId = userService.getClaimsToken().get("sub").toString();
+        List<Point> points = pointUpdateListInput.getPoints().stream()
+                .map(pointUpdateInput -> this.update(teacherId, pointUpdateInput))
+                .toList();
+
+        points = pointRepository.saveAll(points);
+        return points.stream()
+                .map(pointMapper::toDTO)
+                .toList();
+    }
+
+    @Override
+    public Point update(String teacherId, PointUpdateInput newPointDTO) {
+        Point oldPoint = pointRepository.findById(newPointDTO.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.POINT_NOT_EXIST));
-
-        this.checkPointTeacher(userService.getClaimsToken().get("sub").toString(),
-                oldPoint.getStudent().getGroup().getResearch(),
-                oldPoint.getTypePoint().getName());
-
+        this.checkPointTeacher(teacherId, oldPoint.getStudent().getGroup().getResearch(), oldPoint.getTypePoint().getName());
         oldPoint.setPoint(newPointDTO.getPoint());
-
-        oldPoint = pointRepository.save(oldPoint);
-        return pointMapper.toDTO(oldPoint);
+        return oldPoint;
     }
 
     @Override
