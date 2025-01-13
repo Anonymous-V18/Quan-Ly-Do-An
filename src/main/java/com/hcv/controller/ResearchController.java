@@ -74,9 +74,10 @@ public class ResearchController {
                     @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit,
                     @RequestParam(value = "orderBy", required = false, defaultValue = "id") String orderBy,
                     @RequestParam(value = "orderDirection", required = false, defaultValue = "ASC") String orderDirection,
-                    @RequestParam(value = "roleCouncil", required = false, defaultValue = "false") Boolean isRoleCouncil,
-                    @RequestParam(value = "roleThesisAdvisor", required = false, defaultValue = "false") Boolean isRoleThesisAdvisor,
-                    @RequestParam(value = "roleInstructor", required = false, defaultValue = "true") Boolean isRoleInstructor
+                    @RequestParam(value = "roleCouncil", required = false, defaultValue = "false") boolean isRoleCouncil,
+                    @RequestParam(value = "roleThesisAdvisor", required = false, defaultValue = "false") boolean isRoleThesisAdvisor,
+                    @RequestParam(value = "roleInstructor", required = false, defaultValue = "true") boolean isRoleInstructor,
+                    @RequestParam(value = "status", required = false, defaultValue = "%%") String status
             ) {
 
         ShowAllRequest showAllRequest = ShowAllRequest.builder()
@@ -87,7 +88,7 @@ public class ResearchController {
                 .build();
 
         ShowAllResponse<ResearchResponse> response =
-                researchService.showAllMyResearch(showAllRequest, isRoleCouncil, isRoleThesisAdvisor, isRoleInstructor);
+                researchService.showAllMyResearch(showAllRequest, isRoleCouncil, isRoleThesisAdvisor, isRoleInstructor, status);
         return ApiResponse.<ShowAllResponse<ResearchResponse>>builder()
                 .result(response)
                 .build();

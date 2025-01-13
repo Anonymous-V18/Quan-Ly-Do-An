@@ -30,11 +30,15 @@ public interface IResearchService {
 
     void cancelRegistrationResearch(ResearchCancelRegistrationInput researchCancelRegistrationInput);
 
-    int countByStatusInAndSubjectsIdAndStageAndSchoolYear(Collection<StatusResearch> statuses, String id, String stage, String schoolYear);
+    int countByStatusInAndSubjectsIdAndStageAndSchoolYear(Collection<StatusResearch> statuses, String id,
+                                                          String stage, String schoolYear);
 
-    int countByCurrentResearch(String teacherId, String typeTeacherCode, String schoolYear, String stage);
+    int countByCurrentResearch(String teacherId, String typeTeacherCode,
+                               String schoolYear, String stage, String status);
 
-    ShowAllResponse<ResearchResponse> showAllMyResearch(ShowAllRequest showAllRequest, Boolean isRoleCouncil, Boolean isRoleThesisAdvisor, Boolean isRoleInstructor);
+    ShowAllResponse<ResearchResponse> showAllMyResearch(ShowAllRequest showAllRequest, boolean isRoleCouncil,
+                                                        boolean isRoleThesisAdvisor, boolean isRoleInstructor,
+                                                        String status);
 
     ShowAllResponse<ResearchResponse> showAllToFeedback(ShowAllRequest showAllRequest);
 
