@@ -22,5 +22,6 @@ public class JobTeacherShortenedResponse {
     Integer quantityRequirement;
     Integer totalQuantityRequired;
     Integer quantityCompleted;
+    Integer isCompleted;
 
 }

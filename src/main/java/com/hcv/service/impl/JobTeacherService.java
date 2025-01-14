@@ -123,7 +123,15 @@ public class JobTeacherService implements IJobTeacherService {
         return jobTeacherDetailRepository.findByTeacher_Id(currentUserId).stream()
                 .map(JobTeacherDetail::getJobTeacher)
                 .sorted(Comparator.comparing(JobTeacher::getCreatedDate).reversed())
-                .map(jobTeacherMapper::toShortenedDTO)
+                .map(jobTeacher -> {
+                    JobTeacherShortenedResponse response = jobTeacherMapper.toShortenedDTO(jobTeacher);
+                    jobTeacher.getJobTeacherDetails().forEach(jobTeacherDetail -> {
+                        if (jobTeacherDetail.getTeacher().getId().equals(currentUserId)) {
+                            response.setIsCompleted(jobTeacherDetail.getIsCompleted());
+                        }
+                    });
+                    return response;
+                })
                 .toList();
     }
 }
