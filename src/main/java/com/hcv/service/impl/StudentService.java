@@ -174,7 +174,7 @@ public class StudentService implements IStudentService {
         Student student = studentRepository.findById(currentUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_EXIST));
 
-        return studentRepository.findStudentToInvite(currentUserId, List.of(student.getSubject()), 0)
+        return studentRepository.findStudentToInvite(currentUserId, List.of(student.getSubject()), 1)
                 .stream().map(studentMapper::toShowToSelectionDTO)
                 .toList();
     }
