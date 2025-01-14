@@ -109,7 +109,7 @@ public class JwtUtil {
         }
 
         Date expirationTimeToken = isRefresh
-                ? new Date(Long.parseLong(signedJWT.getJWTClaimsSet().getClaim("expirationTime_Refresh").toString()))
+                ? signedJWT.getJWTClaimsSet().getDateClaim("expirationTime_Refresh")
                 : signedJWT.getJWTClaimsSet().getExpirationTime();
         boolean isTokenExpired = expirationTimeToken.before(new Date());
         if (isTokenExpired) {
